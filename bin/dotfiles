@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/path_configuration'
+require_relative '../lib/command_line_object_wrapper'
+require_relative '../lib/dotfile_manager'
+
+def config_file_path
+  parent_dir = File.expand_path(File.dirname(File.dirname(__FILE__)))
+  File.join(parent_dir, "config", "paths_config.yaml")
+end
+
+def main
+  config = PathConfiguration.new(config_file_path)
+  manager = DotFileManager.new(config)
+  CommandLineObjectWrapper.new(manager, ARGV).execute
+end
+
+if __FILE__ == $0
+  main
+end

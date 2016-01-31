@@ -49,7 +49,8 @@ syntax enable
 
 set ttimeoutlen=0
 
-
+set listchars=tab:>>,space:·
+set list
 
 "##########################################################
 " delimitMate
@@ -68,7 +69,6 @@ let g:ctrlp_user_command = 'ag %s -l --hidden --nocolor -g ""'
 let g:ctrlp_use_caching = 0
 
 " use ~/.agignore to exclude results (.git)
-
 
 "##########################################################
 " Leader Keybindings
