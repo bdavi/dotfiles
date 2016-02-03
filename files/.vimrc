@@ -35,31 +35,27 @@ filetype plugin indent on    " required
 "General settings
 
 "Set up tabs
-set tabstop=2      
-set shiftwidth=2   
-set softtabstop=2 
-set expandtab    
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
+set expandtab
 
 " Line Numbers
 set number
-set relativenumber          
+set relativenumber
 
 "Hightlight Syntax
-syntax enable   
+syntax enable
 
 set ttimeoutlen=0
 
-set listchars=tab:>>,space:·
+"Show trailing spaces!!!!
+set listchars=trail:·
 set list
 
 "##########################################################
 " delimitMate
 let delimitMate_matchpairs = "(:),[:],{:}"
-
-" Jump over closing delimters with a tab. SO THERE
-" let g:delimitMate_expand_cr=1
-" let g:delimitMate_expand_space=1
-" inoremap <Tab> <C-R>=delimitMate#JumpAny("\<C-Tab>")<CR>
 
 "##########################################################
 " ctrlp
@@ -91,7 +87,7 @@ let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml"
 " Better integration with tmux
 
 " Evenly resize windows when vim resized
-autocmd VimResized * :wincmd = 
+autocmd VimResized * :wincmd =
 
 " Set up bindings for  pane zoom and rebalance
 nnoremap <leader>- :wincmd _<cr>:wincmd \|<cr>
@@ -104,3 +100,8 @@ map <Leader>s :call RunNearestSpec()<CR>
 map <Leader>l :call RunLastSpec()<CR>
 map <Leader>a :call RunAllSpecs()<CR>
 
+"##########################################################
+" NERDTree
+let NERDTreeShowHidden=1
+
+"##########################################################

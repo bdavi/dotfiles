@@ -4,7 +4,7 @@ class CommandLineObjectWrapper
   def initialize obj, args
     @obj = obj
     @method_to_call = args[0].to_sym
-    @method_params = args.drop(1) 
+    @method_params = args.drop(1)
   rescue Exception => e
     abort e.message
   end

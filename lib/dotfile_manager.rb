@@ -2,11 +2,11 @@ require 'fileutils'
 
 class DotFileManager
   def initialize config
-    @config = config
-    @filenames = Dir.new(@config.dotfiles_dir).reject {|f| f =~ /\A\.{1,2}\z/ }
-    @home_paths = Hash[filenames.map {|f| [f, File.join(Dir.home, f)]}]
-    @backup_paths = Hash[filenames.map {|f| [f, File.join(config.backup_dir, f)]}]
-    @install_paths = Hash[filenames.map {|f| [f, File.join(config.dotfiles_dir, f)]}]
+    @config        = config
+    @filenames     = Dir.new(@config.dotfiles_dir).reject {|f| f =~ /\A\.{1,2}\z/ }
+    @home_paths    = Hash[filenames.map {|f| [f, File.join(Dir.home, f)           ] }]
+    @backup_paths  = Hash[filenames.map {|f| [f, File.join(config.backup_dir, f)  ] }]
+    @install_paths = Hash[filenames.map {|f| [f, File.join(config.dotfiles_dir, f)] }]
   end
 
   def install

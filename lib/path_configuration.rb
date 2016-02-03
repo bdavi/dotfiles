@@ -8,7 +8,7 @@ class PathConfiguration
   end
 
   def method_missing m, *args, &block
-    return nil unless paths[m.to_s]
+    raise NoMethodError unless paths[m.to_s]
     File.expand_path(paths[m.to_s])
   end
 end
