@@ -16,5 +16,6 @@ eval "$(rbenv init -)"
 # Add my custom scripts folder to the path
 PATH=$PATH:~/code/scripts
 
-# Add Postgres bin to path
+# Set up PostgreSQL
 PATH=$PATH:/Library/PostgreSQL/9.5/bin/
+export PGHOST=localhost
