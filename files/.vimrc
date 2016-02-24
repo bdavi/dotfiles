@@ -69,7 +69,7 @@ let g:ctrlp_use_caching = 0
 "##########################################################
 " Leader Keybindings
 let mapleader = " "
-nnoremap <leader>e a<%=   %><esc>hhhi
+nnoremap <leader>e a<%=  %><esc>hhhi
 nnoremap <leader>w <esc>:w<enter>
 nnoremap <leader># a#{}<esc>i
 noremap <leader>n :NERDTreeToggle<cr>

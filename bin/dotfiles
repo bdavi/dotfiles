@@ -5,7 +5,7 @@ require_relative '../lib/command_line_object_wrapper'
 require_relative '../lib/dotfile_manager'
 
 def config_file_path
-  parent_dir = File.expand_path(File.dirname(File.dirname(__FILE__)))
+  parent_dir = File.dirname(File.dirname(File.expand_path($0)))
   File.join(parent_dir, "config", "paths_config.yaml")
 end
 
