@@ -95,3 +95,9 @@ PATH=$PATH:~/code/scripts
 # Set up PostgreSQL
 PATH=$PATH:/Library/PostgreSQL/9.5/bin/
 export PGHOST=localhost
+
+
+#auto complete
+if [ -f $(brew --prefix)/etc/bash_completion ]; then
+  . $(brew --prefix)/etc/bash_completion
+fi

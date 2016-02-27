@@ -50,7 +50,7 @@ syntax enable
 set ttimeoutlen=0
 
 "Show trailing spaces!!!!
-set listchars=trail:·
+set listchars=trail:·,tab:»·
 set list
 
 "##########################################################
