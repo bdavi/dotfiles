@@ -6,4 +6,4 @@
 [push]
 	default = simple
 [core]
-	excludesfile = /Users/brian/.gitignore_global
+	excludesfile = /Users/brian/.gitignore

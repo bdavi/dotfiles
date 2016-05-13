@@ -1,5 +1,5 @@
 .*.sw*
 .ruby-version
-.*.swp
+**/*.swp
 .*.swo
 *.sw?

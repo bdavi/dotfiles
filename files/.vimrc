@@ -26,6 +26,8 @@ Plugin 'rizzatti/dash.vim'
 Plugin 'mickaobrien/vim-stackoverflow'
 Plugin 'sjl/vitality.vim' "Fix some issues iwth the cursor and focus with vim 
                           "in the console/tmux
+" Plugin 'mustache/vim-mustache-handlebars'
+Plugin 'sheerun/vim-polyglot'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -40,6 +42,9 @@ set shiftwidth=2
 set softtabstop=2
 set expandtab
 
+"Stop beeping at me!!
+set visualbell
+
 " Line Numbers
 set number
 set relativenumber
@@ -49,9 +54,20 @@ syntax enable
 
 set ttimeoutlen=0
 
+"Highlight based on cursor
+set cursorline
+set cursorcolumn
+highlight CursorLine ctermbg=DarkGrey
+
+
 "Show trailing spaces!!!!
 set listchars=trail:·,tab:»·
 set list
+
+"##########################################################
+" mustache-handlebars
+" let g:mustache_abbreciations = 1 "Interfering with YouCompleteMe (I
+" think...)
 
 "##########################################################
 " delimitMate
@@ -81,7 +97,7 @@ set clipboard=unnamed,unnamedplus
 "##########################################################
 "closetag.vim
 
-let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml"
+let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs"
 
 "##########################################################
 " Better integration with tmux

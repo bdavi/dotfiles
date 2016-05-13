@@ -93,7 +93,7 @@ eval "$(rbenv init -)"
 PATH=$PATH:~/code/scripts
 
 # Set up PostgreSQL
-PATH=$PATH:/Library/PostgreSQL/9.5/bin/
+PATH=$PATH:/Library/PostgreSQL/9.5/bin
 export PGHOST=localhost
 
 
