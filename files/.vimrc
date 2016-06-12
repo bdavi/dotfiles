@@ -64,6 +64,11 @@ highlight CursorLine ctermbg=DarkGrey
 set listchars=trail:·,tab:»·
 set list
 
+
+"##########################################################
+" nerdtree
+let g:NERDTreeWinSize = 75
+
 "##########################################################
 " mustache-handlebars
 " let g:mustache_abbreciations = 1 "Interfering with YouCompleteMe (I
