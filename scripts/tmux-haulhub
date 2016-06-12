@@ -24,7 +24,6 @@ tmux send 'cd ~/code/toggle/haulhub-web-broker' ENTER 'sleep 5' ENTER 'ember s' 
 tmux select-pane -t 3
 tmux send 'cd ~/code/toggle/haulhub-server' ENTER 'bundle exec rails c'
 
-
 # Create server window
 tmux new-window -d -t $SESSION_NAME:2 -n 'server'
 tmux select-window -t $SESSION_NAME:2

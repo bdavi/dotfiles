@@ -90,7 +90,7 @@ alias pg.stop='sudo -u postgres pg_ctl -D /Library/PostgreSQL/9.5/data stop'
 eval "$(rbenv init -)"
 
 # Add my custom scripts folder to the path
-PATH=$PATH:~/code/scripts
+PATH=$PATH:~/code/dotfiles/scripts
 
 # Set up PostgreSQL
 PATH=$PATH:/Library/PostgreSQL/9.5/bin
