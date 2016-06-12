@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+# Set starting dir
+cd ~/code
+
+# Create Session
+SESSION_NAME=haulhub
+tmux new-session -d -s $SESSION_NAME
+
+# Create running window
+tmux select-window -t $SESSION_NAME:1
+tmux rename-window 'running'
+tmux split-window -h
+tmux split-window -v
+tmux select-pane -t 0
+tmux split-window -v
+
+tmux select-pane -t 0
+tmux send 'cd ~/code/toggle/haulhub-server' ENTER 'foreman start' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/toggle/haulhub-web-trucker' ENTER 'sleep 2' ENTER 'ember s' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/toggle/haulhub-web-broker' ENTER 'sleep 5' ENTER 'ember s' ENTER
+tmux select-pane -t 3
+tmux send 'cd ~/code/toggle/haulhub-server' ENTER 'bundle exec rails c'
+
+
+# Create server window
+tmux new-window -d -t $SESSION_NAME:2 -n 'server'
+tmux select-window -t $SESSION_NAME:2
+tmux split-window -h
+tmux split-window -v
+
+tmux select-pane -t 0
+tmux send 'cd ~/code/toggle/haulhub-server' ENTER 'vim' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/toggle/haulhub-server' ENTER 'vim ~/code/working_notes/server_scratchpad.rb' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/toggle/haulhub-server' ENTER
+
+
+# Create broker window
+tmux new-window -d -t $SESSION_NAME:3 -n 'broker'
+tmux select-window -t $SESSION_NAME:3
+tmux split-window -h
+tmux split-window -v
+
+tmux select-pane -t 0
+tmux send 'cd ~/code/toggle/haulhub-web-broker' ENTER 'vim' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/toggle/haulhub-web-broker' ENTER 'vim ~/code/working_notes/broker_scratchpad.rb' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/toggle/haulhub-web-broker' ENTER
+
+# Create trucker window
+tmux new-window -d -t $SESSION_NAME:4 -n 'trucker'
+tmux select-window -t $SESSION_NAME:4
+tmux split-window -h
+tmux split-window -v
+
+tmux select-pane -t 0
+tmux send 'cd ~/code/toggle/haulhub-web-trucker' ENTER 'vim' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/toggle/haulhub-web-trucker' ENTER 'vim ~/code/working_notes/trucker_scratchpad.rb' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/toggle/haulhub-web-trucker' ENTER
+
+# Attach to this session
+tmux attach -t $SESSION_NAME
