@@ -1,2 +1,4 @@
 -T
 -d postgresql
+--skip-turbolinks
+-B
