@@ -28,6 +28,8 @@ Plugin 'sjl/vitality.vim' "Fix some issues iwth the cursor and focus with vim
                           "in the console/tmux
 " Plugin 'mustache/vim-mustache-handlebars'
 Plugin 'sheerun/vim-polyglot'
+Plugin 'editorconfig/editorconfig-vim'
+
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
