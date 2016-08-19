@@ -81,10 +81,9 @@ export PS1="\e[0;32m\u@\h\e[m \e[0;36m \w\e[m  \$(git_prompt)\n$"
 alias ll='clear;ls -lah'
 alias vim='mvim -v'
 alias c='clear'
-
-# PostgreSQL
-alias pg.start='sudo -u postgres pg_ctl -D /Library/PostgreSQL/9.5/data start'
-alias pg.stop='sudo -u postgres pg_ctl -D /Library/PostgreSQL/9.5/data stop'
+alias be='bundle exec'
+alias ber='bundle exec rspec'
+alias gl="git log --pretty=format:'%C(yellow)%h%C(reset) - %an [%C(green)%ar%C(reset)] %s' --graph"
 
 # Make sure rbenv is running
 eval "$(rbenv init -)"
@@ -95,7 +94,11 @@ PATH=$PATH:~/code/dotfiles/scripts
 # Set up PostgreSQL
 PATH=$PATH:/Library/PostgreSQL/9.5/bin
 export PGHOST=localhost
+alias pg.start='sudo -u postgres pg_ctl -D /Library/PostgreSQL/9.5/data start'
+alias pg.stop='sudo -u postgres pg_ctl -D /Library/PostgreSQL/9.5/data stop'
 
+# Editor
+export EDITOR='mvim -v'
 
 #auto complete
 if [ -f $(brew --prefix)/etc/bash_completion ]; then
