@@ -84,6 +84,7 @@ alias c='clear'
 alias be='bundle exec'
 alias ber='bundle exec rspec'
 alias gl="git log --pretty=format:'%C(yellow)%h%C(reset) - %an [%C(green)%ar%C(reset)] %s' --graph"
+alias annotate-model='annotate --exclude tests,fixtures,factories,serializers'
 
 # Make sure rbenv is running
 eval "$(rbenv init -)"
