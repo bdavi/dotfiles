@@ -90,6 +90,7 @@ eval "$(rbenv init -)"
 
 # Add my custom scripts folder to the path
 PATH=$PATH:~/code/dotfiles/scripts
+PATH=$PATH:~/code/utilities
 
 # Set up PostgreSQL
 PATH=$PATH:/Library/PostgreSQL/9.5/bin
