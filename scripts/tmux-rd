@@ -4,7 +4,7 @@
 cd ~/code
 
 # Create Session
-SESSION_NAME=haulhub
+SESSION_NAME=rd
 tmux new-session -d -s $SESSION_NAME
 
 # Create running window
@@ -16,13 +16,13 @@ tmux select-pane -t 0
 tmux split-window -v
 
 tmux select-pane -t 0
-tmux send 'cd ~/code/toggle/haulhub-server' ENTER 'foreman start' ENTER
+tmux send 'cd ~/code/toggle/rd-server' ENTER 'foreman start' ENTER
 tmux select-pane -t 1
-tmux send 'cd ~/code/toggle/haulhub-web-trucker' ENTER 'sleep 2' ENTER 'ember s' ENTER
+tmux send 'cd ~/code/toggle/rd-web-trucker' ENTER 'sleep 2' ENTER 'ember s' ENTER
 tmux select-pane -t 2
-tmux send 'cd ~/code/toggle/haulhub-web-broker' ENTER 'sleep 5' ENTER 'ember s' ENTER
+tmux send 'cd ~/code/toggle/rd-web-broker' ENTER 'sleep 5' ENTER 'ember s' ENTER
 tmux select-pane -t 3
-tmux send 'cd ~/code/toggle/haulhub-server' ENTER 'bundle exec rails c'
+tmux send 'cd ~/code/toggle/rd-server' ENTER 'bundle exec rails c'
 
 # Create server window
 tmux new-window -d -t $SESSION_NAME:2 -n 'server'
@@ -31,12 +31,11 @@ tmux split-window -h
 tmux split-window -v
 
 tmux select-pane -t 0
-tmux send 'cd ~/code/toggle/haulhub-server' ENTER 'vim' ENTER
+tmux send 'cd ~/code/toggle/rd-server' ENTER 'vim' ENTER
 tmux select-pane -t 1
-tmux send 'cd ~/code/toggle/haulhub-server' ENTER 'vim ~/code/working_notes/server_scratchpad.rb' ENTER
+tmux send 'cd ~/code/toggle/rd-server' ENTER 'vim ~/code/working_notes/server_scratchpad.rb' ENTER
 tmux select-pane -t 2
-tmux send 'cd ~/code/toggle/haulhub-server' ENTER
-
+tmux send 'cd ~/code/toggle/rd-server' ENTER
 
 # Create broker window
 tmux new-window -d -t $SESSION_NAME:3 -n 'broker'
@@ -45,11 +44,11 @@ tmux split-window -h
 tmux split-window -v
 
 tmux select-pane -t 0
-tmux send 'cd ~/code/toggle/haulhub-web-broker' ENTER 'vim' ENTER
+tmux send 'cd ~/code/toggle/rd-web-broker' ENTER 'vim' ENTER
 tmux select-pane -t 1
-tmux send 'cd ~/code/toggle/haulhub-web-broker' ENTER 'vim ~/code/working_notes/broker_scratchpad.rb' ENTER
+tmux send 'cd ~/code/toggle/rd-web-broker' ENTER 'vim ~/code/working_notes/broker_scratchpad.rb' ENTER
 tmux select-pane -t 2
-tmux send 'cd ~/code/toggle/haulhub-web-broker' ENTER
+tmux send 'cd ~/code/toggle/rd-web-broker' ENTER
 
 # Create trucker window
 tmux new-window -d -t $SESSION_NAME:4 -n 'trucker'
@@ -58,11 +57,11 @@ tmux split-window -h
 tmux split-window -v
 
 tmux select-pane -t 0
-tmux send 'cd ~/code/toggle/haulhub-web-trucker' ENTER 'vim' ENTER
+tmux send 'cd ~/code/toggle/rd-web-trucker' ENTER 'vim' ENTER
 tmux select-pane -t 1
-tmux send 'cd ~/code/toggle/haulhub-web-trucker' ENTER 'vim ~/code/working_notes/trucker_scratchpad.rb' ENTER
+tmux send 'cd ~/code/toggle/rd-web-trucker' ENTER 'vim ~/code/working_notes/trucker_scratchpad.rb' ENTER
 tmux select-pane -t 2
-tmux send 'cd ~/code/toggle/haulhub-web-trucker' ENTER
+tmux send 'cd ~/code/toggle/rd-web-trucker' ENTER
 
 # Attach to this session
 tmux attach -t $SESSION_NAME

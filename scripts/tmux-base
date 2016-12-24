@@ -4,7 +4,7 @@
 cd ~/code
 
 # Create Session
-SESSION_NAME=recruiting
+SESSION_NAME=baseApp
 tmux new-session -d -s $SESSION_NAME
 
 # Create running window
@@ -16,9 +16,9 @@ tmux select-pane -t 0
 tmux split-window -v
 
 tmux select-pane -t 0
-tmux send 'cd ~/code/toggle/recruiting_automation-server' ENTER 'foreman start' ENTER
+tmux send 'cd ~/code/api-base' ENTER 'foreman start' ENTER
 tmux select-pane -t 1
-tmux send 'cd ~/code/toggle/recruiting_automation-client-web' ENTER 'sleep 2' ENTER 'ember s' ENTER
+tmux send 'cd ~/code/ember-client-base' ENTER 'sleep 2' ENTER 'ember s' ENTER
 
 # Create server window
 tmux new-window -d -t $SESSION_NAME:2 -n 'server'
@@ -27,12 +27,11 @@ tmux split-window -h
 tmux split-window -v
 
 tmux select-pane -t 0
-tmux send 'cd ~/code/toggle/recruiting_automation-server' ENTER 'vim' ENTER
+tmux send 'cd ~/code/api-base' ENTER 'vim' ENTER
 tmux select-pane -t 1
-tmux send 'cd ~/code/toggle/recruiting_automation-server' ENTER 'vim ~/code/working_notes/recruiting_server.rb' ENTER
+tmux send 'cd ~/code/api-base' ENTER 'vim ~/code/working_notes/api-base.rb' ENTER
 tmux select-pane -t 2
-tmux send 'cd ~/code/toggle/recruiting_automation-server' ENTER
-
+tmux send 'cd ~/code/api-base' ENTER
 
 # Create client window
 tmux new-window -d -t $SESSION_NAME:3 -n 'client'
@@ -41,11 +40,11 @@ tmux split-window -h
 tmux split-window -v
 
 tmux select-pane -t 0
-tmux send 'cd ~/code/toggle/recruiting_automation-client-web' ENTER 'vim' ENTER
+tmux send 'cd ~/code/ember-client-base' ENTER 'vim' ENTER
 tmux select-pane -t 1
-tmux send 'cd ~/code/toggle/recruiting_automation-client-web' ENTER 'vim ~/code/working_notes/recruiting_web.js.rb' ENTER
+tmux send 'cd ~/code/ember-client-base' ENTER 'vim ~/code/working_notes/ember-client-base.js' ENTER
 tmux select-pane -t 2
-tmux send 'cd ~/code/toggle/recruiting_automation-client-web' ENTER
+tmux send 'cd ~/code/ember-client-base' ENTER
 
 # Attach to this session
 tmux attach -t $SESSION_NAME
