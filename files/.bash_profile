@@ -93,6 +93,9 @@ eval "$(rbenv init -)"
 PATH=$PATH:~/code/dotfiles/scripts
 PATH=$PATH:~/code/utilities
 
+# Make sure ssh keys are in keychain
+ssh-add -A 2>/dev/null;
+
 # Set up PostgreSQL
 PATH=$PATH:/Library/PostgreSQL/9.5/bin
 export PGHOST=localhost
