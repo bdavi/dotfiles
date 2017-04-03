@@ -85,6 +85,7 @@ alias be='bundle exec'
 alias ber='bundle exec rspec'
 alias gl="git log --pretty=format:'%C(yellow)%h%C(reset) - %an [%C(green)%ar%C(reset)] %s' --graph"
 alias annotate-model='annotate --exclude tests,fixtures,factories,serializers'
+alias nt='nosetests'
 
 # Make sure rbenv is running
 eval "$(rbenv init -)"
@@ -109,3 +110,9 @@ export EDITOR='mvim -v'
 if [ -f $(brew --prefix)/etc/bash_completion ]; then
   . $(brew --prefix)/etc/bash_completion
 fi
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/brian/code/google-cloud-sdk/path.bash.inc' ]; then source '/Users/brian/code/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/brian/code/google-cloud-sdk/completion.bash.inc' ]; then source '/Users/brian/code/google-cloud-sdk/completion.bash.inc'; fi

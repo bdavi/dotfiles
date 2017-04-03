@@ -48,8 +48,9 @@ config = {
             "name": "Default profile",
             "selected": true,
             "simple_modifications": {
-                "caps_lock": "left_control",
-                "fn": "left_control"
+                "caps_lock": "escape",
+                "left_command": "left_option",
+                "left_option": "left_command"
             }
         }
     ]
