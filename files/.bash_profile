@@ -86,6 +86,7 @@ alias ber='bundle exec rspec'
 alias gl="git log --pretty=format:'%C(yellow)%h%C(reset) - %an [%C(green)%ar%C(reset)] %s' --graph"
 alias annotate-model='annotate --exclude tests,fixtures,factories,serializers'
 alias nt='nosetests'
+alias rmpyc='find . -name "*.pyc" -type f -delete'
 
 # Make sure rbenv is running
 eval "$(rbenv init -)"
