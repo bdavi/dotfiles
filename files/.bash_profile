@@ -87,6 +87,8 @@ alias gl="git log --pretty=format:'%C(yellow)%h%C(reset) - %an [%C(green)%ar%C(r
 alias annotate-model='annotate --exclude tests,fixtures,factories,serializers'
 alias nt='nosetests'
 alias rmpyc='find . -name "*.pyc" -type f -delete'
+alias das='dev_appserver.py ./'
+alias source!='source ~/.bash_profile'
 
 # Make sure rbenv is running
 eval "$(rbenv init -)"
