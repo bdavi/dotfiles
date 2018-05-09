@@ -89,6 +89,10 @@ alias nt='nosetests'
 alias rmpyc='find . -name "*.pyc" -type f -delete'
 alias das='dev_appserver.py ./'
 alias source!='source ~/.bash_profile'
+alias pv='python -m virtualenv venv && source venv/bin/activate && pip install -r requirements.txt'
+alias rename='tmux rename-window'
+alias mig='bundle exec rake db:migrate && bundle exec rake db:migrate RAILS_ENV=test'
+alias eb='ember build'
 
 # Make sure rbenv is running
 eval "$(rbenv init -)"
@@ -119,3 +123,6 @@ if [ -f '/Users/brian/code/google-cloud-sdk/path.bash.inc' ]; then source '/User
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/brian/code/google-cloud-sdk/completion.bash.inc' ]; then source '/Users/brian/code/google-cloud-sdk/completion.bash.inc'; fi
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"

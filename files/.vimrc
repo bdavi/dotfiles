@@ -106,7 +106,7 @@ set clipboard=unnamed,unnamedplus
 "##########################################################
 "closetag.vim
 
-let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs"
+let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx"
 
 "##########################################################
 " Better integration with tmux
