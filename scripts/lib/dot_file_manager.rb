@@ -1,27 +1,18 @@
-#!/usr/bin/env ruby
-
 require 'fileutils'
 
 class DotFileManager
-  BASE_BACKUP_PATH = '~/original_dotfile_backup'
-  FILES_PATH = '~/code/dotfiles/config_files'
+  DEFAULT_BACKUP_PATH = '~/original_dotfile_backup'
+  DEFAULT_FILES_PATH = '~/code/dotfiles/config_files'
 
-  def initialize
-    @backup_path   = File.expand_path(BASE_BACKUP_PATH)
-    @files_path    = File.expand_path(FILES_PATH)
-    @filenames     = Dir.new(@files_path).reject {|f| f =~ /\A\.{1,2}\z/ }
-    @home_paths    = Hash[filenames.map {|f| [f, File.join(Dir.home,    f)] }]
-    @backup_paths  = Hash[filenames.map {|f| [f, File.join(backup_path, f)] }]
-    @install_paths = Hash[filenames.map {|f| [f, File.join(files_path,  f)] }]
-  end
-
-  def install
+  def install *args
+    init(*args)
     prepare_backup_dir
     move_existing_dotfiles_to_backup
     create_symbolic_links_to_new_files
   end
 
-  def uninstall
+  def uninstall *args
+    init(*args)
     remove_symbolic_links
     copy_dotfile_backups_to_home
     remove_dotfile_backup
@@ -29,6 +20,15 @@ class DotFileManager
 
 private
   attr_reader :filenames, :home_paths, :backup_paths, :install_paths, :backup_path, :files_path
+
+  def init files_path=DEFAULT_FILES_PATH, backup_path=DEFAULT_BACKUP_PATH
+    @files_path    = File.expand_path(files_path)
+    @backup_path   = File.expand_path(backup_path)
+    @filenames     = Dir.new(@files_path).reject {|f| f =~ /\A\.{1,2}\z/ }
+    @home_paths    = Hash[filenames.map {|f| [f, File.join(Dir.home,     f)] }]
+    @backup_paths  = Hash[filenames.map {|f| [f, File.join(@backup_path, f)] }]
+    @install_paths = Hash[filenames.map {|f| [f, File.join(@files_path,  f)] }]
+  end
 
   def prepare_backup_dir
     Dir.mkdir(backup_path) unless Dir.exist?(backup_path)
@@ -51,29 +51,15 @@ private
   end
 
   def copy_dotfile_backups_to_home
+    return unless Dir.exists?(backup_path)
+
     filenames.each do |f|
       FileUtils.cp(backup_paths[f], home_paths[f]) if File.exist?(backup_paths[f])
     end
   end
 
   def remove_dotfile_backup
-    FileUtils.rm_rf backup_path
+    FileUtils.rm_rf(backup_path) if Dir.exists?(backup_path)
   end
-end
 
-ALLOWED_PARAMETERS = ['install', 'uninstall']
-
-def main
-  command = ARGV.first
-  if ALLOWED_PARAMETERS.include?(command)
-    puts "Executing command: #{command}..."
-    DotFileManager.new.send(command)
-    puts "Complete"
-  else
-    puts "Allowed parameters are #{ALLOWED_PARAMETERS.join(', ')}."
-  end
-end
-
-if __FILE__ == $0
-  main
 end

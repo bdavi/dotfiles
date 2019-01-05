@@ -1,6 +1,5 @@
 "##########################################################
-" Vundle Stuff
-
+" Vundle
 set nocompatible
 filetype off
 
@@ -17,19 +16,16 @@ Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-endwise'
 Plugin 'alvan/vim-closetag'
 Plugin 'christoomey/vim-tmux-navigator'
-Plugin 'Valloric/YouCompleteMe'
 Plugin 'Raimondi/delimitMate'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'thoughtbot/vim-rspec'
 Plugin 'scrooloose/nerdtree'
-Plugin 'rizzatti/dash.vim'
-Plugin 'mickaobrien/vim-stackoverflow'
-Plugin 'sjl/vitality.vim' "Fix some issues iwth the cursor and focus with vim 
-                          "in the console/tmux
-" Plugin 'mustache/vim-mustache-handlebars'
+Plugin 'sjl/vitality.vim' "Fix some issues iwth the cursor and focus with vim in the console/tmux
 Plugin 'sheerun/vim-polyglot'
 Plugin 'editorconfig/editorconfig-vim'
 
+" Maybe later
+" Plugin 'Valloric/YouCompleteMe'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -43,9 +39,6 @@ set tabstop=2
 set shiftwidth=2
 set softtabstop=2
 set expandtab
-
-"Stop beeping at me!!
-set visualbell
 
 " Line Numbers
 set number
@@ -70,13 +63,21 @@ noremap j gj
 noremap k gk
 
 "##########################################################
+" Set location of working files
+" set backupdir=/Users/brian/dotfiles/.vim-temp//
+" set directory=/Users/brian/dotfiles/.vim-temp//
+" set undodir=/Users/brian/dotfiles/.vim-temp//
+
+set backupdir=/tmp//
+set directory=/tmp//
+set undodir=/tmp//
+
+
+
+"##########################################################
 " nerdtree
 let g:NERDTreeWinSize = 75
 
-"##########################################################
-" mustache-handlebars
-" let g:mustache_abbreciations = 1 "Interfering with YouCompleteMe (I
-" think...)
 
 "##########################################################
 " delimitMate
@@ -89,8 +90,6 @@ let delimitMate_matchpairs = "(:),[:],{:}"
 let g:ctrlp_user_command = 'ag %s -l --hidden --nocolor -g ""'
 let g:ctrlp_use_caching = 0
 
-" use ~/.agignore to exclude results (.git)
-
 "##########################################################
 " Leader Keybindings
 let mapleader = " "
@@ -101,12 +100,27 @@ noremap <leader>n :NERDTreeToggle<cr>
 
 " Always use the + register so our copys and pastes are better integrated with
 " the system clipboard.
-set clipboard=unnamed,unnamedplus
+" set clipboard=unnamed,unnamedplus
 
 "##########################################################
 "closetag.vim
-
 let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx"
+
+
+"##########################################################
+" Search!!!!!!
+
+" Case insensitive unless pattern include capital letter
+set ignorecase
+set smartcase
+
+" Automatically jump to next match when entering pattern
+set incsearch
+
+" Highlight all matches, clear with a space in command mode
+set hlsearch
+" Clear matches with a space
+nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
 
 "##########################################################
 " Better integration with tmux
