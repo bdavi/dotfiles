@@ -57,7 +57,7 @@ tmux select-pane -t 2
 tmux send 'cd ~/code/fancyhands/odo-datastore-customer-dashboard' ENTER 'c' ENTER
 
 # Create Heroku window
-tmux new-window -d -t $SESSION_NAME:5 -n 'CD'
+tmux new-window -d -t $SESSION_NAME:5 -n 'heroku'
 tmux select-window -t $SESSION_NAME:5
 tmux split-window -h
 tmux split-window -v
