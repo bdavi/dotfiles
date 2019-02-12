@@ -31,6 +31,7 @@ Plugin 'editorconfig/editorconfig-vim'
 call vundle#end()            " required
 filetype plugin indent on    " required
 
+
 "##########################################################
 "General settings
 
@@ -62,6 +63,9 @@ set list
 noremap j gj
 noremap k gk
 
+"SILENCE!!!!!
+set vb t_vb=
+
 "##########################################################
 " Set location of working files
 " set backupdir=/Users/brian/dotfiles/.vim-temp//
@@ -73,7 +77,6 @@ set directory=/tmp//
 set undodir=/tmp//
 
 
-
 "##########################################################
 " nerdtree
 let g:NERDTreeWinSize = 75
@@ -83,12 +86,13 @@ let g:NERDTreeWinSize = 75
 " delimitMate
 let delimitMate_matchpairs = "(:),[:],{:}"
 
+
 "##########################################################
 " ctrlp
-
 " Make CtrlP use ag for listing the files. Way faster and no useless files.
 let g:ctrlp_user_command = 'ag %s -l --hidden --nocolor -g ""'
 let g:ctrlp_use_caching = 0
+
 
 "##########################################################
 " Leader Keybindings
@@ -100,7 +104,7 @@ noremap <leader>n :NERDTreeToggle<cr>
 
 " Always use the + register so our copys and pastes are better integrated with
 " the system clipboard.
-" set clipboard=unnamed,unnamedplus
+set clipboard=unnamed,unnamedplus
 
 "##########################################################
 "closetag.vim
@@ -122,6 +126,7 @@ set hlsearch
 " Clear matches with a space
 nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
 
+
 "##########################################################
 " Better integration with tmux
 
@@ -131,6 +136,7 @@ autocmd VimResized * :wincmd =
 " Set up bindings for  pane zoom and rebalance
 nnoremap <leader>- :wincmd _<cr>:wincmd \|<cr>
 nnoremap <leader>= :wincmd =<cr>
+
 
 "##########################################################
 " thoughtbot/vim-rspec
@@ -142,6 +148,7 @@ map <Leader>a :call RunAllSpecs()<CR>
 " Make sure we are running the spec with bundle exec so we have no 
 " dependency issues between projects
 let g:rspec_command = "!bundle exec rspec -I . -f d -c {spec}"
+
 
 "##########################################################
 " NERDTree

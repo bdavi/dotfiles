@@ -11,7 +11,7 @@ brew cask install karabiner-elements
 # The important stuff
 brew install tmux
 brew install macvim --with-override-system-vim
-
+brew install reattach-to-user-namespace # Fix copy mode in vim/tmux
 
 ################################################################################
 # Some apps

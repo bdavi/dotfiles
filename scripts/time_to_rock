@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+# Create Session
+SESSION_NAME="TIME_TO_ROCK"
+tmux new-session -d -s $SESSION_NAME
+
+# Create running window
+tmux select-window -t $SESSION_NAME:1
+tmux rename-window 'running'
+tmux split-window -h
+tmux split-window -v
+tmux select-pane -t 0
+tmux split-window -v
+tmux select-pane -t 0
+tmux send 'cd ~/code/fancyhands/odo-datastore' ENTER 'foreman start' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/fancyhands/odo-datastore-web-client' ENTER 'sleep 5' ENTER 'ember s' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/fancyhands/odo-datastore-customer-dashboard' ENTER 'sleep 5' ENTER 'npm run start' ENTER
+tmux select-pane -t 3
+tmux send 'cd ~/code/fancyhands/odo-datastore' ENTER 'tail -f log/development.log' ENTER
+
+# Create Rails server window
+tmux new-window -d -t $SESSION_NAME:2 -n 'server'
+tmux select-window -t $SESSION_NAME:2
+tmux split-window -h
+tmux split-window -v
+tmux select-pane -t 0
+tmux send 'cd ~/code/fancyhands/odo-datastore' ENTER 'vim' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/fancyhands/odo-datastore' ENTER 'vim' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/fancyhands/odo-datastore' ENTER 'c' ENTER
+
+# Create DS window
+tmux new-window -d -t $SESSION_NAME:3 -n 'ds'
+tmux select-window -t $SESSION_NAME:3
+tmux split-window -h
+tmux split-window -v
+tmux select-pane -t 0
+tmux send 'cd ~/code/fancyhands/odo-datastore-web-client' ENTER 'vim' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/fancyhands/odo-datastore-web-client' ENTER 'vim' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/fancyhands/odo-datastore-web-client' ENTER 'c' ENTER
+
+# Create CD window
+tmux new-window -d -t $SESSION_NAME:4 -n 'cd'
+tmux select-window -t $SESSION_NAME:4
+tmux split-window -h
+tmux split-window -v
+tmux select-pane -t 0
+tmux send 'cd ~/code/fancyhands/odo-datastore-customer-dashboard' ENTER 'vim' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/fancyhands/odo-datastore-customer-dashboard' ENTER 'vim' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/fancyhands/odo-datastore-customer-dashboard' ENTER 'c' ENTER
+
+# Create Heroku window
+tmux new-window -d -t $SESSION_NAME:5 -n 'CD'
+tmux select-window -t $SESSION_NAME:5
+tmux split-window -h
+tmux split-window -v
+tmux select-pane -t 0
+tmux send 'cd ~/code/fancyhands/odo-datastore' ENTER 'vim' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/fancyhands/odo-datastore' ENTER 'vim ~/code/fancyhands/working_notes/heroku_notes.rb' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/fancyhands/odo-datastore-customer-dashboard' ENTER 'c' ENTER
+
+# Create importer window
+tmux new-window -d -t $SESSION_NAME:6 -n 'importer'
+tmux select-window -t $SESSION_NAME:6
+tmux split-window -h
+tmux split-window -v
+tmux select-pane -t 0
+tmux send 'cd ~/code/fancyhands/odo-project-importer' ENTER 'vim' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/fancyhands/odo-project-importer' ENTER 'vim' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/fancyhands/odo-project-importer' ENTER 'c' ENTER
+
+# Create importer window
+tmux new-window -d -t $SESSION_NAME:7 -n 'clients'
+tmux select-window -t $SESSION_NAME:7
+tmux split-window -h
+tmux split-window -v
+tmux select-pane -t 0
+tmux send 'cd ~/code/fancyhands/odo-clients' ENTER 'vim' ENTER
+tmux select-pane -t 1
+tmux send 'cd ~/code/fancyhands/odo-clients' ENTER 'vim' ENTER
+tmux select-pane -t 2
+tmux send 'cd ~/code/fancyhands/odo-clients' ENTER 'c' ENTER
+
+# Desktop notes
+tmux send 'mvim ~/code/fancyhands/working_notes/call_notes.txt' ENTER
+tmux send 'sleep 1' ENTER
+tmux send 'mvim --remote-tab-silent ~/code/fancyhands/working_notes/time_card.txt' ENTER
+tmux send 'sleep 1' ENTER
+tmux send 'mvim --remote-tab-silent tmp' ENTER
+tmux send 'c' ENTER
+
+# Attach to this session
+tmux attach -t $SESSION_NAME
