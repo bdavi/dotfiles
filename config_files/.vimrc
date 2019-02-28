@@ -23,6 +23,7 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'sjl/vitality.vim' "Fix some issues iwth the cursor and focus with vim in the console/tmux
 Plugin 'sheerun/vim-polyglot'
 Plugin 'editorconfig/editorconfig-vim'
+Plugin 'nathanaelkane/vim-indent-guides'
 
 " Maybe later
 " Plugin 'Valloric/YouCompleteMe'
@@ -65,6 +66,10 @@ noremap k gk
 
 "SILENCE!!!!!
 set vb t_vb=
+
+"Show filename in staus line
+set laststatus=2
+set statusline+=%F
 
 "##########################################################
 " Set location of working files
