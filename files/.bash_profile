@@ -110,6 +110,9 @@ export PGHOST=localhost
 alias pg.start='sudo -u postgres pg_ctl -D /Library/PostgreSQL/9.5/data start'
 alias pg.stop='sudo -u postgres pg_ctl -D /Library/PostgreSQL/9.5/data stop'
 
+alias pg10.start='sudo -u postgres pg_ctl -D /Library/PostgreSQL/10/data start'
+alias pg10.stop='sudo -u postgres pg_ctl -D /Library/PostgreSQL/10/data stop'
+
 # Editor
 export EDITOR='mvim -v'
 
@@ -126,3 +129,12 @@ if [ -f '/Users/brian/code/google-cloud-sdk/completion.bash.inc' ]; then source 
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
+
+##
+# Your previous /Users/brian/.bash_profile file was backed up as /Users/brian/.bash_profile.macports-saved_2019-04-10_at_21:19:09
+##
+
+# MacPorts Installer addition on 2019-04-10_at_21:19:09: adding an appropriate PATH variable for use with MacPorts.
+export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+# Finished adapting your PATH environment variable for use with MacPorts.
+
