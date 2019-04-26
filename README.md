@@ -1,6 +1,12 @@
-# Brian Davies dotfiles 
+# My dotfiles and a few other things
 
-This repo contains the various dotfiles I use to setup my development environment.
+## Note
+Generally, this repo should be located at `~/code/dotfiles`. You'll have the least friction using it if it's placed there.
 
-Install using ```dotfiles install```
-Uninstall using ```dotfiles uninstall```
+## Install dotfiles
+Use `scripts/dotfiles install` or `scripts/dotfiles uninstall`.
+
+You may override the default locations like this:
+```
+scripts/dotfiles install 'path/to/dir/containing/files/to/install' 'path/to/backup/existing/files/to'
+```

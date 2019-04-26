@@ -1,6 +1,5 @@
 "##########################################################
-" Vundle Stuff
-
+" Vundle
 set nocompatible
 filetype off
 
@@ -17,23 +16,22 @@ Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-endwise'
 Plugin 'alvan/vim-closetag'
 Plugin 'christoomey/vim-tmux-navigator'
-Plugin 'Valloric/YouCompleteMe'
 Plugin 'Raimondi/delimitMate'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'thoughtbot/vim-rspec'
 Plugin 'scrooloose/nerdtree'
-Plugin 'rizzatti/dash.vim'
-Plugin 'mickaobrien/vim-stackoverflow'
-Plugin 'sjl/vitality.vim' "Fix some issues iwth the cursor and focus with vim 
-                          "in the console/tmux
-" Plugin 'mustache/vim-mustache-handlebars'
+Plugin 'sjl/vitality.vim' "Fix some issues iwth the cursor and focus with vim in the console/tmux
 Plugin 'sheerun/vim-polyglot'
 Plugin 'editorconfig/editorconfig-vim'
+Plugin 'nathanaelkane/vim-indent-guides'
 
+" Maybe later
+" Plugin 'Valloric/YouCompleteMe'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
+
 
 "##########################################################
 "General settings
@@ -43,9 +41,6 @@ set tabstop=2
 set shiftwidth=2
 set softtabstop=2
 set expandtab
-
-"Stop beeping at me!!
-set visualbell
 
 " Line Numbers
 set number
@@ -69,27 +64,40 @@ set list
 noremap j gj
 noremap k gk
 
+"SILENCE!!!!!
+set vb t_vb=
+
+"Show filename in staus line
+set laststatus=2
+set statusline+=%F
+
+"##########################################################
+" Set location of working files
+" set backupdir=/Users/brian/dotfiles/.vim-temp//
+" set directory=/Users/brian/dotfiles/.vim-temp//
+" set undodir=/Users/brian/dotfiles/.vim-temp//
+
+set backupdir=/tmp//
+set directory=/tmp//
+set undodir=/tmp//
+
+
 "##########################################################
 " nerdtree
 let g:NERDTreeWinSize = 75
 
-"##########################################################
-" mustache-handlebars
-" let g:mustache_abbreciations = 1 "Interfering with YouCompleteMe (I
-" think...)
 
 "##########################################################
 " delimitMate
 let delimitMate_matchpairs = "(:),[:],{:}"
 
+
 "##########################################################
 " ctrlp
-
 " Make CtrlP use ag for listing the files. Way faster and no useless files.
 let g:ctrlp_user_command = 'ag %s -l --hidden --nocolor -g ""'
 let g:ctrlp_use_caching = 0
 
-" use ~/.agignore to exclude results (.git)
 
 "##########################################################
 " Leader Keybindings
@@ -106,8 +114,24 @@ set clipboard=unnamed,unnamedplus
 
 "##########################################################
 "closetag.vim
-
 let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx"
+
+
+"##########################################################
+" Search!!!!!!
+
+" Case insensitive unless pattern include capital letter
+set ignorecase
+set smartcase
+
+" Automatically jump to next match when entering pattern
+set incsearch
+
+" Highlight all matches, clear with a space in command mode
+set hlsearch
+" Clear matches with a space
+nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
+
 
 "##########################################################
 " Better integration with tmux
@@ -119,6 +143,7 @@ autocmd VimResized * :wincmd =
 nnoremap <leader>- :wincmd _<cr>:wincmd \|<cr>
 nnoremap <leader>= :wincmd =<cr>
 
+
 "##########################################################
 " thoughtbot/vim-rspec
 map <Leader>t :call RunCurrentSpecFile()<CR>
@@ -129,6 +154,7 @@ map <Leader>a :call RunAllSpecs()<CR>
 " Make sure we are running the spec with bundle exec so we have no 
 " dependency issues between projects
 let g:rspec_command = "!bundle exec rspec -I . -f d -c {spec}"
+
 
 "##########################################################
 " NERDTree

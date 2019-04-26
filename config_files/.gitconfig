@@ -1,0 +1,9 @@
+[user]
+  name = Brian Davies
+  email = brian@briandavies.me
+[color]
+  ui = true
+[push]
+  default = simple
+[core]
+  excludesfile = ~/.gitignore
