@@ -71,12 +71,13 @@ alias eb='ember build'
 alias gdc='git diff --cached'
 
 # Typos
-alias cim='vim'
+alias vim='mvim -v'
+alias cim='mvim -v'
 
 ################################################################################
 # Editor
 ################################################################################
-export EDITOR='vim'
+export EDITOR='mvim -v'
 
 ################################################################################
 # Git Completion
