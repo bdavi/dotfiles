@@ -68,6 +68,7 @@ alias pv='python -m virtualenv venv && source venv/bin/activate && pip install -
 alias rename='tmux rename-window'
 alias mig='bundle exec rake db:migrate && bundle exec rake db:migrate RAILS_ENV=test'
 alias eb='ember build'
+alias gdc='git diff --cached'
 
 # Typos
 alias cim='vim'
@@ -76,11 +77,6 @@ alias cim='vim'
 # Editor
 ################################################################################
 export EDITOR='vim'
-
-################################################################################
-# Use vi bindings on cli
-################################################################################
-set -o vi
 
 ################################################################################
 # Git Completion
