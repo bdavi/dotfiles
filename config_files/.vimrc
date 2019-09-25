@@ -56,6 +56,10 @@ set cursorline
 set cursorcolumn
 highlight CursorLine ctermbg=DarkGrey
 
+"Highlight width
+set colorcolumn=80,100,120
+highlight ColorColumn ctermbg=8
+
 "Show trailing spaces!!!!
 set listchars=trail:·,tab:»·
 set list
@@ -69,7 +73,7 @@ set vb t_vb=
 
 "Show filename in staus line
 set laststatus=2
-set statusline+=%F
+set statusline=%<%f\ %h%m%r%=%-14.(%l,%c%)
 
 "##########################################################
 " Set location of working files
