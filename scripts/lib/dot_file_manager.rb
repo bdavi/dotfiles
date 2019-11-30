@@ -19,7 +19,8 @@ class DotFileManager
   end
 
 private
-  attr_reader :filenames, :home_paths, :backup_paths, :install_paths, :backup_path, :files_path
+  attr_reader :filenames, :home_paths, :backup_paths, :install_paths,
+              :backup_path, :files_path
 
   def init files_path=DEFAULT_FILES_PATH, backup_path=DEFAULT_BACKUP_PATH
     @files_path    = File.expand_path(files_path)
@@ -61,5 +62,4 @@ private
   def remove_dotfile_backup
     FileUtils.rm_rf(backup_path) if Dir.exists?(backup_path)
   end
-
 end

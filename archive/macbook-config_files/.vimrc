@@ -155,7 +155,7 @@ map <Leader>s :call RunNearestSpec()<CR>
 map <Leader>l :call RunLastSpec()<CR>
 map <Leader>a :call RunAllSpecs()<CR>
 
-" Make sure we are running the spec with bundle exec so we have no 
+" Make sure we are running the spec with bundle exec so we have no
 " dependency issues between projects
 let g:rspec_command = "!bundle exec rspec -I . -f d -c {spec}"
 
