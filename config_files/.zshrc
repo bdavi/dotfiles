@@ -86,5 +86,4 @@ alias eb='ember build'
 ###############################################################################
 # Path
 ###############################################################################
-export PATH=/home/brian/.scripts:$PATH
 export PATH=$PATH:~/code/dotfiles/scripts
