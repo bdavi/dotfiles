@@ -1,0 +1,7 @@
+.*.sw*
+**/*.swp
+.*.swo
+*.sw?
+*.sv?
+*.pyc
+tags
