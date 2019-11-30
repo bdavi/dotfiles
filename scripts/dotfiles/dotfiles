@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require_relative 'lib/dot_file_manager.rb'
-require_relative 'lib/simple_cli_wrapper.rb'
+require_relative 'dot_file_manager.rb'
+require_relative 'simple_cli_wrapper.rb'
 
 def main
   SimpleCLIWrapper.new(ARGV, DotFileManager).perform
