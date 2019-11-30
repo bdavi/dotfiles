@@ -28,7 +28,6 @@ source $ZSH/oh-my-zsh.sh
 /usr/bin/setxkbmap -option "caps:swapescape"
 alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
 
-
 ###############################################################################
 # Editor
 ###############################################################################
