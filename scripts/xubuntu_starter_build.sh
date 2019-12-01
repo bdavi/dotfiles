@@ -2,6 +2,7 @@
 # The easy stuff
 #######################################################################
 sudo apt-get --yes install curl
+sudo apt-get --yes install wget
 sudo apt-get --yes install git
 sudo apt-get --yes install npm
 sudo apt-get --yes install tmux
