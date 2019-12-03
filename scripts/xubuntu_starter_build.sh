@@ -99,6 +99,14 @@ asdf install nodejs 13.2.0
 asdf global nodejs 13.2.0
 
 #######################################################################
+# Postgres
+#######################################################################
+sudo apt-get --yes install postgresql postgresql-contrib libpq-dev
+systemctl start postgresql
+systemctl enable postgresql
+
+
+#######################################################################
 # Install Albert
 #######################################################################
 curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -

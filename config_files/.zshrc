@@ -28,6 +28,7 @@ source $ZSH/oh-my-zsh.sh
 /usr/bin/setxkbmap -option "caps:swapescape"
 alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
 
+
 ###############################################################################
 # Editor
 ###############################################################################
@@ -61,6 +62,13 @@ alias ber='bundle exec rspec'
 alias annotate-model='annotate --exclude tests,fixtures,factories,serializers'
 alias am='annotate --exclude tests,fixtures,factories,serializers'
 alias mig='bundle exec rake db:migrate && bundle exec rake db:migrate RAILS_ENV=test'
+
+
+###############################################################################
+# Pronto
+###############################################################################
+# Runs pronto against entire repo
+alias pra='be pronto run --commit=$(git log --pretty=format:%H | tail -1)'
 
 
 ###############################################################################
