@@ -46,32 +46,6 @@ set autoread
 
 
 "##########################################################
-" Statusline
-"##########################################################
-set laststatus=2
-
-"Git funrctions from https://shapeshed.com/vim-statuslines/
-function! GitBranch()
-  return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
-endfunction
-
-function! StatuslineGit()
-  let l:branchname = GitBranch()
-  return strlen(l:branchname) > 0?' ['.l:branchname.']':''
-endfunction
-
-set statusline=
-set statusline+=%#PmenuSel#
-set statusline+=%{StatuslineGit()}
-set statusline+=%#LineNr#
-set statusline+=\ %m
-set statusline+=\ %f
-set statusline+=%=
-set statusline+=%#CursorColumn#
-set statusline+=\ %l:%c
-
-
-"##########################################################
 "Search
 "##########################################################
 " Case insensitive unless pattern include capital letter
@@ -91,8 +65,6 @@ nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
 "##########################################################
 " Colors
 "##########################################################
-set term=screen-256color
-
 "Highlight based on cursor
 set cursorline
 set cursorcolumn
@@ -110,7 +82,7 @@ highlight ColorColumn ctermbg=234
 "Set leader
 let mapleader = " "
 
-"Easier split navigation
+"Easier split navigation (unnecessary with tmux-navigator)
 "nnoremap <C-J> <C-W><C-J>
 "nnoremap <C-K> <C-W><C-K>
 "nnoremap <C-L> <C-W><C-L>
@@ -177,3 +149,38 @@ nnoremap <leader>= :wincmd =<cr>
 
 "afteglow
 colorscheme afterglow
+
+
+"##############################################################################
+"##############################################################################
+" The following cause rendering artifacts in vim-gtk on Ubuntu. Figure them
+" out. OR ELSE
+"##############################################################################
+"##############################################################################
+
+"set term=screen-256color
+
+"##########################################################
+" Statusline
+"##########################################################
+"set laststatus=2
+
+"Git funrctions from https://shapeshed.com/vim-statuslines/
+"function! GitBranch()
+"  return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
+"endfunction
+"
+"function! StatuslineGit()
+"  let l:branchname = GitBranch()
+"  return strlen(l:branchname) > 0?' ['.l:branchname.']':''
+"endfunction
+"
+"set statusline=
+"set statusline+=%#PmenuSel#
+"set statusline+=%{StatuslineGit()}
+"set statusline+=%#LineNr#
+"set statusline+=\ %m
+"set statusline+=\ %f
+"set statusline+=%=
+"set statusline+=%#CursorColumn#
+"set statusline+=\ %l:%c
