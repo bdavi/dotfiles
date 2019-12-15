@@ -18,7 +18,7 @@ sudo apt-get --yes install fonts-powerline
 sudo apt-get --yes install zeal
 sudo apt-get --yes install doublecmd-gtk
 sudo snap install --classic heroku
-
+sudo apt-get --yes install xclip
 
 #######################################################################
 # Oh my zsh
