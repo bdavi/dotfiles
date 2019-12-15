@@ -63,6 +63,11 @@ alias annotate-model='annotate --exclude tests,fixtures,factories,serializers'
 alias am='annotate --exclude tests,fixtures,factories,serializers'
 alias mig='bundle exec rake db:migrate && bundle exec rake db:migrate RAILS_ENV=test'
 
+###############################################################################
+# Yarn
+###############################################################################
+alias yt='yarn test'
+
 
 ###############################################################################
 # Pronto

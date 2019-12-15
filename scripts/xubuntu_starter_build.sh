@@ -4,6 +4,7 @@
 sudo apt-get --yes install curl
 sudo apt-get --yes install wget
 sudo apt-get --yes install git
+sudo apt-get --yes install tree
 sudo apt-get --yes install npm
 sudo apt-get --yes install tmux
 sudo apt-get --yes install terminator
@@ -15,6 +16,8 @@ sudo apt-get --yes install synaptic
 sudo apt-get --yes install exuberant-ctags
 sudo apt-get --yes install fonts-powerline
 sudo apt-get --yes install zeal
+sudo apt-get --yes install doublecmd-gtk
+sudo snap install --classic heroku
 
 
 #######################################################################
@@ -76,9 +79,12 @@ asdf update
 # Set up for Ruby
 sudo apt-get --yes install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm5 libgdbm-dev
 
-asdf plugin-add python
-asdf install ruby 2.6.5
-asdf global ruby 2.6.5
+asdf plugin-add ruby
+asdf install ruby 2.6.3
+asdf global ruby 2.6.3
+gem install rubocop
+gem install brakeman
+gem install rails_best_practices
 
 # Set up for Python
 sudo apt-get update

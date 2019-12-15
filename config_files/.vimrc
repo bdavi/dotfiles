@@ -135,7 +135,7 @@ let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx"
 
 "vim-test
 let test#strategy = "asyncrun"
-let g:asyncrun_open = 8
+let g:asyncrun_open = 20
 nmap <Leader>t :TestFile<CR>
 nmap <Leader>s :TestNearest<CR>
 nmap <Leader>l :TestLast<CR>
