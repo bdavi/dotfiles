@@ -119,7 +119,13 @@ call plug#begin('~/.vim/plugged')
   Plug 'valloric/youcompleteme'
   Plug 'tpope/vim-surround'
   Plug 'craigemery/vim-autotag'
+  Plug 'jpalardy/vim-slime'
 call plug#end()
+
+"vim-slime
+let g:slime_target = "tmux"
+let g:slime_paste_file = "$HOME/.slime_paste"
+let g:slime_default_config = {"socket_name": "default", "target_pane": "{last}"}
 
 "NERDTree
 let g:NERDTreeWinSize = 75

@@ -20,6 +20,24 @@ sudo apt-get --yes install doublecmd-gtk
 sudo snap install --classic heroku
 sudo apt-get --yes install xclip
 
+
+sudo apt-get install sqlitebrowser
+
+# Zotero
+sudo add-apt-repository ppa:smathot/cogscinl
+sudo apt-get update
+sudo apt-get install zotero-standalone
+
+
+#sudo apt install pgadmin4 pgadmin4-apache2
+
+sudo apt install pgadmin3
+sudo -u postgres psql postgres
+alter user postgres with password 'postgres';
+
+# Can't find the repo:
+#sudo apt install pgadmin4 pgadmin4-apache2
+
 #######################################################################
 # Oh my zsh
 #######################################################################
@@ -84,7 +102,7 @@ asdf install ruby 2.6.3
 asdf global ruby 2.6.3
 gem install rubocop
 gem install brakeman
-gem install rails_best_practices
+gem install foreman
 
 # Set up for Python
 sudo apt-get update
@@ -110,7 +128,6 @@ asdf global nodejs 13.2.0
 sudo apt-get --yes install postgresql postgresql-contrib libpq-dev
 systemctl start postgresql
 systemctl enable postgresql
-
 
 
 #######################################################################
