@@ -52,6 +52,7 @@ alias vc='vim -p ~/.vimrc ~/.zshrc ~/.tmux.conf'
 ###############################################################################
 alias gl="git log --pretty=format:'%C(yellow)%h%C(reset) - %an [%C(green)%ar%C(reset)] %s' --graph"
 alias gdc='git diff --cached'
+alias gdm='git diff master..$(git rev-parse --abbrev-ref HEAD)'
 
 
 ###############################################################################
@@ -62,18 +63,13 @@ alias ber='bundle exec rspec'
 alias annotate-model='annotate --exclude tests,fixtures,factories,serializers'
 alias am='annotate --exclude tests,fixtures,factories,serializers'
 alias mig='bundle exec rake db:migrate && bundle exec rake db:migrate RAILS_ENV=test'
+alias rb='bundle exec rake db:rollback && bundle exec rake db:rollback RAILS_ENV=test'
+
 
 ###############################################################################
 # Yarn
 ###############################################################################
 alias yt='yarn test'
-
-
-###############################################################################
-# Pronto
-###############################################################################
-# Runs pronto against entire repo
-alias pra='be pronto run --commit=$(git log --pretty=format:%H | tail -1)'
 
 
 ###############################################################################

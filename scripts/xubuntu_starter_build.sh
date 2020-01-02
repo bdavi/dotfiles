@@ -10,7 +10,6 @@ sudo apt-get --yes install tmux
 sudo apt-get --yes install terminator
 sudo apt-get --yes install arc-theme
 sudo apt-get --yes install gimp
-sudo apt-get --yes install flameshot
 sudo apt-get --yes install chromium-browser
 sudo apt-get --yes install synaptic
 sudo apt-get --yes install exuberant-ctags
@@ -20,6 +19,9 @@ sudo apt-get --yes install doublecmd-gtk
 sudo snap install --classic heroku
 sudo apt-get --yes install xclip
 
+sudo add-apt-repository ppa:sicklylife/flameshot
+sudo apt-get update
+sudo apt-get --yes install flameshot
 
 sudo apt-get install sqlitebrowser
 
