@@ -1,7 +1,7 @@
 "##########################################################
 "General settings
 "##########################################################
-set updatetime=300
+set updatetime=500
 
 "Set up tabs
 set tabstop=2
@@ -11,7 +11,7 @@ set expandtab
 
 "Line Numbers
 set number
-set relativenumber
+" set relativenumber
 
 "Hightlight Syntax
 syntax enable
@@ -27,22 +27,44 @@ noremap k gk
 "SILENCE!!!!!
 set vb t_vb=
 
-"Generally, don't use swapfiles
+"Don't use swapfiles
 set noswapfile
-
-"But when you do use swapfiles, keep them tidy
-set backupdir=/tmp//
-set directory=/tmp//
-set undodir=/tmp//
 
 "Use system clipboard
 set clipboard=unnamed,unnamedplus
 
+"Set cursor in different modes (may not work in all terminals)
+let &t_SI = "\<Esc>[6 q"
+let &t_SR = "\<Esc>[4 q"
+let &t_EI = "\<Esc>[2 q"
+
 "Misc
 set wildmenu
-set ruler
 set scrolloff=3
 set autoread
+
+
+"##########################################################
+"Super lightweight autocomplete using the built in and autocmd
+"##########################################################
+set cot=menu,menuone
+
+ino <BS> <BS><C-r>=getline('.')[col('.')-3:col('.')-2]=~#'\k\k'?!pumvisible()?"\<lt>C-n>\<lt>C-p>":'':pumvisible()?"\<lt>C-y>":''<CR>
+ino <CR> <C-r>=pumvisible()?"\<lt>C-y>":""<CR><CR>
+ino <Tab> <C-r>=pumvisible()?"\<lt>C-n>":"\<lt>Tab>"<CR>
+ino <S-Tab> <C-r>=pumvisible()?"\<lt>C-p>":"\<lt>S-Tab>"<CR>
+
+augroup MyAutoComplete
+    au!
+    au InsertCharPre * if
+    \ !exists('s:complete') &&
+    \ !pumvisible() &&
+    \ getline('.')[col('.')-2].v:char =~# '\k\k' |
+        \ let s:complete = 1 |
+        \ noautocmd call feedkeys("\<C-n>\<C-p>", "nt") |
+    \ endif
+    au CompleteDone * if exists('s:complete') | unlet s:complete | endif
+augroup END
 
 
 "##########################################################
@@ -82,15 +104,46 @@ highlight ColorColumn ctermbg=234
 "Set leader
 let mapleader = " "
 
-"Easier split navigation (unnecessary with tmux-navigator)
-"nnoremap <C-J> <C-W><C-J>
-"nnoremap <C-K> <C-W><C-K>
-"nnoremap <C-L> <C-W><C-L>
-"nnoremap <C-H> <C-W><C-H>
-
 "ERB
 nnoremap <leader>e a<%=  %><esc>hhi
 nnoremap <leader>E a<%  %><esc>hhi
+
+
+"##########################################################
+" Statusline
+"##########################################################
+set laststatus=2
+
+function! StatuslineGit()
+    if exists("g:git_branch")
+        return g:git_branch
+    else
+        return ''
+    endif
+endfunction
+
+function! GetGitBranch()
+    let l:is_git_dir = system('echo -n $(git rev-parse --is-inside-work-tree)')
+
+    if l:is_git_dir == 'true'
+      let g:git_branch =  system('bash -c "echo -n $(git rev-parse --abbrev-ref HEAD)"')
+    else
+      let g:git_branch =  ''
+    endif
+endfunction
+
+autocmd BufEnter * call GetGitBranch()
+
+set statusline=
+set statusline+=%#PmenuSel#
+set statusline+=\ 
+set statusline+=%{StatuslineGit()}
+set statusline+=\ 
+set statusline+=%#CursorColumn#
+set statusline+=\ %m
+set statusline+=\ %f
+set statusline+=%=
+set statusline+=\ %l:%c
 
 
 "##########################################################
@@ -98,30 +151,40 @@ nnoremap <leader>E a<%  %><esc>hhi
 "Using https://github.com/junegunn/vim-plug (Install new with `:PlugInstall`
 "##########################################################
 call plug#begin('~/.vim/plugged')
+  Plug 'danilo-augusto/vim-afterglow' "Theme
   Plug 'scrooloose/nerdtree'
-  Plug 'editorconfig/editorconfig-vim'
   Plug 'airblade/vim-gitgutter'
   Plug '/usr/local/opt/fzf'
   Plug 'junegunn/fzf.vim'
-  Plug 'sheerun/vim-polyglot'
-  Plug 'janko/vim-test'
-  Plug 'skywind3000/asyncrun.vim'
-  Plug 'tpope/vim-dispatch'
-  Plug 'dense-analysis/ale'
-  Plug 'tpope/vim-rails'
-  Plug 'christoomey/vim-tmux-navigator'
-  Plug 'danilo-augusto/vim-afterglow' "Theme
   Plug 'tpope/vim-commentary'
   Plug 'jiangmiao/auto-pairs'
   Plug 'tpope/vim-endwise'
-  Plug 'wincent/terminus' "Improve cursor
   Plug 'alvan/vim-closetag'
-  Plug 'valloric/youcompleteme'
-  Plug 'tpope/vim-surround'
-  Plug 'craigemery/vim-autotag'
+  Plug 'christoomey/vim-tmux-navigator'
+  Plug 'janko/vim-test'
+  Plug 'skywind3000/asyncrun.vim' "Use with vim-test
   Plug 'jpalardy/vim-slime'
-  Plug 'metakirby5/codi.vim'
+  Plug 'terryma/vim-multiple-cursors'
+  Plug 'dense-analysis/ale'
 call plug#end()
+
+"afteglow
+colorscheme afterglow
+
+"vim-gitgutter
+"Be sure to set this AFTER the colorscheme or it won't render colors correctly
+set signcolumn=yes
+hi GitGutterAdd    guibg=#121212 ctermbg=233 guifg=#00ff00 ctermfg=46
+hi GitGutterDelete guibg=#121212 ctermbg=233 guifg=#ff0000 ctermfg=196
+hi GitGutterChange guibg=#121212 ctermbg=233 guifg=#ff8700 ctermfg=208
+let g:gitgutter_sign_removed = '◢'
+let g:gitgutter_sign_added = '➕'
+let g:gitgutter_sign_modified = '≈'
+
+"ale
+"Be sure to set this AFTER the colorscheme or it won't render colors correctly
+highlight ALEWarning ctermbg=52
+highlight ALEError ctermbg=52
 
 "vim-slime
 let g:slime_target = "tmux"
@@ -153,41 +216,3 @@ nmap <Leader>v :TestVisit<CR>
 autocmd VimResized * :wincmd =
 nnoremap <leader>- :wincmd _<cr>:wincmd \|<cr>
 nnoremap <leader>= :wincmd =<cr>
-
-"afteglow
-colorscheme afterglow
-
-
-"##############################################################################
-"##############################################################################
-" The following cause rendering artifacts in vim-gtk on Ubuntu. Figure them
-" out. OR ELSE
-"##############################################################################
-"##############################################################################
-
-"set term=screen-256color
-
-"##########################################################
-" Statusline
-"##########################################################
-"set laststatus=2
-
-"Git funrctions from https://shapeshed.com/vim-statuslines/
-"function! GitBranch()
-"  return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
-"endfunction
-"
-"function! StatuslineGit()
-"  let l:branchname = GitBranch()
-"  return strlen(l:branchname) > 0?' ['.l:branchname.']':''
-"endfunction
-"
-"set statusline=
-"set statusline+=%#PmenuSel#
-"set statusline+=%{StatuslineGit()}
-"set statusline+=%#LineNr#
-"set statusline+=\ %m
-"set statusline+=\ %f
-"set statusline+=%=
-"set statusline+=%#CursorColumn#
-"set statusline+=\ %l:%c
