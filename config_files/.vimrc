@@ -135,7 +135,7 @@ noremap <leader>n :NERDTreeToggle<cr>
 
 "fzf
 set rtp+=~/.fzf
-nmap <c-p> :FZF<cr>
+nmap <c-p> :GFiles<cr>
 
 "closetag.vim
 let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx"
