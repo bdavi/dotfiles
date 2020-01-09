@@ -120,6 +120,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-surround'
   Plug 'craigemery/vim-autotag'
   Plug 'jpalardy/vim-slime'
+  Plug 'metakirby5/codi.vim'
 call plug#end()
 
 "vim-slime
