@@ -147,6 +147,18 @@ set statusline+=\ %l:%c
 
 
 "##########################################################
+"Markdown Preview
+"##########################################################
+function! PreviewMarkdown()
+  if filereadable('preview.html')
+    !pandoc %:p -f markdown_github -t html -s -o preview.html
+  endif
+endfunction
+
+autocmd BufWritePost *.md silent call PreviewMarkdown()
+
+
+"##########################################################
 "Install and configure plugins
 "Using https://github.com/junegunn/vim-plug (Install new with `:PlugInstall`
 "##########################################################
@@ -154,7 +166,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'danilo-augusto/vim-afterglow' "Theme
   Plug 'scrooloose/nerdtree'
   Plug 'airblade/vim-gitgutter'
-  Plug '/usr/local/opt/fzf'
+  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
   Plug 'junegunn/fzf.vim'
   Plug 'tpope/vim-commentary'
   Plug 'jiangmiao/auto-pairs'
@@ -166,7 +178,23 @@ call plug#begin('~/.vim/plugged')
   Plug 'jpalardy/vim-slime'
   Plug 'terryma/vim-multiple-cursors'
   Plug 'dense-analysis/ale'
+  Plug 'sheerun/vim-polyglot'
+
+  Plug 'rust-lang/rust.vim'
+  Plug 'prabirshrestha/async.vim'
+  Plug 'prabirshrestha/vim-lsp'
+  Plug 'prabirshrestha/asyncomplete.vim'
+  Plug 'prabirshrestha/asyncomplete-lsp.vim'
 call plug#end()
+
+" For Rust
+if executable('rls')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'rls',
+        \ 'cmd': {server_info->['rustup', 'run', 'nightly', 'rls']},
+        \ 'whitelist': ['rust'],
+        \ })
+endif
 
 "afteglow
 colorscheme afterglow
@@ -197,8 +225,10 @@ let NERDTreeShowHidden=1
 noremap <leader>n :NERDTreeToggle<cr>
 
 "fzf
-set rtp+=~/.fzf
+" set rtp+=~/.fzf
 nmap <c-p> :GFiles<cr>
+nmap <c-f> :Files<cr>
+nmap <c-g> :Ag<cr>
 
 "closetag.vim
 let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx"

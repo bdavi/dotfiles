@@ -53,6 +53,7 @@ alias vc='vim -p ~/.vimrc ~/.zshrc ~/.tmux.conf'
 alias gl="git log --pretty=format:'%C(yellow)%h%C(reset) - %an [%C(green)%ar%C(reset)] %s' --graph"
 alias gdc='git diff --cached'
 alias gdm='git diff master..$(git rev-parse --abbrev-ref HEAD)'
+alias ga.='git add .'
 
 
 ###############################################################################
@@ -83,6 +84,13 @@ alias eb='ember build'
 ###############################################################################
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
+
+
+###############################################################################
+# Rust / Cargo
+###############################################################################
+source $HOME/.cargo/env
+export RUST_SRC_PATH=/usr/local/src/rust/src
 
 
 ###############################################################################
