@@ -31,14 +31,49 @@ sudo apt-get update
 sudo apt-get install zotero-standalone
 
 
-#sudo apt install pgadmin4 pgadmin4-apache2
+sudo apt-get install virtualbox
 
 sudo apt install pgadmin3
 sudo -u postgres psql postgres
 alter user postgres with password 'postgres';
 
+sudo apt-get install keepassxc
+
+sudo apt-get install silversearcher-ag
+
+
 # Can't find the repo:
-#sudo apt install pgadmin4 pgadmin4-apache2
+# sudo apt install pgadmin4 pgadmin4-apache2
+
+
+# Install Rust
+curl https://sh.rustup.rs -sSf | sh
+
+rustup component add rls
+rustup component add rls-preview --toolchain nightly
+rustup component add rust-analysis --toolchain nightly
+rustup component add rust-src --toolchain nightly
+cargo +nightly install racer
+
+
+sudo apt-get install krusader
+sudo apt-get install konsole
+
+
+#######################################################################
+# syncthing
+#######################################################################
+# Add the release PGP keys:
+curl -s https://syncthing.net/release-key.txt | sudo apt-key add -
+
+# Add the "stable" channel to your APT sources:
+echo "deb https://apt.syncthing.net/ syncthing stable" | sudo tee /etc/apt/sources.list.d/syncthing.list
+
+# Update and install syncthing:
+sudo apt-get update
+sudo apt-get install syncthing
+
+
 
 #######################################################################
 # Oh my zsh
@@ -67,11 +102,6 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 cd ~/.fzf/
 ./install
-
-# you complete me
-sudo apt-get --yes install build-essential cmake python3-dev
-cd ~/.vim/bundle/YouCompleteMe
-python3 install.py --all
 
 
 #######################################################################
@@ -106,6 +136,9 @@ gem install rubocop
 gem install brakeman
 gem install foreman
 
+# Need this to make guard work with spring on larger projects.
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
 # Set up for Python
 sudo apt-get update
 sudo apt-get --yes install --no-install-recommends make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
@@ -123,6 +156,7 @@ bash ~/.asdf/plugins/nodejs/bin/import-release-team-keyring
 
 asdf install nodejs 13.2.0
 asdf global nodejs 13.2.0
+
 
 #######################################################################
 # Postgres
