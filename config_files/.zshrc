@@ -48,6 +48,18 @@ alias vc='vim -p ~/.vimrc ~/.zshrc ~/.tmux.conf'
 
 
 ###############################################################################
+# Safety
+###############################################################################
+# Don't rm root and prompt for multiple files
+alias rm='rm -I --preserve-root'
+
+# Require confirmation
+alias mv='mv -i'
+alias cp='cp -i'
+alias ln='ln -i'
+
+
+###############################################################################
 # Git
 ###############################################################################
 alias gl="git log --pretty=format:'%C(yellow)%h%C(reset) - %an [%C(green)%ar%C(reset)] %s' --graph"
