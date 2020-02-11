@@ -179,6 +179,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'terryma/vim-multiple-cursors'
   Plug 'dense-analysis/ale'
   Plug 'sheerun/vim-polyglot'
+  Plug 'francoiscabrol/ranger.vim'
 
   Plug 'rust-lang/rust.vim'
   Plug 'prabirshrestha/async.vim'
