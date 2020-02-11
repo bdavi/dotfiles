@@ -1,6 +1,7 @@
-class SimpleCLIWrapper
-  attr_accessor :args, :klass
+# frozen_string_literal: true
 
+# Passes cli arguments to class methods
+class SimpleCLIWrapper
   def initialize(args, klass)
     @klass = klass
     @args = args
@@ -14,7 +15,9 @@ class SimpleCLIWrapper
     end
   end
 
-private
+  private
+
+  attr_accessor :args, :klass
 
   def _command
     args.first
