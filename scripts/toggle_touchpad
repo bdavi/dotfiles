@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+
+# frozen_string_literal: true
+
+# Wraps xinput to manage touchpad enabled state
+class Touchpad
+  def toggle_enabled
+    if enabled?
+      disable
+    else
+      enable
+    end
+  end
+
+  def enable
+    `xinput enable #{xinput_touchpad_id}`
+  end
+
+  def disable
+    `xinput disable #{xinput_touchpad_id}`
+  end
+
+  def enabled?
+    xinput_enabled_state == '1'
+  end
+
+  private
+
+  def xinput_enabled_state
+    `xinput list-props #{xinput_touchpad_id}`
+      .split("\n")
+      .find { |line| line =~ /Device Enabled \(/ }
+      .split(/:\s+/)
+      .last
+  end
+
+  def xinput_touchpad_id
+    `xinput list`
+      .split("\n")
+      .find { |line| line =~ /touchpad/i }
+      .match(/(?<=id=)\d+/)
+      .to_a
+      .first
+  end
+end
+
+def main
+  Touchpad.new.toggle_enabled
+end
+
+if __FILE__ == $0
+  main
+end
