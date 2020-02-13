@@ -1,7 +1,0 @@
-.*.sw*
-.ruby-version
-**/*.swp
-.*.swo
-*.sw?
-*.sv?
-*.pyc
