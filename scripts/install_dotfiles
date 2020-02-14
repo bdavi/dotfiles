@@ -11,6 +11,12 @@ module Dotfiles
 
   BACKUP_DIRECTORY_PATH = File.expand_path('~/.dotfiles_backup').freeze
 
+  DEFAULT_INSTALL_DIRECTORY = Dir.home
+
+  CUSTOM_INSTALL_DIRECTORIES = {
+    'rc.conf' => File.expand_path('~/.config/ranger')
+  }.freeze
+
   # Models an individual dotfile for installation
   class Dotfile
     attr_reader :name
@@ -20,8 +26,13 @@ module Dotfiles
     end
 
     def install
+      prepare_install_directory
       backup_existing if file_already_exists?
       create_link_to_repo
+    end
+
+    def prepare_install_directory
+      FileUtils.mkdir_p(install_directory) unless Dir.exist?(install_directory)
     end
 
     def backup_existing
@@ -38,11 +49,15 @@ module Dotfiles
     end
 
     def prepare_backup_directory
-      Dir.mkdir(BACKUP_DIRECTORY_PATH) unless Dir.exist?(BACKUP_DIRECTORY_PATH)
+      FileUtils.mkdir_p(BACKUP_DIRECTORY_PATH) unless Dir.exist?(BACKUP_DIRECTORY_PATH)
     end
 
     def install_path
       File.join(Dir.home, name)
+    end
+
+    def install_directory
+      CUSTOM_INSTALL_DIRECTORIES[name] || DEFAULT_INSTALL_DIRECTORY
     end
 
     def repo_path
