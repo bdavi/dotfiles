@@ -13,9 +13,6 @@ plugins=(
   fast-syntax-highlighting
   gem
   git
-  npm
-  pip
-  python
   zsh-autosuggestions
 )
 
