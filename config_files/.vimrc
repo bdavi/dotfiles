@@ -206,8 +206,9 @@ set signcolumn=yes
 hi GitGutterAdd    guibg=#121212 ctermbg=233 guifg=#00ff00 ctermfg=46
 hi GitGutterDelete guibg=#121212 ctermbg=233 guifg=#ff0000 ctermfg=196
 hi GitGutterChange guibg=#121212 ctermbg=233 guifg=#ff8700 ctermfg=208
-let g:gitgutter_sign_removed = '◢'
-let g:gitgutter_sign_added = '➕'
+
+let g:gitgutter_sign_removed = '🡶'
+let g:gitgutter_sign_added = '+'
 let g:gitgutter_sign_modified = '≈'
 
 "ale
