@@ -53,7 +53,7 @@ module Dotfiles
     end
 
     def install_path
-      File.join(Dir.home, name)
+      File.join(install_directory, name)
     end
 
     def install_directory
