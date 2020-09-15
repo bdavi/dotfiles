@@ -30,6 +30,12 @@ alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
 # Editor
 ###############################################################################
 export EDITOR='vim'
+
+
+###############################################################################
+# Save me from myself
+###############################################################################
+alias celar='clear'
 alias cim='vim' # Becuase I can't type!!
 
 
