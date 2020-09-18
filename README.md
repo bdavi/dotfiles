@@ -4,4 +4,5 @@
 Place this repo at `~/code/dotfiles`
 
 ## Install dotfiles
-Use `scripts/dotfiles/dotfiles install` or `scripts/dotfiles/dotfiles uninstall`.
+Run this to install:
+`~/code/dotfiles/scripts/install_dotfiles`
