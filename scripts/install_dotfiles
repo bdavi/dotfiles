@@ -32,7 +32,9 @@ module Dotfiles
     end
 
     def prepare_install_directory
-      FileUtils.mkdir_p(install_directory) unless Dir.exist?(install_directory)
+      return if Dir.exist?(install_directory)
+
+      FileUtils.mkdir_p(install_directory)
     end
 
     def backup_existing
@@ -49,7 +51,9 @@ module Dotfiles
     end
 
     def prepare_backup_directory
-      FileUtils.mkdir_p(BACKUP_DIRECTORY_PATH) unless Dir.exist?(BACKUP_DIRECTORY_PATH)
+      return if Dir.exist?(BACKUP_DIRECTORY_PATH)
+
+      FileUtils.mkdir_p(BACKUP_DIRECTORY_PATH)
     end
 
     def install_path

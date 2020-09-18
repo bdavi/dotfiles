@@ -1,0 +1,85 @@
+###############################################################################
+# Save me from myself
+###############################################################################
+alias celar='clear'
+
+
+###############################################################################
+# Shell / Tmux
+###############################################################################
+alias c="clear"
+alias ll="ls -lah"
+alias rename='tmux rename-window'
+alias vc='vim -p ~/.vimrc ~/.commonrc ~/.tmux.conf ~/.zshrc ~/.bashrc'
+
+
+###############################################################################
+# Safety
+###############################################################################
+# Don't rm root and prompt for multiple files
+alias rm='rm -I --preserve-root'
+
+# Require confirmation
+alias mv='mv -i'
+alias cp='cp -i'
+alias ln='ln -i'
+
+
+###############################################################################
+# Git
+###############################################################################
+alias gl="git log --pretty=format:'%C(yellow)%h%C(reset) - %an [%C(green)%ar%C(reset)] %s' --graph"
+alias gdc='git diff --cached'
+alias gdm='git diff master..$(git rev-parse --abbrev-ref HEAD)'
+alias ga.='git add .'
+
+
+###############################################################################
+# Ruby/Rails
+###############################################################################
+alias be='bundle exec'
+alias ber='bundle exec rspec'
+alias annotate-model='annotate --exclude tests,fixtures,factories,serializers'
+alias am='annotate --exclude tests,fixtures,factories,serializers'
+alias mig='bundle exec rake db:migrate && bundle exec rake db:migrate RAILS_ENV=test'
+alias rb='bundle exec rake db:rollback && bundle exec rake db:rollback RAILS_ENV=test'
+
+
+###############################################################################
+# Yarn
+###############################################################################
+alias yt='yarn test'
+
+
+###############################################################################
+# Ember
+###############################################################################
+alias eb='ember build'
+
+
+###############################################################################
+# Path
+###############################################################################
+export PATH=$PATH:~/code/dotfiles/scripts
+
+
+###############################################################################
+# Linux Specific
+###############################################################################
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  /usr/bin/setxkbmap -option "caps:swapescape"
+  alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
+
+  export EDITOR='vim'
+  alias cim='vim' # Becuase I can't type!!
+fi
+
+
+###############################################################################
+# MacOS Specific
+###############################################################################
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export EDITOR='mvim -v'
+  alias vim='mvim -v'
+  alias cim='mvim -v'
+fi
