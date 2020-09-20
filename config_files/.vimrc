@@ -1,7 +1,7 @@
 "##########################################################
 " General settings
 "##########################################################
-set updatetime=500
+set updatetime=250
 
 " Set up tabs
 set tabstop=2
@@ -42,29 +42,6 @@ let &t_EI = "\<Esc>[2 q"
 set wildmenu
 set scrolloff=3
 set autoread
-
-
-"##########################################################
-" Super lightweight autocomplete using the built in and autocmd
-"##########################################################
-set cot=menu,menuone
-
-ino <BS> <BS><C-r>=getline('.')[col('.')-3:col('.')-2]=~#'\k\k'?!pumvisible()?"\<lt>C-n>\<lt>C-p>":'':pumvisible()?"\<lt>C-y>":''<CR>
-ino <CR> <C-r>=pumvisible()?"\<lt>C-y>":""<CR><CR>
-ino <Tab> <C-r>=pumvisible()?"\<lt>C-n>":"\<lt>Tab>"<CR>
-ino <S-Tab> <C-r>=pumvisible()?"\<lt>C-p>":"\<lt>S-Tab>"<CR>
-
-augroup MyAutoComplete
-    au!
-    au InsertCharPre * if
-    \ !exists('s:complete') &&
-    \ !pumvisible() &&
-    \ getline('.')[col('.')-2].v:char =~# '\k\k' |
-        \ let s:complete = 1 |
-        \ noautocmd call feedkeys("\<C-n>\<C-p>", "nt") |
-    \ endif
-    au CompleteDone * if exists('s:complete') | unlet s:complete | endif
-augroup END
 
 
 "##########################################################
@@ -147,18 +124,6 @@ set statusline+=\ %l:%c
 
 
 "##########################################################
-" Markdown Preview
-"##########################################################
-function! PreviewMarkdown()
-  if filereadable('preview.html')
-    !pandoc %:p -f gfm -t html -s -o preview.html --metadata pagetitle="Preview"
-  endif
-endfunction
-
-autocmd BufWritePost *.md silent call PreviewMarkdown()
-
-
-"##########################################################
 " Install and configure plugins
 " Using https://github.com/junegunn/vim-plug (Install new with `:PlugInstall`
 "##########################################################
@@ -175,6 +140,8 @@ call plug#begin('~/.vim/plugged')
   Plug 'jpalardy/vim-slime'
   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
   Plug 'junegunn/fzf.vim'
+  Plug 'neoclide/coc-solargraph', {'do': 'yarn install --frozen-lockfile'}
+  Plug 'neoclide/coc.nvim', { 'branch': 'release' }
   Plug 'scrooloose/nerdtree'
   Plug 'sheerun/vim-polyglot'
   Plug 'skywind3000/asyncrun.vim' "Use with vim-test
@@ -183,8 +150,30 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-surround'
 call plug#end()
 
+
+" coc.nvim
+" Use tab for trigger completion with characters ahead and navigate.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config.
+
+" IMPORTANT: The coc.nvim docs use <C-p> and <C-n> for navigating completion.
+" For some reason this causes <cr> confirmation to add a carriage return after
+" the completion. Use <up> and <down> instead to prevent this.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<down>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<up>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+
 " afteglow
 colorscheme afterglow
+
 
 " vim-gitgutter
 " Be sure to set this AFTER the colorscheme or it won't render colors correctly
@@ -197,29 +186,35 @@ let g:gitgutter_sign_removed = '🡶'
 let g:gitgutter_sign_added = '+'
 let g:gitgutter_sign_modified = '≈'
 
+
 " ale
 " Be sure to set this AFTER the colorscheme or it won't render colors correctly
 highlight ALEWarning ctermbg=52
 highlight ALEError ctermbg=52
+
 
 " vim-slime
 let g:slime_target = "tmux"
 let g:slime_paste_file = "$HOME/.slime_paste"
 let g:slime_default_config = {"socket_name": "default", "target_pane": "{last}"}
 
+
 " NERDTree
 let g:NERDTreeWinSize = 75
 let NERDTreeShowHidden=1
 noremap <leader>n :NERDTreeToggle<cr>
 
+
 " fzf
-" set rtp+=~/.fzf
+set rtp+=~/.fzf
 nmap <c-p> :GFiles<cr>
 nmap <c-f> :Files<cr>
 nmap <c-g> :Ag<cr>
 
+
 " closetag.vim
 let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx"
+
 
 " vim-test
 let test#strategy = "asyncrun"
@@ -229,6 +224,7 @@ nmap <Leader>s :TestNearest<CR>
 nmap <Leader>l :TestLast<CR>
 nmap <Leader>a :TestSuite<CR>
 nmap <Leader>v :TestVisit<CR>
+
 
 " vim-tmux-navigator
 autocmd VimResized * :wincmd =
