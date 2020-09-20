@@ -14,7 +14,8 @@ module Dotfiles
   DEFAULT_INSTALL_DIRECTORY = Dir.home
 
   CUSTOM_INSTALL_DIRECTORIES = {
-    'rc.conf' => File.expand_path('~/.config/ranger')
+    'rc.conf' => File.expand_path('~/.config/ranger'),
+    'coc-settings.json' => File.expand_path('~/.vim/coc-settings.json')
   }.freeze
 
   # Models an individual dotfile for installation
