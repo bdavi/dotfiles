@@ -135,12 +135,16 @@ call plug#begin('~/.vim/plugged')
   Plug 'dense-analysis/ale'
   Plug 'editorconfig/editorconfig-vim'
   Plug 'francoiscabrol/ranger.vim'
+  Plug 'iamcco/coc-tailwindcss',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
   Plug 'janko/vim-test'
   Plug 'jiangmiao/auto-pairs'
   Plug 'jpalardy/vim-slime'
   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
   Plug 'junegunn/fzf.vim'
+  Plug 'neoclide/coc-css',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
+  Plug 'neoclide/coc-prettier', {'do': 'yarn install --frozen-lockfile'}
   Plug 'neoclide/coc-solargraph', {'do': 'yarn install --frozen-lockfile'}
+  Plug 'neoclide/coc-tsserver', {'do': 'yarn install --frozen-lockfile'}
   Plug 'neoclide/coc.nvim', { 'branch': 'release' }
   Plug 'scrooloose/nerdtree'
   Plug 'sheerun/vim-polyglot'
@@ -169,6 +173,12 @@ function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
+
+
+" coc-prettier
+command! -nargs=0 Prettier :CocCommand prettier.formatFile
+vmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
 
 
 " afteglow

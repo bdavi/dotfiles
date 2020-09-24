@@ -1,4 +1,3 @@
 {
-  // Automatically select first option in autocomplete
   "suggest.noselect": false
 }
