@@ -43,6 +43,7 @@ alias annotate-model='annotate --exclude tests,fixtures,factories,serializers'
 alias am='annotate --exclude tests,fixtures,factories,serializers'
 alias mig='bundle exec rake db:migrate && bundle exec rake db:migrate RAILS_ENV=test'
 alias rb='bundle exec rake db:rollback && bundle exec rake db:rollback RAILS_ENV=test'
+alias kill_rails='lsof -t -i tcp:3000 | xargs kill -KILL'
 
 
 ###############################################################################
@@ -71,7 +72,8 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
 
   export EDITOR='vim'
-  alias cim='vim' # Becuase I can't type!!
+  alias cim='vim'
+  alias bim='vim'
 fi
 
 
@@ -82,4 +84,5 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   export EDITOR='mvim -v'
   alias vim='mvim -v'
   alias cim='mvim -v'
+  alias bim='mvim -v'
 fi

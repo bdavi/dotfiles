@@ -143,7 +143,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'junegunn/fzf.vim'
   Plug 'neoclide/coc-css',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
   Plug 'neoclide/coc-prettier', {'do': 'yarn install --frozen-lockfile'}
-  Plug 'neoclide/coc-solargraph', {'do': 'yarn install --frozen-lockfile'}
+  " Plug 'neoclide/coc-solargraph', {'do': 'yarn install --frozen-lockfile'}
   Plug 'neoclide/coc-tsserver', {'do': 'yarn install --frozen-lockfile'}
   Plug 'neoclide/coc.nvim', { 'branch': 'release' }
   Plug 'scrooloose/nerdtree'
@@ -152,6 +152,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-endwise'
   Plug 'tpope/vim-surround'
+  Plug 'tpope/vim-repeat'
 call plug#end()
 
 
@@ -217,7 +218,7 @@ noremap <leader>n :NERDTreeToggle<cr>
 
 " fzf
 set rtp+=~/.fzf
-nmap <c-p> :GFiles<cr>
+nmap <c-p> :GFiles --exclude-standard --others --cached<cr>
 nmap <c-f> :Files<cr>
 nmap <c-g> :Ag<cr>
 
@@ -227,8 +228,8 @@ let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx"
 
 
 " vim-test
-let test#strategy = "asyncrun"
-let g:asyncrun_open = 20
+" let test#strategy = "asyncrun"
+" let g:asyncrun_open = 20
 nmap <Leader>t :TestFile<CR>
 nmap <Leader>s :TestNearest<CR>
 nmap <Leader>l :TestLast<CR>

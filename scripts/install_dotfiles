@@ -14,8 +14,30 @@ module Dotfiles
   DEFAULT_INSTALL_DIRECTORY = Dir.home
 
   CUSTOM_INSTALL_DIRECTORIES = {
-    'rc.conf' => File.expand_path('~/.config/ranger'),
-    'coc-settings.json' => File.expand_path('~/.vim/coc-settings.json')
+    'picom.conf' => {
+      install_dir: File.expand_path('~/.config/picom'),
+      install_name: 'picom.conf'
+    },
+    'rofi_config.rasi' => {
+      install_dir: File.expand_path('~/.config/rofi'),
+      install_name: 'config.rasi'
+    },
+    'i3_config' => {
+      install_dir: File.expand_path('~/.config/i3'),
+      install_name: 'config'
+    },
+    'polybar_config' => {
+      install_dir: File.expand_path('~/.config/polybar'),
+      install_name: 'config'
+    },
+    'rc.conf' => {
+      install_dir: File.expand_path('~/.config/ranger'),
+      install_name: 'rc.conf'
+    },
+    'coc-settings.json' => {
+      install_dir: File.expand_path('~/.vim'),
+      install_name: 'coc-settings.json'
+    }
   }.freeze
 
   # Models an individual dotfile for installation
@@ -58,11 +80,15 @@ module Dotfiles
     end
 
     def install_path
-      File.join(install_directory, name)
+      File.join(install_directory, install_name)
     end
 
     def install_directory
-      CUSTOM_INSTALL_DIRECTORIES[name] || DEFAULT_INSTALL_DIRECTORY
+      CUSTOM_INSTALL_DIRECTORIES[name]&.fetch(:install_dir, nil) || DEFAULT_INSTALL_DIRECTORY
+    end
+
+    def install_name
+      CUSTOM_INSTALL_DIRECTORIES[name]&.fetch(:install_name, nil) || name
     end
 
     def repo_path
