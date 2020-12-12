@@ -4,7 +4,11 @@ height = 35px;
 scroll-down = i3-msg workspace next_on_output
 scroll-up = i3-msg workspace prev_on_output
 separator = "   "
+
 tray-position = right
+; Fixes bug on tray preventing click actions
+wm-restack = i3
+
 modules-left = i3
 modules-center = xwindow
 modules-right = pulseaudio cpu memory date
