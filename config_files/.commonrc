@@ -44,6 +44,7 @@ alias am='annotate --exclude tests,fixtures,factories,serializers'
 alias mig='bundle exec rake db:migrate && bundle exec rake db:migrate RAILS_ENV=test'
 alias rb='bundle exec rake db:rollback && bundle exec rake db:rollback RAILS_ENV=test'
 alias kill_rails='lsof -t -i tcp:3000 | xargs kill -KILL'
+alias bv='bin/verify'
 
 
 ###############################################################################
