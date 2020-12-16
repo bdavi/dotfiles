@@ -216,6 +216,10 @@ let NERDTreeShowHidden=1
 noremap <leader>n :NERDTreeToggle<cr>
 
 
+" Ranger
+nnoremap <leader>r :Ranger<cr>
+
+
 " fzf
 set rtp+=~/.fzf
 nmap <c-p> :GFiles --exclude-standard --others --cached<cr>
