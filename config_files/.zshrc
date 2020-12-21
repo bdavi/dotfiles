@@ -18,7 +18,7 @@ plugins=(
 )
 
 source $ZSH/oh-my-zsh.sh
-source ~/code/dotfiles/config_files/.commonrc
+source ~/.commonrc
 
 
 ################################################################################
@@ -31,9 +31,3 @@ alias source!='source ~/.zshrc; tmux source-file ~/.tmux.conf; tmux display-mess
 # asdf (version manager)
 ###############################################################################
 . $HOME/.asdf/asdf.sh
-
-
-###############################################################################
-# fzf search
-###############################################################################
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

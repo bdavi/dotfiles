@@ -66,24 +66,12 @@ export PATH=$PATH:~/code/dotfiles/scripts
 
 
 ###############################################################################
-# Linux Specific
+# OS Specific
 ###############################################################################
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  /usr/bin/setxkbmap -option "caps:swapescape"
-  alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
-
-  export EDITOR='vim'
-  alias cim='vim'
-  alias bim='vim'
+  source ~/.commonrc-linux
 fi
 
-
-###############################################################################
-# MacOS Specific
-###############################################################################
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  export EDITOR='mvim -v'
-  alias vim='mvim -v'
-  alias cim='mvim -v'
-  alias bim='mvim -v'
+  source ~/.commonrc-macos
 fi

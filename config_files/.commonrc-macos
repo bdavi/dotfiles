@@ -1,0 +1,4 @@
+export EDITOR='mvim -v'
+alias vim='mvim -v'
+alias cim='mvim -v'
+alias bim='mvim -v'
