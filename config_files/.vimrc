@@ -228,7 +228,7 @@ nmap <c-g> :Ag<cr>
 
 
 " closetag.vim
-let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx"
+let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx,*.tsx"
 
 
 " vim-test
