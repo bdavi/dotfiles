@@ -9,4 +9,4 @@ alias r2k='xrandr -s 2560x1440'
 alias rhd='xrandr -s 1920x1080'
 
 # Speed up the keyboard
-xset r rate 200 50
+xset r rate 175 60
