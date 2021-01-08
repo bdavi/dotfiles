@@ -178,9 +178,8 @@ endfunction
 
 " coc-prettier
 command! -nargs=0 Prettier :CocCommand prettier.formatFile
-vmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
-
+vmap <leader>f <Plug>(coc-format-selected)
+nmap <leader>f :Prettier<cr>
 
 " afteglow
 colorscheme afterglow
@@ -217,6 +216,7 @@ noremap <leader>n :NERDTreeToggle<cr>
 
 
 " Ranger
+let g:ranger_map_keys = 0
 nnoremap <leader>r :Ranger<cr>
 
 
