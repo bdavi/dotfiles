@@ -1,4 +1,12 @@
-export EDITOR='mvim -v'
-alias vim='mvim -v'
-alias cim='mvim -v'
-alias bim='mvim -v'
+# Preferred editor for local and remote sessions
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='mvim -v'
+  alias vim='mvim -v'
+  alias cim='mvim -v'
+  alias bim='mvim -v'
+fi
+
+# Don't rm without confirmation
+alias rm='rm -i'

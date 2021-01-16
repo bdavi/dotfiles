@@ -2,7 +2,7 @@
 # OH-MY-ZSH
 ###############################################################################
 export DISABLE_MAGIC_FUNCTIONS=true
-export ZSH="/home/brian/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 export ZSH_THEME="avit"
 HYPHEN_INSENSITIVE="true"
 

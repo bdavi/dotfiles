@@ -10,3 +10,6 @@ alias rhd='xrandr -s 1920x1080'
 
 # Speed up the keyboard
 xset r rate 225 60
+
+# Don't rm root and prompt for multiple files
+alias rm='rm -I --preserve-root'

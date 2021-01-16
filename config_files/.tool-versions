@@ -1,5 +1,5 @@
-ruby 2.6.6
-python 3.8.5 2.7.17
-nodejs 14.10.1
-yarn 1.22.5
+ruby 2.6.5
+python 3.9.1 2.7.17
+nodejs 15.6.0
+yarn 1.22.10
 rust 1.46.0
