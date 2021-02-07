@@ -12,8 +12,12 @@ for_window [class="^.*"] border pixel 3
 exec --no-startup-id picom -bc
 exec --no-startup-id nitrogen --restore
 exec --no-startup-id flameshot
-exec --no-startup-id polybar -r main
 exec --no-startup-id blueman-applet
+
+# Kill and restart polybar on refresh to get around cannot-click issues in tray
+exec_always --no-startup-id pkill polybar && polybar -r main
+
+exec_always --no-startup-id barrier
 
 # The combination of xss-lock, nm-applet and pactl is a popular choice, so
 # they are included here as an example. Modify as you see fit.
