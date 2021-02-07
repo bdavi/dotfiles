@@ -2,8 +2,10 @@ export EDITOR='vim'
 alias cim='vim'
 alias bim='vim'
 
-# Only run these if not inside Windows/WSL
-if ! grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null ; then
+# A few differences between bare Linux and WSL
+if grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null ; then
+  alias open="explorer.exe"
+else
   /usr/bin/setxkbmap -option "caps:swapescape"
   alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
 
