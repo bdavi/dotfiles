@@ -29,6 +29,8 @@ alias gl="git log --pretty=format:'%C(yellow)%h%C(reset) - %an [%C(green)%ar%C(r
 alias gdc='git diff --cached'
 alias gdm='git diff master..$(git rev-parse --abbrev-ref HEAD)'
 alias ga.='git add .'
+alias gst='git status'
+alias gc='git commit'
 
 
 ###############################################################################
