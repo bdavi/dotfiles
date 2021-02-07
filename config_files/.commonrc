@@ -31,7 +31,7 @@ alias gdm='git diff master..$(git rev-parse --abbrev-ref HEAD)'
 alias ga.='git add .'
 alias gst='git status'
 alias gc='git commit'
-alias gp='git pull'
+alias gp='git push'
 
 
 ###############################################################################
