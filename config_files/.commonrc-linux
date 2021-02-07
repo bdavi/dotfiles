@@ -2,6 +2,9 @@ export EDITOR='vim'
 alias cim='vim'
 alias bim='vim'
 
+# Don't rm root and prompt for multiple files
+alias rm='rm -I --preserve-root'
+
 # A few differences between bare Linux and WSL
 if grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null ; then
   alias open="explorer.exe"
@@ -11,9 +14,6 @@ else
 
   # Speed up the keyboard
   xset r rate 225 60
-
-  # Don't rm root and prompt for multiple files
-  alias rm='rm -I --preserve-root'
 
   # Screen reslution adjustments
   alias r2k='xrandr -s 2560x1440'
