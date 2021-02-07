@@ -1,15 +1,19 @@
-/usr/bin/setxkbmap -option "caps:swapescape"
-alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
-
 export EDITOR='vim'
 alias cim='vim'
 alias bim='vim'
 
-alias r2k='xrandr -s 2560x1440'
-alias rhd='xrandr -s 1920x1080'
+# Only run these if not inside Windows/WSL
+if ! grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null ; then
+  /usr/bin/setxkbmap -option "caps:swapescape"
+  alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
 
-# Speed up the keyboard
-xset r rate 225 60
+  # Speed up the keyboard
+  xset r rate 225 60
 
-# Don't rm root and prompt for multiple files
-alias rm='rm -I --preserve-root'
+  # Don't rm root and prompt for multiple files
+  alias rm='rm -I --preserve-root'
+
+  # Screen reslution adjustments
+  alias r2k='xrandr -s 2560x1440'
+  alias rhd='xrandr -s 1920x1080'
+fi
