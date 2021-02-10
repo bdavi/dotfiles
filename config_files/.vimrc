@@ -146,6 +146,7 @@ call plug#begin('~/.vim/plugged')
   " Plug 'neoclide/coc-solargraph', {'do': 'yarn install --frozen-lockfile'}
   Plug 'neoclide/coc-tsserver', {'do': 'yarn install --frozen-lockfile'}
   Plug 'neoclide/coc.nvim', { 'branch': 'release' }
+  Plug 'neoclide/coc-eslint'
   Plug 'scrooloose/nerdtree'
   Plug 'sheerun/vim-polyglot'
   Plug 'skywind3000/asyncrun.vim' "Use with vim-test
@@ -153,7 +154,13 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-endwise'
   Plug 'tpope/vim-surround'
   Plug 'tpope/vim-repeat'
+  Plug 'scrooloose/syntastic'
+  Plug 'gcorne/vim-sass-lint'
 call plug#end()
+
+" sass-lint
+let g:syntastic_sass_checkers=["sasslint"]
+let g:syntastic_scss_checkers=["sasslint"]
 
 
 " coc.nvim
