@@ -85,6 +85,8 @@ let mapleader = " "
 nnoremap <leader>e a<%=  %><esc>hhi
 nnoremap <leader>E a<%  %><esc>hhi
 
+" Misc
+nnoremap <leader>d "=strftime("%a %m/%e/%Y")<CR>P
 
 "##########################################################
 " Statusline
