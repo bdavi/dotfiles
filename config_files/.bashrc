@@ -56,8 +56,11 @@ export PS1="\e[0;32m\u@\h\e[m \e[0;36m \w\e[m  \$(git_prompt)\n$"
 ###############################################################################
 # asdf (version manager)
 ###############################################################################
-. $HOME/.asdf/asdf.sh
-. $HOME/.asdf/completions/asdf.bash
+if [ -d "$HOME/.asdf" ] 
+then
+  . $HOME/.asdf/asdf.sh
+  . $HOME/.asdf/completions/asdf.bash
+fi
 
 
 ################################################################################
@@ -71,3 +74,12 @@ source ~/.commonrc
 # Aliases
 ################################################################################
 alias source!='source ~/.bashrc; tmux source-file ~/.tmux.conf; tmux display-message "SOURCED!"'
+source /usr/share/google-cloud-sdk/completion.bash.inc
+source ~/monorepo/zlaverse/support/bash_functions.sh
+
+################################################################################
+# Work
+################################################################################
+source /usr/share/google-cloud-sdk/completion.bash.inc
+source ~/monorepo/zlaverse/support/bash_functions.sh
+export COMPOSE_FILE=./docker-compose.yml:./docker-compose-linux.yml

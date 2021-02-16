@@ -30,4 +30,14 @@ alias source!='source ~/.zshrc; tmux source-file ~/.tmux.conf; tmux display-mess
 ###############################################################################
 # asdf (version manager)
 ###############################################################################
-. $HOME/.asdf/asdf.sh
+if [ -d "$HOME/.asdf" ] 
+then
+  . $HOME/.asdf/asdf.sh
+fi
+
+################################################################################
+# Work
+################################################################################
+source /usr/share/google-cloud-sdk/completion.bash.inc
+source ~/monorepo/zlaverse/support/bash_functions.sh
+export COMPOSE_FILE=./docker-compose.yml:./docker-compose-linux.yml
