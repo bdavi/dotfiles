@@ -77,9 +77,13 @@ alias source!='source ~/.bashrc; tmux source-file ~/.tmux.conf; tmux display-mes
 source /usr/share/google-cloud-sdk/completion.bash.inc
 source ~/monorepo/zlaverse/support/bash_functions.sh
 
+
 ################################################################################
 # Work
 ################################################################################
-source /usr/share/google-cloud-sdk/completion.bash.inc
-source ~/monorepo/zlaverse/support/bash_functions.sh
-export COMPOSE_FILE=./docker-compose.yml:./docker-compose-linux.yml
+if [ -d "$HOME/monorepo" ]
+then
+  source /usr/share/google-cloud-sdk/completion.bash.inc
+  source ~/monorepo/zlaverse/support/bash_functions.sh
+  export COMPOSE_FILE=./docker-compose.yml:./docker-compose-linux.yml
+fi
