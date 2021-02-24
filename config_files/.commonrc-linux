@@ -12,8 +12,9 @@ else
   /usr/bin/setxkbmap -option "caps:swapescape"
   alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
 
-  # Speed up the keyboard
-  xset r rate 225 60
+  # Keyboard speed
+  alias keyslow="xset r rate 700 20"
+  alias keyfast="xset r rate 225 60"
 
   # Screen reslution adjustments
   alias r2k='xrandr -s 2560x1440'
