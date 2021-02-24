@@ -1,0 +1,14 @@
+################################################################################
+# Specific to work
+################################################################################
+if [ -d "$HOME/monorepo" ]
+then
+  source /usr/share/google-cloud-sdk/completion.bash.inc
+  source ~/monorepo/zlaverse/support/bash_functions.sh
+  export COMPOSE_FILE=./docker-compose.yml:./docker-compose-linux.yml
+fi
+
+if [ -d "$HOME/loyalty-api" ]
+then
+  source ~/loyalty-api/scripts/bash_functions.sh
+fi
