@@ -19,4 +19,7 @@ else
   # Screen reslution adjustments
   alias r2k='xrandr -s 2560x1440'
   alias rhd='xrandr -s 1920x1080'
+
+  # Reset audio so lineout is recognized by pulseaudio
+  alias headphones!='sudo alsa force-reload'
 fi
