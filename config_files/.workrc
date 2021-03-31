@@ -6,6 +6,8 @@ then
   source /usr/share/google-cloud-sdk/completion.bash.inc
   source ~/monorepo/zlaverse/support/bash_functions.sh
   export COMPOSE_FILE=./docker-compose.yml:./docker-compose-linux.yml
+  alias ecom-log='docker logs -f --tail 1000 zla_ecom-webapp_1'
+  alias cg-log='container-log cycle-gear-redline-webapp'
 fi
 
 if [ -d "$HOME/loyalty-api" ]

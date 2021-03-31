@@ -243,6 +243,9 @@ let g:closetag_filenames = "*.xml,*.html,*.erb,*.htm,*.xhtml,*.hbs,*.js,*.jsx,*.
 " vim-test
 " let test#strategy = "asyncrun"
 " let g:asyncrun_open = 20
+
+" let test#ruby#minitest#executable='ect'
+
 nmap <Leader>t :TestFile<CR>
 nmap <Leader>s :TestNearest<CR>
 nmap <Leader>l :TestLast<CR>
