@@ -257,3 +257,19 @@ nmap <Leader>v :TestVisit<CR>
 autocmd VimResized * :wincmd =
 nnoremap <leader>- :wincmd _<cr>:wincmd \|<cr>
 nnoremap <leader>= :wincmd =<cr>
+
+" Work
+set autoread
+autocmd BufWritePost *.ex,*.exs call FormatAndRedraw()
+function FormatAndRedraw()
+  let currentpath = expand('%:p')
+  let rlfilematch = matchstr(currentpath, 'redline')
+
+  if len(rlfilematch)
+    let redlinepath = $HOME . "/monorepo/redline/"
+    let formatpath = substitute(currentpath, "^" . redlinepath, "", "")
+
+    silent exec "!${PROJECT_ROOT}/monorepo/zlaverse/support/frmt_vim.sh " . formatpath
+    redraw!
+  endif
+endfunction
