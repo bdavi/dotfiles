@@ -8,6 +8,7 @@ then
   export COMPOSE_FILE=./docker-compose.yml:./docker-compose-linux.yml
   alias ecom-log='docker logs -f --tail 1000 zla_ecom-webapp_1'
   alias cg-log='container-log cycle-gear-redline-webapp'
+  alias rz-log='container-log revzilla-redline-webapp'
   alias elts='ecom-load-test-schema'
 fi
 
