@@ -34,6 +34,11 @@ alias gc='git commit'
 alias gp='git push'
 alias ga='git add'
 
+# Switch to -D for danger mode
+function full-prune() {
+  git fetch -p
+  git branch -r | awk '{print $1}' | egrep -v -f /dev/fd/0 <(git branch -vv | grep origin) | awk '{print $1}' | xargs git branch -d
+}
 
 ###############################################################################
 # Ruby/Rails

@@ -30,7 +30,7 @@ alias source!='source ~/.zshrc; tmux source-file ~/.tmux.conf; tmux display-mess
 ###############################################################################
 # asdf (version manager)
 ###############################################################################
-if [ -d "$HOME/.asdf" ] 
+if [ -d "$HOME/.asdf" ]
 then
   . $HOME/.asdf/asdf.sh
 fi
