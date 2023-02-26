@@ -74,5 +74,5 @@ source ~/.commonrc
 # Aliases
 ################################################################################
 alias source!='source ~/.bashrc; tmux source-file ~/.tmux.conf; tmux display-message "SOURCED!"'
-source /usr/share/google-cloud-sdk/completion.bash.inc
-source ~/monorepo/zlaverse/support/bash_functions.sh
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
