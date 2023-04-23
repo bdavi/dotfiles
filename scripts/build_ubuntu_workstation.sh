@@ -122,7 +122,84 @@ vim +'PlugInstall --sync' +qa
 
 
 #######################################################################
+# Databases
+#######################################################################
+
+# postgres
+sudo apt-get --yes install postgresql postgresql-contrib libpq-dev
+
+sudo systemctl start postgresql
+
+sudo systemctl enable postgresql
+
+sudo -i -u postgres psql postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+
+sudo -i -u postgres psql postgres -c "CREATE USER brian WITH SUPERUSER;"
+sudo -i -u postgres psql postgres -c "ALTER USER brian WITH SUPERUSER;"
+
+# Redis
+sudo apt-get --yes install redis-server
+sudo systemctl start redis-server.service
+sudo systemctl enable redis-server.service
+
+# tableplus
+wget -qO - https://deb.tableplus.com/apt.tableplus.com.gpg.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tableplus-archive.gpg > /dev/null
+
+sudo add-apt-repository "deb [arch=amd64] https://deb.tableplus.com/debian/22 tableplus main"
+
+sudo apt update
+sudo apt install tableplus
+
+# DBeaver
+flatpak install flathub io.dbeaver.DBeaverCommunity
+
+#######################################################################
+# Docker
+#######################################################################
+
+sudo apt-get remove docker docker-engine docker.io containerd runc
+
+sudo apt-get update
+
+sudo apt-get install ca-certificates curl gnupg lsb-release
+
+sudo mkdir -m 0755 -p /etc/apt/keyrings
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo apt-install docker-compose
+
+sudo groupadd docker
+
+sudo usermod -aG docker ${USER}
+
+su -s ${USER}
+
+
+
+#######################################################################
+# Touchegg - touchpad gestures
+#######################################################################
+sudo add-apt-repository ppa:touchegg/stable
+sudo apt update
+sudo apt install touchegg
+
+
+
+
+#######################################################################
 # Misc
 #######################################################################
 # Need this to make guard work with spring on larger projects.
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
+
+
