@@ -1,0 +1,2598 @@
+------------------------------
+-------------------------------
+-------------------------------
+
+Intro to Linux
+
+-------------------------------
+-------------------------------
+-------------------------------
+
+Commands:
+uptime
+- Get info about how long the system has been up and its load
+
+type <some command here>
+- Tells you if it's built in or an alias or what
+
+pwd
+
+ls
+ls -lah
+
+mkdir
+-p makes parents
+
+
+cd
+cd ..
+  go up one dir
+
+
+pushd / popd
+- remembers current dir
+- popd pulls back the last dir
+
+mv <from path> <to path>
+
+cp <source path> <destination path>
+
+rm
+
+cat <path> 
+- concatenate command
+
+cat > path
+- ">" is the redirection symbol
+- Waits for input and puts typed text in file specified by path
+- Use ctrl-D to finish and save
+
+touch <path>
+- makes empty file
+
+
+more
+- pager
+
+less
+- pager
+
+ls
+- list storage
+- -l (long extra info)
+- -lt sort by time (newest first)
+- -ltr (oldest first)
+
+
+whatis <command>
+one line description of commmand
+
+apropos <keyword>
+- find all man pages with keyword
+
+man <commmand>
+
+<commmand> --help
+
+
+
+echo $SHELL
+- check current shell
+
+chsh <user>
+- change login shell
+- cat /etc/shells
+
+
+date
+- get date
+
+
+alias dt=date
+
+
+env
+- command to show all environment variables
+
+TACO=delicious
+export TACO=delicious
+- export sets var for all programs started by shell. 
+- persist by adding the ~/.profile or ~/.pam_environment
+
+
+echo $LOGNAME
+
+echo $PATH
+- dirs searched for commands
+- separated by :
+- add with: export PATH=$PATH:/some/new/path
+
+
+echo $PS1
+- user prompt controlled by this
+- \W is working directory
+- \d date
+- \h host name
+- \n new line
+- \t time
+
+
+
+kernel
+- Manages memory
+- Process management (which can use)
+- system calls/security
+- device drivers
+- Monolithic
+- modular (dynamically loaded kernel modules)
+
+
+
+uname
+- prints linux kernel name
+
+uname -a or --all
+- all info
+
+
+
+# Memory is divided into kernel space vs user space (or kernel mode vs user mode)
+
+kernel space
+- unrestricted access to hardware
+- kernel code, device drivers, kernel extensions
+
+
+user space
+- all other apps
+
+user programs get access to to memory and devices by making system calls to kernel space which then access hardware
+
+# Working with hardware
+
+usb attached
+device driver in kernel space creates user event uevent
+
+
+sudo dmesg
+- print or control kernel ring buffer
+- device logs
+
+
+udev
+
+dynamic device management 
+
+udevadm
+- management tool for udev
+
+udevadm monitor
+- shows events after started
+
+udevadm info --query=path --name=/dev/nvme0n1
+
+udevadm info --attribute-walk /dev/nvme0n1
+
+lspci
+- list pci devices
+- ethernet cards, video cards, raid controllers, etc
+- peripheral component interconnect
+
+
+lsblk
+- list block devices
+- major number tells you the driver associated with the device (i.e. what type of device)
+  - 1 = ram
+  - 2 = hdd or cd rom
+  - 6 = parallel printer
+  - 8 = scsi disk
+  - 252 = nvme
+- minor number indexes similar devices
+
+lsblk -j
+- gets output in json
+
+lscpu
+- show info about cpu architecture
+
+lsmem
+- show info about ram
+
+free
+- show total vs used memory
+
+free -h
+- show more human readable output
+
+lshw
+- show detailed info on all hardware
+- run as sudo
+
+
+# BOOT PROCESS
+Basic steps:
+1. BIOS Post
+    POST = power on self test
+2. Boot loader (GRUB2)
+    executes code in first sector of first disk
+    loads kernel into memory
+3. Kernel initialization
+    decompresess kernel
+    starts execution
+    init hardware
+    memory management
+4. INIT Process (systemd)
+    sets up user space
+    usually systemd (prior was system 5 init or SysV)
+    systemd parallelizes startup so it is faster
+
+    can tell init process looking at this:
+    $ls -l /sbin/init
+    lrwxrwxrwx 1 root root 20 Sep 19 10:50 /sbin/init -> /lib/systemd/systemd
+
+
+Linux can run in multiple modes
+Set by run level. 
+
+runlevel
+- See current run level
+- Prints the previous and current SysV run level if known
+- Prints "N" if one not known
+- Prints unknown in neither are known
+
+   ┌─────────┬───────────────────┐
+   │Runlevel │ Target            │
+   ├─────────┼───────────────────┤
+   │0        │ poweroff.target   │
+   ├─────────┼───────────────────┤
+   │1        │ rescue.target     │
+   ├─────────┼───────────────────┤
+   │2, 3, 4  │ multi-user.target │
+   ├─────────┼───────────────────┤
+   │5        │ graphical.target  │
+   ├─────────┼───────────────────┤
+   │6        │ reboot.target     │
+   └─────────┴───────────────────┘
+
+During init, the run level is checked and the necessary programs are started.
+
+
+
+systemctl get-default
+- Shows default systemd target (i.e. run level)
+- looks
+
+systemclt set-default multi-user.target
+
+$systemctl set-default multi-user.target
+Created symlink /etc/systemd/system/default.target → /lib/systemd/system/multi-user.target.
+
+$ls -ltr /etc/systemd/system/default.target
+lrwxrwxrwx 1 root root 37 Nov 27 15:06 /etc/systemd/system/default.target -> /lib/systemd/system/multi-user.target
+
+$systemctl set-default graphical.target
+
+runlevel 0 -> poweroff.target
+runlevel 1 -> rescue.target
+runlevel 2 -> multi-user.target
+runlevel 3 -> multi-user.target
+runlevel 4 -> multi-user.target
+runlevel 5 -> graphical.target
+runlevel 6 -> reboot.target
+
+
+
+# File types in Linux
+Everything is a file
+All objects
+- regular files
+- directory
+- Special
+    - character files in in /dev file system (i/o mouse keyboard)
+    - block files in /dev file system (read from/to device in blocks. harddrives, ram)
+    - links 
+        - hard links -> two files share data on file. Deleting one deletes the other
+        - soft links / sym links => act like pointers.
+    - socker -> enables communication between processes
+    - named pipes -> allows connecting output of one process as input into another
+
+
+file <path here>
+Shows some info about a file and its type
+
+
+ls <opts> [path]
+- list storage
+
+
+
+The file type is one of the following characters:
+https://www.gnu.org/software/coreutils/ls
+https://www.gnu.org/software/coreutils/manual/html_node/What-information-is-listed.html
+- - regular file
+b - block special file
+c - character special file
+C - high performance (“contiguous data”) file
+d - directory
+D - door (Solaris)
+l - symbolic link
+M - off-line (“migrated”) file (Cray DMF)
+n - network special file (HP-UX)
+p - FIFO (named pipe)
+P - port (Solaris)
+s - socket
+? - some other file type
+
+
+# File system hierarchy
+
+
+
+
+
+
+/ -- The Root Directory
+
+
+/bin -- Essential User Binaries
+    basic commands like cp, mv, etc
+    link to /usr/bin maybe?
+
+/boot -- Static Boot Files
+
+
+/cdrom -- Historical Mount Point for CD-ROMs
+
+
+/dev -- Device Files
+
+
+/etc -- Configuration Files
+    
+
+/home -- Home Folders
+
+
+/lib -- Essential Shared Libraries
+/lib64
+    Libraries to be imported into software
+
+
+/lost+found -- Recovered Files
+
+
+/media -- Removable Media
+    Mounts usb drives
+    All external media
+
+
+/mnt -- Temporary Mount Points
+    Good for mounting network drives
+
+
+/opt -- Optional Packages
+    Optional packages. For installing 3rd party software
+    
+
+
+/proc -- Kernel & Process Files
+
+
+/root -- Root Home Directory
+
+
+/run -- Application State Files
+
+
+/sbin -- System Administration Binaries
+
+
+/selinux -- SELinux Virtual File System
+
+
+/srv -- Service Data
+
+
+/tmp -- Temporary Files
+    
+
+/usr -- User Binaries & Read-Only Data
+    User space applications and their data
+    In old systems this contained home directories
+
+
+/var -- Variable Data Files
+    logs in /var/log/
+    cached data
+
+
+
+df
+df -hP
+- disk file or disk free command
+- Gives an overview of the filesystem disk space usage.
+
+
+# Package managers
+dpkg / apt-get / apt
+
+rpm / yum / dng
+
+----------------------
+
+rpm = redhat package manager. Centos, Red Hat Fedora
+
+intall, uninstall, upgrade, query, verify
+
+-i installing
+-v verbose
+-U upgrade
+
+Data stored in /var/lib/rpm
+
+rpm -q package name (get info from local db)
+
+rpm -Vf <path to file> verify
+
+----------------------------------------------------------
+
+YUM = yellow dog updater moditifier
+/etc/yum.repos.d/
+
+relies on rpm
+handles dependent packages
+
+uses repositories
+
+Usually a repository is bundled with the OS
+/etc/yum.repos.d/redhat.repo
+can add other repositories if the official repo doen't have what you need
+
+yum install <package name>
+transaction summary. 
+download and install needeed rpms
+
+
+yum repolist
+list all repos on machine
+
+yum provides <command> 
+finds package that provides the specified command
+
+yum remove <package>
+
+yum update <package>
+
+yum update
+updates all packages
+
+
+===============================
+
+Ubuntu/Debian/Pure
+
+dpkg
+
+package extension is .deb
+
+-i install
+-r remove
+-l list
+-s status
+-p verify
+
+
+
+
+apt = advanced package manager. More advanced than apt-get
+relies on repositories
+/etc/apt/sources.list
+
+apt install <package name>
+apt update (refresh repository)
+apt upgrade (update all packages installed)
+apt edit-sources (open repo list in /etc/apt/sources.list)
+
+apt remove <package name>
+apt search <package name>
+apt list
+
+
+-----------------------------------------
+apt-get
+
+apt install firefox
+
+apt-get install firefox
+
+less user friendly output in apt-get vs apt
+cannot search in apt-get. Must use apt-cache search <package>
+
+
+caleston123
+
+-----------------------------------------
+
+# Compression and archiving
+
+du (disk usage)
+
+du -sh <path>
+shows amount of disk usage in human readable format
+
+tar (tape archive)
+
+tar -c
+create artchive
+
+tar -cf archive.tar foo bar  # Create archive.tar from files foo and bar.
+
+
+tar -tf <path>
+shows contents
+
+tar -xf <path>
+extracts contents
+
+tar -xf <path to tar> -C /target/dir/
+
+tar -zcf <path>
+compresses tarball
+
+
+Popular algorithms bzip2, gzip, xz
+each addes extension
+
+bzip2 <path>
+compresses
+
+gzip <path>
+compresses
+
+
+xz <path>
+compresses
+
+
+to decompress use:
+bunzip2 <path>
+gunzip <path>
+unxz <path>
+
+read file without decompressing:
+zcat <path>
+bzcat <path>
+xzcat <path>
+
+--------------------------------------------
+
+# Searching for files and patterns
+
+locate <filename>
+sudo apt install plocate
+depends on th db
+updatdb updates the db
+
+find <path to search> -name <filename>
+
+
+
+grep
+search in files
+
+
+grep <term> <file to search in>
+
+-i case insensitive
+-r recursive in a dir
+-w match whole word. i.e. exclude "example" when searching "exam"
+-v invert/inverse. Excluding the pattern
+-A1 matches pattern and one line below (or A2, A3, etc)
+-B1 matches pattern and one line above
+
+--------------------------------------------
+
+IO redirection
+
+Basic streams:
+- Standard input
+- Standard out
+- Standard error
+
+>
+echo "hello" > something.txt
+REPLACES the file with the stdout
+
+>>
+echo "hello" >> something.txt
+APPENDS the file with the stdout
+
+
+2>
+echo "hello" 2> something.txt
+REPLACES the file with the STDERR
+
+2>>
+echo "hello" 2>> something.txt
+APPENDS the file with the STDERR
+
+To suppress error output you can redirect to /dev/null
+cat missing_file 2> /dev/null
+
+
+
+Command line pipes
+Allow the stdout of a file to be the stdin for the next commmand
+Can chain mulitple commands together
+
+grep Hello sample.txt | less
+Sent filtered sample.txt into less
+
+
+
+tee - read from standard input and write to standard output and files
+Can use instead of the redirect operator. the difference is that with tee the stdout is still printed to the screen
+
+echo $SHELL | tee shell.txt
+echo $SHELL > shell.txt
+
+    brian@aleph-null  ~/code/test
+    $echo $SHELL > shell.txt
+    brian@aleph-null  ~/code/test
+    $echo $SHELL | tee shell.txt
+    /bin/bash
+
+Use -a options to append instead of overwriting
+
+
+
+printenv
+prints out all environment variables
+
+=====================================================================
+
+
+Networking
+
+ping
+
+/etc/hosts
+- local dns entries
+
+hostname
+- get host name for computer
+
+
+nslookup
+dig
+
+/etc/resolv.conf
+every host has a dns resolution file
+gives location of nameserver
+
+/etc/hosts is first, DNS is second in order of resolution
+
+To use internal subdomains without having to use the fully qualified domain name:
+add an entry in /etc/resolv.conf: "search      mycompany.com prod.mycompany.com"
+If you try to ping a name, it will now try "<name>.mycompany.com" first then "<name>.prod.mycompany.com"
+
+
+DNS Record types
+
+A
+host name to IP
+
+AAAA (Quad A)
+host name to IPv6
+
+CNAME
+map one name to another name
+
+
+nslookup
+query host name
+does not consider hosts file
+
+dig
+DNS look up
+more details than nslookup
+does not consider hosts file
+
+
+/etc/nsswitch.conf
+sets the order hosts file and DNS are evaluated
+
+
+---------------------------------------------------------------------
+
+# Switching and Routing
+
+need interface on each host linked to a switch to get them connected on a network
+
+each interface has an ip address
+
+
+ip link
+- shows the networking interfaces
+
+ip addr
+- Shows addresses assigned to all network interfaces.
+
+ip addr add 192.168.1.10/24 dev eth01
+- assign ip address
+
+
+
+
+
+Switch connects hosts in a network
+Router connects two networks
+
+gateway address to router
+
+
+route
+- sudo apt install net-tools
+- shows route table
+
+configure gateway
+ip route add 192.168.2.0/24 via 192.168.1.1
+
+default gateway routes traffic for anything without a specific route setup
+the following are equivalent and setup a default gateway
+ip route add default via 192.168.2.1
+ip route add 0.0.0.0 via 192.168.2.1
+
+
+ip link
+ip addr
+ip addr add
+
+ip addr add changes are not persistent.
+
+to make them permanent set them in /etc/network/interfaces
+
+
+
+telnet [server_address] [port]
+check for open ports
+
+
+ifconfig [nic name] Down/Up
+
+----------------------------------------------
+# Network Troubleshooting
+# Issues connecting to host
+FROM CLIENT HOST:
+
+1. Make sure local network interface is in state up
+ip link
+
+2. Make sure host name is resolving to an ip address
+nslookup <host name>
+
+3. ping remote server to see if we get a response
+ping may be disabled on remote server but worth checking
+ping <ip>
+
+4. see if there is an issue in the route between us and remote host
+traceroute <ip>
+
+FROM REMOTE SERVER:
+5. From remote server
+netstat - Print network connections, routing tables, interface statistics, masquerade connections, and multicast memberships
+
+netstat -an | grep 80 | grep -i LISTEN
+
+6. ip link
+(ensure the interface is up)
+
+
+
+# Security & File permission
+
+Access Control
+PAM - Pluggable authentication model
+Network Security
+SSH hardening
+SELinux (Security policies)
+
+
+## Accounts
+users have a uid
+
+cat /etc/passwd
+
+groups have a gid
+
+cat /etc/group
+
+users have a name aund uid when created.
+they will also be a member of a group.
+if no group is assigned then they will by defalt it will be set to a group for the user name and gid = uid
+can have multiple groups
+
+Types of user accounts
+
+Normal user account
+- has home dir
+
+super user
+- root
+- uid = 0
+
+system account
+- UID < 100 or between 500 and 1000
+- don't usually have a home directory
+- for running SSH or mail 
+
+Service account
+- For running services like nginx
+- generally created by packages as they are installed
+
+
+
+
+id <user name>
+- get info about a user
+
+
+who
+- shows show is logged in
+
+last
+- show recent sessions
+
+
+switch between users
+
+su -
+switch to user
+
+sudo
+cat /etc/sudoers
+edit with: visudo
+
+Should probably set a nologin shell for root to prevent people from
+logging in directly as root
+Do this in /etc/passwd the shell for root should be /usr/sbin/nologin
+
+
+/etc/sudoers file syntax
+1. User or group. Group is prefixed with '%' 
+2. Hosts   generally localhost. ALL is an option and default
+3. User and group the user in the first field as
+4. command allowed to be run
+
+
+# Access control files
+Most access control files are stored in /etc
+Anyone can read but only root can write
+
+should never modify with an editor. There are built in commands to edit
+
+
+/etc/passwd
+- stores user/group/shell
+- does NOT store passwords
+
+username, passwor, uid, gid, gecos(csv list of full name, phone, etc),home dir path, shell
+
+/etc/shadow
+- stores hashed passwords
+username, password hash, last changed epoch, min age before changing again, max days before changing again, warn days after expired to still accept, expdate
+
+
+/etc/group
+- info on groups. Name, guid, users
+
+name, password (x means saved in shadow), gid, members (comma separated)
+
+
+
+
+# User management
+
+useradd <name>
+- add user
+-c custom comments
+-d custom home dir
+-e expiry date
+-g specify GID
+-G create with multiple secondary groups
+-s specify login shell
+-u specify uid
+
+
+passwd <name>
+- set password for user
+- must be run as root
+- run without name to change your own password
+
+whoami
+- returns current user
+
+userdel <name>
+-delete user
+
+groupaadd -g <gid> <name>
+
+
+
+caleston123
+
+re-run last command 
+!!
+
+re-run last command as sudo
+sudo !!
+
+
+Linux File Permissions
+first char of ls:
+
+d dir
+- regular file
+c character device
+l link
+s socket file
+p pipe
+b block device
+
+
+<file type><owner permission><group permission><other permission>
+
+drwxrwxrwx
+
+
+r Read 4
+w write 2
+x execute 1
+- no permission 0
+
+
+permissions applied in order owner, group, other
+
+rwx = 4+2+1
+r-x = 4+0+1
+
+chmod <who><addor remove +/-><permission> file
+- change permission
+- chmod ug+r-x,o-rwx some/file
+
+
+do it in numeric mode
+chmod 777 test-file applies rwe to all 
+chmod 660 test file
+
+
+chown <new owner>:<new group> file
+chown <new owner> group> file
+- change owner of file
+
+chown -R owner_name folder_name
+- recursive change owner
+
+chgrp <group> file
+
+
+
+
+drwxr-xr-x   2 root root 4.0K Nov 26 17:25 if-up.d
+               ownwer group
+
+
+ssh <host or ip>
+ssh <user>@<host>
+ssh -l user <host or ip>
+- no user will try to use local user
+
+generate keypair on client. Private and public
+when public key is installed on server then you can use it
+
+FIRST CREATE KEYPAIR
+ssh-keygen -t rsa
+- creates key pair on local machine
+- asks for passphrase. optional but improves security (must type in each time).
+- public key stored in file at /home/<user>/.ssh/id_rsa.pub
+- private key stored in file at /home/<user>/.ssh/id_rsa
+
+SECOND COPY PUBLIC KEY TO SERVER
+ssh-copy-id <ssh connection config>
+
+This will copy the file to the remote server at /home/<user name>/.ssh/autorized_keys
+
+
+# Copy data over ssh
+scp <local path> <host>:<remote path>
+
+use -r to copy files
+use -p to preserve permissions
+
+
+default ssh port is 22
+
+
+
+# NETWORK SECURITY
+
+iptables
+- installed by default on redhat and centos
+- will have to install on ubuntu
+- install with sudo apt install iptables
+
+incoming/outgoing rules. Execute first match
+
+default is to accept/allow all all
+
+iptables -A INPUT -p tcp -s <some ip> --dport 22 -j ACCEPT
+-A add incoming rule:
+-p protocol
+-s source
+--dport destinationport
+-j action to take
+
+
+iptables --list
+- list all rules
+
+
+iptables -A INPUT -p tcp --dport 22 -j DROP
+- rejects all incoming traffic to 22
+- Will be evaluate AFTER prior rules
+
+
+INPUT vs OUTPUT
+ACCEPT vs DROP
+
+use -I instead of -A to insert a rule at the top of the chain rather than the bottom
+
+
+To delete a rule first list the rules with iptables -l and then use:
+iptables -D OUTPUT <index>
+(index is 1 based)
+
+Block all incoming traffic
+sudo iptables -A INPUT -p all -j REJECT
+
+Allow outgoing traffic to a specific ip/port
+sudo iptables -A OUTPUT -p tcp -d 172.16.238.11 --dport 5432 -j ACCEPT
+
+sudo iptables -A OUTPUT -p tcp -d 172.16.238.15 --dport 80 -j ACCEPT
+
+
+BLOCK ALL OUTGOING traffic to http(s)
+sudo iptables -A OUTPUT -p tcp --dport 80 -j DROP
+sudo iptables -A OUTPUT -p tcp --dport 443 -j DROP
+
+
+-------------------------------------------------------------------------
+
+Cron jobs
+-------------------------------------------------------------------------
+enabled by crond service
+
+crontab -e
+- edit crontab file
+
+crontabe -u <user>
+- Specifies user to be used
+
+
+do not use sudo or it will use root user
+
+fields:
+minute hour day month weekday <command to be run>
+
+Examples:
+10 8 19 2 * => 8:10 am on Feb 19th regardless of weekday
+
+10 8 19 * * => 8:10 am on the 19th of every month regardless of weekday
+
+
+10 8 * * * => 8:10 am every day of every month regardless of weekday
+
+10 * * * * => 10 minutes past all hours of every day of every month regardless of weekday
+
+* * * * * => every minute of every hour of every day of every month regardless of weekday
+
+*/2 * * * * => every second minute of every hour of every day of every month regardless of weekday
+
+crontab -l
+- list all scheduled cron jobs
+
+
+See that cron jobs are being run by inspecing the syslog:
+tail /var/log/syslog
+
+
+First day of each month at 6 am
+0   6 1 * * /usr/local/bin/last-reboot.sh
+
+at :00 and :30 every hour all the time
+00,30  * * * * /usr/local/bin/system-debugger.sh
+
+
+systemd
+--------------------------------------------
+
+How to create a SYSTEMD service
+Example requirements:
+- run command /usr/bin/project-mercury.sh
+- enable and start on boot
+- use service account
+- relies on another service
+- auto restart on failure
+- restart interval 10s
+- log events
+- graphical target
+
+
+Start by making unit file:
+/etc/systemd/system/project-mercury.service
+
+```
+[Service]
+ExecStart=/bin/bash /usr/bin/project-mercury.sh
+```
+
+To run service in background run this:
+systemclt start project-mercury.service
+
+To get status of service run this:
+systemctl status project-mercury.service
+
+To stop a service run this:
+systemctl stop project-mercury.service
+
+
+To allow this to be enabled during boot add this section:
+```
+[Service]
+ExecStart=/bin/bash /usr/bin/project-mercury.sh
+
+[Install]
+WantedBy=graphical.target
+```
+
+Now specify user:
+```
+[Service]
+ExecStart=/bin/bash /usr/bin/project-mercury.sh
+User=project_mercury
+
+[Install]
+WantedBy=graphical.target
+```
+
+Restart every 10 seconds when failed:
+```
+[Service]
+ExecStart=/bin/bash /usr/bin/project-mercury.sh
+User=project_mercury
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=graphical.target
+```
+
+Events are automatically logged
+
+If we want to wait until another service is started:
+
+```
+[Unit]
+After=postgresql.service
+
+[Service]
+ExecStart=/bin/bash /usr/bin/project-mercury.sh
+User=project_mercury
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy graphical.target
+```
+
+Add docs?
+```
+[Unit]
+Description=Some description here
+Documentation=<some url here>
+After=postgresql.service
+
+[Service]
+ExecStart=/bin/bash /usr/bin/project-mercury.sh
+User=project_mercury
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy graphical.target
+```
+
+Reload changes to service files:
+systemctl daemon-reload
+
+
+
+# SYSTEMD tools
+----------------------
+
+systemctl used to:
+- manage system state
+- start/stop/reload
+- enable/disabled
+- list/manage units
+- list and update targets
+
+journalctl
+- query systemd journal
+
+
+## systemclt
+
+systemctl start <service>
+systemctl stop <service>
+systemctl restart <service>
+systemctl reload <service>
+- try to restart without interrupting functionality
+systemctl enable <service>
+- start after reboot also
+systemctl disable <service>
+- disable after reboot also
+systemctl status <service>
+
+- possible states
+  - Active (running)
+  - Intactive (stopped)
+  - Failed (crashed/error/timeout)
+
+systemctl daemon-reload
+- reloads unit files
+
+systemctl edit <service> --full
+- opens unit file in text editor
+- changes here are applied immediately (do not need daemon-reload)
+
+
+systemctl get-default
+- gets the current default target
+
+systemctl set-default multi-user.target
+- changes the default target to the one specified
+
+
+systemctl list-units
+- show all active units
+
+systemctl list-units --all
+- show all units loaded or attempted to load
+
+
+## journalctl
+- Checks log entries from across the system
+
+journalctl
+- all log entries from oldest to newest
+
+journalctl -b
+- all log entries since last boot
+
+journalctl -u UNIT
+- entries for specific unit
+
+# Storage
+
+df
+- disk free
+
+df -h
+- in human format
+
+## Disk Partitions
+block device found under /dev dir
+block storage = data written in blocks
+
+ls -l /dev/ | grep "^b"
+- lists block devices
+- "b" as first char in ls indicates block device
+
+lsblk
+- lists block device
+- type disk or part
+- disk is physical disk
+- part is partition
+- maj:min
+- maj = type (8 = SCSI)
+- min idenitifis individual drives
+- don't have to partition a disk. But recommended
+
+Information about partitions is saved in the a table.
+
+sudo fdisk -l /dev/sda
+
+partition types
+- primary (can be used to boot, in the old days limited to no more than 4)
+- extended can house additional logical partitions
+- logical
+
+All partition data stored in a partition scheme
+- MBR (master boot record) is one scheme max 2tb
+- GUID Partition table (GUID) is newer standard
+
+In theory GPT can have unlimited partitions and no disk size limits.
+
+Use GPT by default
+
+gdisk
+- improved fdisk that works with GPT
+
+Create new partition of a specific size:
+- gdisk
+- p (prints existing table)
+- n use default for start and number
+- use +500M (or whatever) for end
+- w to write
+
+
+To write to a disk we must create a file system and then once 
+it's mounted it can bw written to
+
+
+- ext2 2tb max file size, 
+- ext3 no problems with unexpected shutdowns like ext2
+- ext4 1 exabit max volume, 16th max file size, uses journal
+
+these are backwards compatible
+
+mkfs.ext4 /dev/sdb1
+- create a file system on /dev/sdb1
+
+mount /dev/sdb1 /mnt/ext4
+- mounts the drive for use
+
+to persist the mount add entry to /etc/fstab
+<device/file system> <mount point> <type> <options> <dump> <pass>
+/dev/sda1             /             ext4  defaults,realtime,errors=panic 0 1 ~
+
+echo "/dev/sdb1 /mnt/ext4 ext4 rw 0 0" >> /etc/fstab
+
+df -T
+- see the filesystem type
+
+
+lsblk -f
+- see filesytem type
+
+mount
+- see details of mounted drives
+
+
+Types of Enterprise storage
+- DAS = Direct attached storage
+    - Attached directly to the device needing storage. server sees this as a block device
+    - No network or firewall so very performant
+    - small biz
+- NAS = Network attached storage
+    - mid size biz
+    - traffic over network, so slower than DAS
+    - Can support multiple servers
+    - NFS/CIFS
+    - Do not use to install OS
+- SAN = Storage area network
+    - shared storage
+    - logical blocks
+    - host sees this 
+    - FCP = fiber channel protocol. Faster than ethernet
+    - can host Mission critical stuff because of performance
+
+
+NFS
+- server shared over network
+- config on the server here: /etc/exports
+- exportfs -a (exports all from exports config file)
+- exportfs -o <ip>:<dir> (exports a specific file)
+
+
+
+# LVM Logical Volume Manager
+Can group physical volumes (PV) into one volume group
+Can resize logical volumes (LV) dynamically
+
+apt-get install lvm2
+
+pvcreate /dev/sdb
+- create physical volume
+
+vgcreate caleston_vg /dev/sdb
+- create volume group
+
+volume group can have one or more physical volumes
+
+lvcreate -L 1G -n vol1 caleston_vg
+- create logical volume
+-L linear
+
+pvdisplay
+- lists data about physical volumes
+
+vgdisplay
+- lists data about volume groups
+
+lvdisplay
+- lists data about logical volumes
+
+lvs
+- show logical volume info
+
+mkfs.ext4 /dev/caleston_vg/vol1
+mkfs.gfs2 -plock_nolock -j 1 /dev/new_vol_group/new_logical_volume
+- add file system to logical volume
+
+resize
+
+vgs
+- see volume group info
+
+lvresize -L +1G -n /dev/caleston_vg/vol1
+- Add one gig to volume
+
+resize2fs /dev/caleston_vg/vol1
+- must also resize file system or you can't use the new space
+
+Can resize a running/mounted filesystem/volume
+
+-------------------------------------------
+-------------------------------------------
+-------------------------------------------
+Basic Shell Scripting
+-------------------------------------------
+-------------------------------------------
+-------------------------------------------
+
+
+Add to path
+echo $PATH
+export PATH=$PATH:/some/new/path
+
+
+which <command>
+- See location of command
+
+chmod +x /path/to/command
+- Add executable bit
+
+
+variables always have a dollar sign at the beginning
+do not use the dollar sign when setting the value
+
+some-var=$(<command_here>)
+rocket-status=$(rocket-status $mission_name)
+- Stores output of command in a variable
+
+snakecase is best practice for naming
+
+/opt/nginx/conf.d/com_${domain}_${sub}.conf
+- use variable name in file path
+
+
+use $0, $1, etc to get command line args
+$0 is name of command
+
+best practice is to put these cli args into varibles with meaningful names before use
+
+
+read <variable_name>
+prompt user for value and store in varible_name
+
+read -p "some prompt here:" <variable_name>
+prompt user for value and store in varible_name
+
+
+
+# arithmetic operations
+expr 6 + 5
+- must separate by space
+
+expr 6 - 5
+expr 6 / 5
+expr 6 \* 5
+- must escape "*" since it is reserved
+
+A=6
+B=5
+expr $A - $B
+
+echo $((5 - 4))
+echo $((A - B))
+=> 1
+- can use dollar double parens instead
+- must either echo or assign to variable to get value or it will try to run result as a command
+- do not need $ in front of variables
+- do not need spaces around operands
+
+
+echo $((++A))
+echo $((--A))
+echo $((A++))
+echo $((A--))
+
+Integer functions only
+
+To get floating point math use bc:
+echo $A / $B | bc -l
+
+-l for floating point
+expects string that represents the math to be done
+
+
+
+
+# Conditionals
+
+if <<some condition>>
+then
+
+fi
+
+
+conditions are in []
+
+##  conditions
+if [ $some_var = "some value" ]
+then
+    <command>
+elif [ $some_var = "some other value" ]
+then
+    <other_command>
+else
+    <other_other_command>
+fi
+
+
+
+if [ $some_var = "some value" ]
+- strings are exactly equal
+
+if [ $some_var != "some value" ]
+- strings are NOT exactly equal
+
+if [ $some_var -eq "some value" ]
+- numbers are equal
+
+if [ $some_var -ne "some value" ]
+- numbers are NOT equal
+
+if [ $some_var -gt "some value" ]
+- number on left is greater than number on right
+
+if [ $some_var -lt "some value" ]
+- number on left is less than number on right
+
+if [ $some_var -z $1 ]
+- $1 has zero length?
+
+
+## Extended conditional operations with double brackets
+if [[ "abcd" = *bc* ]]
+- if left string contains right
+
+if [[ "abc" = ab[cd] ]]
+- if third char of left value is c or d
+
+if [[ "abc" > "bcd" ]]
+- if left is alphabetically after right
+
+if [[ "abc" < "bcd" ]]
+- if left is alphabetically before right
+
+
+## Boolean operators
+[ COND1 ] && [ COND2 ]
+[[ COND1 && COND2 ]]
+- logical and
+
+[ COND1 ] || [ COND2 ]
+[[ COND1 || COND2 ]]
+- logical or
+
+## File level operators
+[ -e <FILE> ]
+- file exists
+
+[ -d <FILE> ]
+- file exists and is directory
+
+[ -s <FILE> ]
+- file exists and has size greater than zero
+
+[ -x <FILE> ]
+- file exists and is executable
+
+[ -w <FILE> ]
+- file exists and is writeable
+
+
+## Loops
+For Loops
+
+for value in val-1 val-2 val-3
+do
+  some_command $value
+end
+
+if values are in a file one on each line
+
+for value in $(cat file_with_values.txt)
+do
+  some_command $value
+end
+
+for num in 1 2 3 4
+do
+  some_command value-$num
+end
+- generates list like value-1, value-2, etc
+
+
+for num in {0..100}
+do
+  some_command value-$num
+end
+-using a range
+
+for (( val = 0 ; val <= 100 ; val++ ))
+do
+  some_command $val
+done
+- with init/condition/increment logic
+
+for file in $(ls)
+do
+    echo Line count of $file is $(cat $file | wc -l)
+done
+
+## while loops
+
+sleep 3
+- sleep for n seconds
+
+while [ $rocket_status = "launching" ]
+do
+    sleep 2
+    rocket_status =rocket-status $mission_name
+done
+
+break
+- exit loop
+
+continue
+- go to start of loop
+
+
+## Case statement
+
+case EXPRESSION in
+
+  PATTERN_1)
+    STATEMENTS
+    ;;
+
+  PATTERN_2)
+    STATEMENTS
+    ;;
+
+  PATTERN_N)
+    STATEMENTS
+    ;;
+
+  *)
+    STATEMENTS
+    ;;
+esac
+
+case $COUNTRY in
+
+  Lithuania)
+    echo -n "Lithuanian"
+    ;;
+
+  Romania | Moldova)
+    echo -n "Romanian"
+    ;;
+
+  Italy | "San Marino" | Switzerland | "Vatican City")
+    echo -n "Italian"
+    ;;
+
+  *)
+    echo -n "unknown"
+    ;;
+esac
+
+*) matches when no other case does
+
+## shebang
+- lets us specify which shell/interpreter to execute the script in
+
+- always start with this (or similar):
+#!/bin/bash
+#!/bin/sh
+
+
+
+# Exit/return codes
+returns 0 on success
+retuns greater than 0 on fail
+stored in $?
+defaults to 0
+
+exit 123
+- return an exit code of 123
+
+
+## functions
+
+function launch-rocket() {
+  mission_name=$1
+  <some code goes here>
+  return 1
+}
+
+launch-rocket tacos
+
+must define before calling
+
+use `return <code>` instead of `exit <code>` but still can get it with `$?` variable
+
+Capture output echo it to the screen
+
+function add() {
+  echo $(( $1 + $2 ))
+}
+
+sum=$( add 3 5 )
+
+
+## Shell script tips and tricks
+
+### Linter
+sudo apt-get install shellcheck
+shellcheck /path/to/script
+
+
+style guide
+
+##############################################
+# DOCKER COURSE
+##############################################
+
+docker run <image>
+docker run nginx
+- first time pulls image from docker hub
+- after first uses local copy
+
+docker ps
+- Show running containers
+docker ps -a
+- Show all containers even if exited
+
+docker rm <container name or id>
+- remove container permanently
+
+docker images
+- see list of images and sizes
+
+docker rmi <image name>
+- remove image
+- cannot use if containers are running on the image
+
+container only lives as long as the process you invoke
+
+docker exec <command>
+- run command on container
+
+docker run <container>
+- run in attached mode. will see std out
+
+docker run -d <command>
+- run in detached mode
+
+docker attach <container>
+- lets you attach to the container's output
+
+containers are for running commands or services.
+must specify one or it will immediately exit
+
+if you just want to get into th container you can just do this:
+docker run -ti ubuntu bash
+(-ti connects the output/input)
+
+
+docker stop <container name or id>
+- force kill container
+
+docker rm <id> <id2> <id3>
+- can remove multiple containers and only have to give it a small piece of the container id (not the whole thing)
+
+
+rm = remove container
+rmi = remove image
+
+docker pull <image name>
+- gets image without running it
+
+
+docker run --name <the container name name you want> <image name>
+
+
+------------------------
+
+docker run redis
+docker run redis:4.0
+- specify tag
+- defaults to latest if no :tag submitted
+
+docker run -i <image>
+- interactive
+
+docker run -ti <image>
+- connect to terminal in interactive mode
+
+
+docker run -p 80:8000 <image name>
+- Every docker host gets a private ip address to assigned
+- must map external port to private IP/port to make docker app available outside the app
+-p <external port>:<internal port>
+
+
+docker run -v /host/path:/container/path <image name>
+- how to persist data?
+- if you put data inside container it is gone once the container is stopped
+- map data from host to container using a volume
+- causes the host dir to be mounted in the container filesystem. 
+
+
+docker inspect <container name>
+- get all data about a container in a json format
+
+
+docker logs <container name or id>
+- get logs in detached mode.
+- This is just the std out
+
+## advanced docker run commands
+docker run ubuntu cat /etc/*release*
+get version of running container
+
+
+timer
+- keeps printing the time infinitely
+
+
+
+
+## How to create docker images
+
+
+For simple Flask app the steps might be:
+- Get OS
+- Update apt repos
+- install dependenices with apt
+- install python dependencies with pip
+- Copy source code to /opt folder
+- Run server with flask command
+
+
+To do this create a `Dockerfile`
+Example:
+```
+FROM Ubuntu
+
+RUN apt-get update
+RUN apt-get install python
+
+RUN pip install flask
+RUN pip install flask-mysql
+
+COPY . /opt/source-code
+ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask runm
+```
+
+docker build Dockerfile -t <author name>/<image name>
+- Build the image with this
+
+docker push <author name>/<image name>
+
+
+Docker builds the file using a "layered architecture"
+
+docker history <image name>
+- See the layers of the build
+
+docker build .
+- builds the image form the Dockerfile in the `.` dir
+
+All layers are cached.
+If things faile it can use the cached layers prior to the failure to speed up the build
+
+docker build . -t <account>/<tag name>
+- builds docker file in current dir with specified name/tag
+
+
+docker login
+- Must login before pushing images to DockerHub
+
+docker push <account>/<tag name>
+- pushes image to DockerHub
+
+Dockerfile
+```
+EXPOSE 80
+EXPOSE 80/udp
+
+```
+Assumes tcp. Can override.
+This doesn't actually expose the port. Must still use the -p option on run to get a specific port translation
+
+-P will publish all exposed ports to random ports
+
+
+# Environment Variables
+
+docker run -e VAR_NAME=value <container name>
+- Run container with env variable
+
+docker inspect <container name>
+- can see env vars set
+- inside config
+
+
+# Command vs Entrypoint
+Containers are meant to run a single commmand and then stop
+
+Stops container and exist if it crashes
+
+CMD ["bash"]
+- will exit if no terminal attached
+
+CMD <command> <param 1>
+    CMD sleep 5
+CMD ["command", "param1"]
+    CMD ["sleep", "5"]
+
+
+ENTRYPOINT ["sleep"]
+- if you run the container and pass "5" then it gets appended ot the sleep command
+- docker run ubuntu-sleeper 5 would then run sleep 5 in the ubuntu image
+
+
+*** If your docker container has a CMD directive then the command line parameters replace, but if you use ENTRYPOINT the commmand line params append
+
+Can combine these two to provide a default value.
+
+ENTRYPOINT ["sleep"]
+CMD ["5"]
+- Uses sleep 5 by default. i.e. the cmd is passed to the entrypoint
+- command line args will overwrite CMD and be passed to ENTRYPOINT
+
+
+Can override the entryoint by passing the `--entrypoint` flag to docker run
+
+
+# Docker compose
+docker run --link
+docker run -d --name=vote --link redis:redis <container name>
+- links containers  together
+- adds entry in /etc/hosts file on container
+- <some ip> redis <some hash>
+- USING LINK THIS WAY is deprecated
+
+
+Example docker-compose.yml:
+```
+redis:
+  image: redis
+db:
+  image: postgres:9.4
+vote:
+  image: voting-app
+  ports:
+    - 5000:80
+  links:
+    - redis
+result:
+  image: result-app
+  ports:
+    - 5001:80
+  links:
+    - db:db
+worker:
+  image: worker
+```
+
+In a link: db = db:db. Could specify differnt name than the service name
+
+
+Instead of an image we could specify a path to build the image from;
+```
+vote:
+  image: voting-app
+
+  vs
+
+vote:
+  build: ./vote
+```
+
+Different formats/versions of docker-compose over time:
+- Can now specify different networks and order of spin up
+- For version 2 and up must specify version
+
+in version 2 there is a default bridged network that allows all services to communicate with eachoter
+
+
+Version 1
+```
+redis:
+  image: redis
+db:
+  image: postgres:9.4
+vote:
+  build: ./vote
+```
+
+Version 2
+```
+version: 2
+services:
+  redis:
+    image: redis
+  db:
+    image: postgres:9.4
+  vote:
+    build: ./vote
+    depends_on:
+      - redis
+```
+
+Version 3
+Support for Docker Swarm
+```
+version: 3
+services:
+  redis:
+    image: redis
+  db:
+    image: postgres:9.4
+  vote:
+    build: ./vote
+```
+
+# Definining networks
+
+
+```
+version: 2
+services:
+  redis:
+    image: redis
+    networks:
+      - back-end
+  db:
+    image: postgres:9.4
+    networks:
+      - back-end
+  vote:
+    build: ./vote
+    networks:
+      - front-end
+      - back-end
+  result:
+    image: result
+    networks:
+      - front-end
+      - back-end
+networks:
+  front-end:
+  back-end:
+```
+
+
+
+Specify env vars
+```
+version: 2
+services:
+  redis:
+    image: redis
+    networks:
+      - back-end
+  db:
+    image: postgres:9.4
+    networks:
+      - back-end
+    environment:
+      POSTGRS_USER: some_user
+      POSTGRES_PASSWORD: somePwdHere
+```
+
+
+# Docker Engine
+docker engine is a host with docker installed. This includes:
+- docker cli
+- docker deamon
+- rest api (used to talk to the daemon)
+
+It is possible for the docker CLI to communicate with a docker daemon on another host. use this:
+docker -H=remote-docker-engine-host:2345 run nginx
+
+
+How does it work under the hood?
+- Creates namespace to isolate processes, timesharing, interprocess communication, mounts, etc
+
+
+## Process ID Namespace Isolation
+Linux starts with PID: 1 and all other pcoesses are children of that.
+
+Containter processes are processes on the host machine and get the next avialble ids, but within the namespace the get a second PID.
+
+The container needs to think it is a stand alone OS instance starting with PID 1
+
+The container thinks it has it's own root process because it's looking only at the namespace
+
+
+## How does docker manage sharing resources between host and container(s)? cgroups
+- By default there is no restriction on how many resources a container can use
+- cgroups = control groups
+- can manage system resources
+    - docker run --cpu=.5 ubuntu
+    - Says don't use more than half the CPU for this container
+    - docker run --memory=100m ubuntu
+    - restricts the container to 100m of memory
+
+
+# Docker storage
+How does docker store data on the fs?
+
+creates:
+/var/lib/docker
+/var/lib/docker/aufs
+/var/lib/docker/containers
+/var/lib/docker/imges
+/var/lib/docker/volumes
+
+Layered architecture. Each line in a docker file creates it's own layer.
+
+Each layer only stores the changes from the prior layer.
+
+Can reuse layers from cache when layers are shared between several images.
+
+Reduces storage size and also speeds up builds
+
+Docker image layers are read only
+
+Will creata a new writable layer on top of the layers created in the image build. It is volatile and only exists during a run of the container. This is called the CONTAINTER LAYER.
+
+If, during a container run, you modify a file that is part of the image layers then it actually copies the file to the writeable container layer. This is called "COPY-ON-WRITE".
+
+## Can add persistence with volumes
+docker volume create data_volume
+
+Creates dir /var/lib/docker/volumes/data_volume
+
+Can mount that volume in a contaier like this:
+docker run -v data_volume:/var/lib/mysql mysql
+
+will auto create volumes if you specify them in a docker run command but they don't exist.
+
+
+Volume mounting vs bind mounting
+- Volume mounting mounts a volume in the container
+    docker run -v <volume name>:<mount path> <container name>
+- Bind mounting mounts an arbitrary folder on the host inside the conainer
+    docker run -v <arbitrary host path>:<mount path> <container name>
+
+
+NOTE: USING -v IS THE OLD WAY
+THE NEW WAY is --mount
+
+Old way to do a bind mount:
+docker run -v /data/mysql:/var/lib/mysql mysql
+
+New way to do a bind mount:
+docker run --mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql
+
+
+Old way to do a volume mount
+docker run -v data_volume:/var/lib/mysql mysql
+
+New way to do a volume mount:
+docker run --mount type=volume,source=data_volume,target=/var/lib/mysql mysql
+
+These mounts are enabled by the storage drivers:
+- AUFS
+- ZFS
+- BTRFS
+- Device Mapper
+- Overlay
+- Overlay2
+
+Docker selects a driver automatically (depending on the OS/env), but can override
+
+
+
+
+
+# Docker networks
+When you install docker it creates three networks automatically:
+- Bridge
+    - default network a containter gets attached to
+    - Private internal network. All containers assigned private ip addresses in 172.X series.
+    - All containers can access eachother using the internal IP
+    - To access the containers from the host/outside docker then you need to map the ports
+- none
+    - no network
+    - cannot access other containers or external host network, etc
+- host
+    - Another way to access a container is to associate it with the host network:
+docker run ubuntu --network=host
+    - Automatically shares the host network with the container. Cannot run several containers listening on the same port
+
+Can create new networks like this:
+docker network create \
+  --driver bridge \
+  --subnet 182.18.0.0/16 \
+  custom-isolated-network-name
+
+docker network ls
+
+
+must use docker run --network=<network> to connect a container to anything aside from Bridge
+
+can see network info for a container using docker inspect
+
+
+## EMBEDDED DNS
+- Containers can reach eachother using their NAMES
+- Built in DNS server is run at 127.0.0.11
+
+Docker uses network namespaces to isolate each container
+
+
+
+# Docker registry
+- Where images are stored
+- docker run nginx is the same as docker run nginx/nginx
+- <uer or account>/image
+- by default uses docker hub at docker.io
+- but lots of other registries.
+- can build private registries on many cloud provider
+- must login before you can use a private registry: docker login private-retistry.io
+
+
+Run from private registry:
+docker run private-registry.io/app/internal-app
+
+
+# Deploy a private registry locallly
+Run the registry container:
+docker run -d -p 5000:5000 --name registry registry:2
+
+Push to the regtistry:
+docker image tag my-image localhost:5000/my-image
+docker push localhost:5000/my-image
+
+
+############################
+DevOps basics
+############################
+
+# For setting an IP address, use it like this:
+ip addr add [ip_address] dev [interface]
+
+# For example, add an IP address to the eth1 interface as:
+sudo ip addr add 192.168.56.21/24 dev eth1
+
+# list network interfaces
+ip a
+ifconfig -a
+ip link show
+
+# Add routing table entry
+
+ip route add <network_ip>/<cidr> via <gateway_ip>
+
+# Example
+ip route add 10.0.3.0/24 via 10.0.3.1
+
+sudo ip route add 172.16.239.0/24 via 172.16.238.10
+
+sudo ip route add 172.16.238.0/24 via 172.16.239.10
+
+
+# DNS on Linux
+
+hostname
+- called without args shows current hostname
+
+How to point a host ot a DNS server?
+Add entry to /etc/resolv.conf like this:
+nameserver 192.168.1.100
+
+by default host file is used before dns
+But can configure it to be the reverse
+by updating /etc/nsswitch.conf
+hosts:           files dns
+
+
+Can add external DNS servers with an additional entry in /etc/resolv.conf
+nameserver 8.8.8.8
+
+configure search to resolve to web.mycompany.com
+search mycompany.com
+
+A records store host name to ip
+AAAA records (quad a) stores host to ipV6
+CNAME records are one name to another name
+
+
+nslookup
+- look up host in DNS. Does not query host file
+
+dig
+- more data than nslookup
+
+
+---------------------------------------
+GIT
+---------------------------------------
+
+Can run git daemon to run your own git server. This daemon comes with git
+
+
+
+---------------------------------------
+Servers
+---------------------------------------
+
+
+---------------------------------------
+SSH
+---------------------------------------
+generate key pair
+ssh-keygen
+
+Private:
+    id_rsa
+Public
+    id_rsa.pub
+
+
+ssh-copy-id -i ~/.ssh/mykey.pub thor@app01
+
+
+---------------------------------------
+JSON & JSON Path
+---------------------------------------
+
+root element denoted by $
+used for JSON with dictonary at root
+
+$.vehicles.bus
+
+Given
+[
+    "a",
+    "b",
+    "c"
+]
+
+$[1]
+=> ["b"]
+returns the second element, wrapped in an array
+
+
+$[1,2]
+=> ["b", "c"]
+
+$.car.wheels[1].model
+
+
+Given
+[ random numbers ]
+
+?(<stuff here>) = criteria
+@ = all items
+operators !=, ==, in [] or @ not in []
+$[?(@ > 40)]
+
+
+--------------------------------------
+Kubernetes Intro
+--------------------------------------
+
+Node is machine (physical or virtual) on which kubernetes is installed.
+
+Worker machine where containers run
+
+Cluser is a set of nodes
+
+Management of cluser is handled by master node
+- handles orchestation
+
+
+When you install kubernetes you install:
+- API Server
+- etcd
+- kubelet
+- Scheduler
+- Controller
+- Container Runtime
+
+
+API server
+- acts as front end.
+- cli connects to this
+
+etcd
+- distributed key value store
+- stores data used to manage the cluser
+
+Scheduler
+- distributes work across multiple nodes
+- looks for newly created containers and assigns them to nodes
+
+Controller
+- "brains behind orchestration"
+- notice and respond to 
+
+kubelet
+- agent that runs on each node in cluster
+- ensures containers are running properly
+
+Container Runtime
+- underlying software that run containers
+- this is docker
+
+Node types: master and worker (or minion)
+
+
+---------------------------
+
+Master node has
+- kube-apiserver
+- etcd (kv store)
+- Controller
+- scheduler
+
+Worker node has
+- kubelet 
+- container runtime
+
+
+kubectl
+deploy and manage clusters
+
+kubectl run hello-minikube
+- deploy
+-
+
+kubectl cluster-info
+kubectl get nodes
+
+
+===============================================
+ARCH INSTALL
+===============================================
+# Make the terminal readable
+setfont ter-124b
+
+# Verify you're using UEFI (will be missing if using BIOS)
+ls /sys/firmware/efi
+
+# Partition the disks
+lsblk
+
+fdisk /dev/sda
+# m = menu
+# p = print
+
+# First make new partition table. probably GPT.
+g
+
+# New partition for GPT
+# Make new partation
+n
+# Partiton Number 1 probably
+# Take default First sector
+# Make it 4 GB
++4G
+# change partiton type to EFI
+t
+L
+1
+
+# New partition for swap
+n
+2
++4G
+t
+L
+19
+
+# new partiton for OS
+n
+3
+
+# Now save changes
+w
+
+lsblk
+
+# Format drives
+# EFI should be FAT32
+mkfs.fat -F 32 /dev/sda1
+
+
+# Swap should be swap
+mkswap /dev/sda2
+
+# Main disk ext4
+mkfs.ext4 /dev/sda3
+
+
+# Mount the FS
+mount /dev/sda3 /mnt
+mount --mkdir /dev/sda1 /mnt/boot
+swapon /dev/sda2
+
+# Check stuff (Should show drives and mounts)
+lsblk -a
+
+
+# Install base packages
+pacstrap -K /mnt base linux linux-firmware
+
+
+# build fstab
+genfstab -U /nt >> /mnt/etc/fstab
+cat /mnt/etc/fstab
+
+
+# change the root
+arch-chroot /mnt
+
+# Follow install guide stuff
+
+echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+echo "arch-test" >> /etc/hostname
+
+# set root password
+passwd
+=> root
+
+
+cat << EOF > /etc/locale.conf
+> LANG=en_US.UTF-8
+> EOF
+
+
+# install bootloader GRUB
+pacman -S grub efibootmgr
+
+grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id=GRUB
+
+
+kubernets
+============================================
+
+
+
+
+
+
+
+
