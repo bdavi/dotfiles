@@ -1,6 +1,7 @@
 "##########################################################
 " General settings
 "##########################################################
+" Decrease this value so gitgutter refreshes faster
 set updatetime=250
 
 " Set up tabs
@@ -11,15 +12,10 @@ set expandtab
 
 " Line Numbers
 set number
-" set relativenumber
-
-" Hightlight Syntax
-syntax enable
 
 " Show trailing whitespace
 set listchars=trail:·,tab:»·
 set list
-
 " Navigate in display line not actual line
 noremap j gj
 noremap k gk
@@ -42,6 +38,9 @@ let &t_EI = "\<Esc>[2 q"
 set wildmenu
 set scrolloff=3
 set autoread
+
+" Hightlight Syntax
+syntax enable
 
 
 "##########################################################
@@ -137,18 +136,12 @@ call plug#begin('~/.vim/plugged')
   Plug 'dense-analysis/ale'
   Plug 'editorconfig/editorconfig-vim'
   Plug 'francoiscabrol/ranger.vim'
-  Plug 'iamcco/coc-tailwindcss',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
   Plug 'janko/vim-test'
   Plug 'jiangmiao/auto-pairs'
   Plug 'jpalardy/vim-slime'
   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
   Plug 'junegunn/fzf.vim'
-  Plug 'neoclide/coc-css',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
-  Plug 'neoclide/coc-prettier', {'do': 'yarn install --frozen-lockfile'}
-  " Plug 'neoclide/coc-solargraph', {'do': 'yarn install --frozen-lockfile'}
-  Plug 'neoclide/coc-tsserver', {'do': 'yarn install --frozen-lockfile'}
   Plug 'neoclide/coc.nvim', { 'branch': 'release' }
-  Plug 'neoclide/coc-eslint'
   Plug 'scrooloose/nerdtree'
   Plug 'sheerun/vim-polyglot'
   Plug 'skywind3000/asyncrun.vim' "Use with vim-test
@@ -167,29 +160,34 @@ let g:syntastic_scss_checkers=["sasslint"]
 
 
 " coc.nvim
-" Use tab for trigger completion with characters ahead and navigate.
+" Use tab for trigger completion with characters ahead and navigate
+" NOTE: There's always complete item selected by default, you may want to enable
+" no select by `"suggest.noselect": true` in your configuration file
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
-" other plugin before putting this into your config.
-
-" IMPORTANT: The coc.nvim docs use <C-p> and <C-n> for navigating completion.
-" For some reason this causes <cr> confirmation to add a carriage return after
-" the completion. Use <up> and <down> instead to prevent this.
+" other plugin before putting this into your config
 inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<down>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<Tab>" :
       \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<up>" : "\<C-h>"
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 
-function! s:check_back_space() abort
+" Make <CR> to accept selected completion item or notify coc.nvim to format
+" <C-g>u breaks current undo, please make your own choice
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+function! CheckBackspace() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
+" Use <c-space> to trigger completion
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
 
-" coc-prettier
-command! -nargs=0 Prettier :CocCommand prettier.formatFile
-vmap <leader>f <Plug>(coc-format-selected)
-nmap <leader>f :Prettier<cr>
 
 " afteglow
 colorscheme afterglow

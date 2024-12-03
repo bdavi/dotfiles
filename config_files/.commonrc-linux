@@ -9,12 +9,13 @@ alias rm='rm -I --preserve-root'
 if grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null ; then
   alias open="explorer.exe"
 else
-  /usr/bin/setxkbmap -option "caps:swapescape"
-  alias swapesc="/usr/bin/setxkbmap -option \"caps:swapescape\""
+  # Swap esc and caplock
+  alias swapesc='/usr/bin/setxkbmap -option caps:swapescape'
+  /usr/bin/setxkbmap -option caps:swapescape
 
   # Keyboard speed
-  alias keyslow="xset r rate 700 20"
-  alias keyfast="xset r rate 225 60"
+  alias keyfast='xset r rate 225 60'
+  xset r rate 225 60
 
   # Screen reslution adjustments
   alias r2k='xrandr -s 2560x1440'
