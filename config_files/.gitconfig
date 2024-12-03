@@ -17,3 +17,5 @@
 [user]
 	email = brian@briandavies.me
 	name = Brian Davies
+[diff "sopsdiffer"]
+	textconv = sops -d --config /dev/null

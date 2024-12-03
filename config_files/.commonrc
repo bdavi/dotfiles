@@ -2,6 +2,7 @@
 # Save me from myself
 ###############################################################################
 alias celar='clear'
+alias cleawr='clear'
 
 
 ###############################################################################
@@ -33,6 +34,9 @@ alias gst='git status'
 alias gc='git commit'
 alias gp='git push'
 alias ga='git add'
+# Delete branches already merged into current branch
+alias gdb='git branch --merged | egrep -v "(^\*|master|main|dev)" | xargs git branch -d'
+
 
 # Switch to -D for danger mode
 function full-prune() {
