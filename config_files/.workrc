@@ -21,6 +21,8 @@ then
   alias ps-log='container-log product-search-service'
   alias ps-logs='container-log product-search-service'
   alias elts='ecom-load-test-schema'
+  alias cglts='cg-load-test-schema'
+  alias fixit='cd ~/monorepo && docker compose down && docker volume remove zla_cg-deps zla_jp-deps zla_rz-deps zla_cg-build zla_jp-build zla_rz-build && docker compose pull && docker compose up -d'
 fi
 
 if [ -d "$HOME/code/comoto/scripts" ]
