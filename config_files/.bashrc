@@ -53,16 +53,6 @@ git_prompt() {
 export PS1="\e[0;32m\u@\h\e[m \e[0;36m \w\e[m  \$(git_prompt)\n$"
 
 
-###############################################################################
-# asdf (version manager)
-###############################################################################
-if [ -d "$HOME/.asdf" ] 
-then
-  . $HOME/.asdf/asdf.sh
-  . $HOME/.asdf/completions/asdf.bash
-fi
-
-
 ################################################################################
 # Additional configuration
 ################################################################################
@@ -85,5 +75,12 @@ alias source!='source ~/.bashrc; tmux source-file ~/.tmux.conf; tmux display-mes
 # Path
 #######################################################################
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+
+###############################################################################
+# asdf (version manager)
+###############################################################################
+command -v asdf >/dev/null && . <(asdf completion bash)

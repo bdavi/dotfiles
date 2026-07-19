@@ -10,7 +10,8 @@
 # Run the rest top-to-bottom.
 #############################################################################
 
-set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/util.sh"
 
 #############################################################################
 # Sudo
@@ -19,22 +20,7 @@ set -euo pipefail
 # write into $HOME and need to run as you, not root. This just makes sure
 # you *can* sudo, and caches the credential so the apt-get/apt calls further
 # down don't stop to prompt for a password in the middle of the script.
-if [[ $EUID -eq 0 ]]; then
-  echo "Run this as your normal user, not root/sudo." >&2
-  exit 1
-fi
-
-if ! sudo -v; then
-  echo "This script requires sudo privileges." >&2
-  exit 1
-fi
-
-# Keep the sudo timestamp alive for the lifetime of this script.
-while true; do
-  sudo -n true
-  sleep 60
-  kill -0 "$$" 2>/dev/null || exit
-done 2>/dev/null &
+require_sudo
 
 #############################################################################
 # Base packages
@@ -42,7 +28,7 @@ done 2>/dev/null &
 sudo apt-get update
 
 sudo apt-get --yes install curl git ranger highlight silversearcher-ag \
-  tmux tree wget xclip shellcheck keepassxc firefox sakura
+  tmux tree wget xclip shellcheck keepassxc firefox sakura shfmt
 
 
 #############################################################################
@@ -53,7 +39,7 @@ sudo apt-get --yes install curl git ranger highlight silversearcher-ag \
 #   git clone https://github.com/bdavi/dotfiles.git
 #   cd dotfiles
 
-~/code/dotfiles/scripts/install_dotfiles.sh
+"$DOTFILES_DIR/scripts/install_dotfiles.sh"
 
 
 #############################################################################
@@ -74,6 +60,15 @@ vim +'PlugInstall --sync' +qa
 # config_files/.zshrc already source ~/.fzf.bash / ~/.fzf.zsh
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install --key-bindings --completion --no-update-rc
+
+
+#############################################################################
+# asdf
+#############################################################################
+# Installing is the same operation as updating for a pinned-version binary,
+# so this just delegates to the update script - see it for how the version
+# is resolved and kept pinned to a major version.
+"$DOTFILES_DIR/scripts/dev_box/update_ubuntu.sh"
 
 
 #############################################################################
