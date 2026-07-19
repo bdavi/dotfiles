@@ -75,8 +75,15 @@ source ~/.commonrc
 ################################################################################
 alias source!='source ~/.bashrc; tmux source-file ~/.tmux.conf; tmux display-message "SOURCED!"'
 
-source /usr/share/google-cloud-sdk/completion.bash.inc
-source ~/monorepo/zlaverse/support/bash_functions.sh
-source /home/brian/monorepo/zlaverse/dev/../../zlaverse/support/bash_functions.sh
+# source /usr/share/google-cloud-sdk/completion.bash.inc
+# source ~/monorepo/zlaverse/support/bash_functions.sh
+# source /home/brian/monorepo/zlaverse/dev/../../zlaverse/support/bash_functions.sh
+
+
+
+#######################################################################
+# Path
+#######################################################################
+export PATH="$HOME/.local/bin:$PATH"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash

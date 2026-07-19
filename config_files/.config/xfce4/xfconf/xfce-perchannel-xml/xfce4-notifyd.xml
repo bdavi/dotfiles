@@ -1,0 +1,17 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<channel name="xfce4-notifyd" version="1.0">
+  <property name="notify-location" type="string" value="top-right"/>
+  <property name="theme" type="empty"/>
+  <property name="initial-opacity" type="empty"/>
+  <property name="do-fadeout" type="empty"/>
+  <property name="log-max-size-enabled" type="bool" value="true"/>
+  <property name="applications" type="empty">
+    <property name="known_applications" type="array">
+      <value type="string" value="org.xfce.Thunar"/>
+      <value type="string" value="thunar-volman"/>
+      <value type="string" value="Xfce volume control"/>
+      <value type="string" value="xfce4-power-manager"/>
+    </property>
+  </property>
+</channel>
