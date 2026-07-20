@@ -18,6 +18,7 @@ source "$SCRIPT_DIR/lib/asdf_langs.sh"
 source "$SCRIPT_DIR/lib/update_cron.sh"
 source "$SCRIPT_DIR/lib/debloat.sh"
 source "$SCRIPT_DIR/lib/configure_xfce.sh"
+source "$SCRIPT_DIR/lib/docker.sh"
 
 ################################################################################
 # Sudo
@@ -91,6 +92,14 @@ sudo flatpak install --system --noninteractive flathub net.nokyan.Resources
 sudo flatpak install --system --noninteractive flathub io.github.linx_systems.ClamUI
 sudo flatpak install --system --noninteractive flathub com.slack.Slack
 sudo flatpak install --system --noninteractive flathub com.tomjwatson.Emote
+
+
+################################################################################
+# Docker
+################################################################################
+# Official apt repo, not Ubuntu's docker.io - see lib/docker.sh for why.
+# New docker group membership only takes effect in a new login session.
+install_docker
 
 
 ################################################################################
