@@ -168,3 +168,12 @@ asdf_cleanup_python
 # Claude Code CLI
 # curl -fsSL https://claude.ai/install.sh | bash
 # Installs to ~/.local/bin - already on PATH via config_files/.bashrc
+
+
+################################################################################
+# Maintenance
+################################################################################
+# Final pass - everything in ubuntu_maintenance.sh is idempotent, so safe
+# to re-run here even though most of it (OS updates, asdf languages) was
+# already covered above.
+"$DOTFILES_DIR/scripts/dev_box/ubuntu_maintenance.sh"
