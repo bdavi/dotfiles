@@ -43,19 +43,9 @@ require_sudo() {
   fi
 }
 
-# Refreshes the apt index and upgrades installed packages within the
-# current Ubuntu release. full-upgrade (not plain upgrade) so dependency
-# changes - e.g. a kernel transition - are handled instead of refused.
-# This can never trigger a distro version upgrade on its own: that only
-# happens via `do-release-upgrade` or by pointing sources.list at a new
-# release, neither of which this touches.
 update_os_packages() {
   sudo apt-get update
-
-  sudo DEBIAN_FRONTEND=noninteractive apt-get --yes \
-    -o Dpkg::Options::="--force-confdef" \
-    -o Dpkg::Options::="--force-confold" \
-    full-upgrade
+  sudo apt-get upgrade
 
   if [[ -f /var/run/reboot-required ]]; then
     echo "A reboot is required to finish applying updates." >&2
@@ -69,30 +59,11 @@ update_os_packages() {
 # hand-rolled "keep N kernels" script is a common way to end up unable to
 # boot, so this deliberately doesn't try to be cleverer than apt here.
 # Also clears out cached .deb files for packages no longer installable at
-# that version, freeing disk without touching anything still in use, and
-# purges packages left in dpkg's "removed but not purged" state (see
-# purge_removed_packages) so residual conffiles/cron jobs/startup
-# scripts don't pile up.
+# that version, freeing disk without touching anything still in use.
 clean_os_packages() {
   sudo apt-get check
   sudo apt-get --yes autoremove --purge
   sudo apt-get autoclean
-  purge_removed_packages
-}
-
-# Purges packages dpkg lists in "rc" state - removed at some point via a
-# plain `apt remove` (not purge, which autoremove --purge above already
-# handles for newly-orphaned packages), leaving behind conffiles, cron
-# jobs, and startup scripts. Flagged by Lynis as PKGS-7346:
-# https://cisofy.com/lynis/controls/PKGS-7346/. Guarded/idempotent -
-# nothing left in "rc" state once this has run.
-purge_removed_packages() {
-  local -a pkgs
-  mapfile -t pkgs < <(dpkg -l | awk '$1 == "rc" {print $2}')
-
-  if ((${#pkgs[@]} > 0)); then
-    sudo DEBIAN_FRONTEND=noninteractive apt-get --yes purge "${pkgs[@]}"
-  fi
 }
 
 # Sets whether do-release-upgrade offers every release (interim included)
