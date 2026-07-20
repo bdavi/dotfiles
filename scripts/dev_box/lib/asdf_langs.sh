@@ -6,18 +6,22 @@
 # Not meant to be run directly - sourced by build_ubuntu.sh and
 # update_ubuntu.sh, after util.sh and asdf_util.sh.
 #
-# Each function is self-contained: apt build deps, plugin add, then
-# asdf_install_latest_global (asdf_util.sh) to build/install the latest
-# version and set it as the global default. Same function handles
+# Each asdf_install_* function is self-contained: apt build deps, plugin
+# add, then asdf_install_latest_global (asdf_util.sh) to build/install the
+# latest version and set it as the global default. Same function handles
 # first-time install and keeping up to date, since
 # asdf_install_latest_global is a no-op when the latest version is already
 # installed.
+#
+# Each has a matching asdf_cleanup_* function (asdf_cleanup_old_versions,
+# asdf_util.sh) that removes old installed versions once a new one is in,
+# keeping the 2 most recent so compiled versions don't pile up on disk.
 ################################################################################
 
 ################################################################################
 # asdf Install Ruby
 ################################################################################
-asdf_install_ruby() {
+asdf_install_latest_ruby() {
   sudo apt-get --yes install build-essential autoconf patch libssl-dev \
     libyaml-dev zlib1g-dev libffi-dev libgmp-dev rustc libreadline-dev \
     libncurses-dev libgdbm-dev libdb-dev
@@ -26,10 +30,14 @@ asdf_install_ruby() {
   asdf_install_latest_global ruby
 }
 
+asdf_cleanup_ruby() {
+  asdf_cleanup_old_versions ruby
+}
+
 ################################################################################
 # asdf Install Node.js
 ################################################################################
-asdf_install_nodejs() {
+asdf_install_latest_nodejs() {
   # asdf-nodejs (via node-build) installs precompiled binaries, so nothing
   # is needed to build Node itself - unzip covers node-build's .zip
   # fallback path; build-essential/python3 are for compiling native npm
@@ -40,13 +48,17 @@ asdf_install_nodejs() {
   asdf_install_latest_global nodejs
 }
 
+asdf_cleanup_nodejs() {
+  asdf_cleanup_old_versions nodejs
+}
+
 ################################################################################
 # asdf Install Erlang
 ################################################################################
-# Not called directly from build/update scripts - asdf_install_elixir pulls
-# this in, since Elixir needs a matching Erlang/OTP version to build
-# against.
-asdf_install_erlang() {
+# Not called directly from build/update scripts -
+# asdf_install_latest_elixir pulls this in, since Elixir needs a matching
+# Erlang/OTP version to build against.
+asdf_install_latest_erlang() {
   # perl and libssl-dev are required (not optional) per OTP's own
   # HOWTO/INSTALL.md - libssl-dev in particular builds `crypto`, which
   # `ssl`/`ssh`/`public_key` all depend on; without it those apps get
@@ -64,13 +76,19 @@ asdf_install_erlang() {
   KERL_CONFIGURE_OPTIONS="--without-javac" asdf_install_latest_global erlang
 }
 
+# Not called directly from build/update scripts - asdf_cleanup_elixir
+# pulls this in, mirroring asdf_install_latest_erlang.
+asdf_cleanup_erlang() {
+  asdf_cleanup_old_versions erlang
+}
+
 ################################################################################
 # asdf Install Elixir
 ################################################################################
-asdf_install_elixir() {
+asdf_install_latest_elixir() {
   sudo apt-get --yes install unzip
 
-  asdf_install_erlang
+  asdf_install_latest_erlang
 
   asdf_plugin_add elixir https://github.com/asdf-vm/asdf-elixir.git
 
@@ -94,10 +112,15 @@ asdf_install_elixir() {
   asdf set --home elixir "$elixir_version"
 }
 
+asdf_cleanup_elixir() {
+  asdf_cleanup_erlang
+  asdf_cleanup_old_versions elixir
+}
+
 ################################################################################
 # asdf Install Python
 ################################################################################
-asdf_install_python() {
+asdf_install_latest_python() {
   # asdf-python (via pyenv's python-build) always compiles from source.
   # List is pyenv's current recommended Ubuntu/Debian build environment,
   # including libzstd-dev - needed for 3.14+'s compression.zstd module.
@@ -107,4 +130,8 @@ asdf_install_python() {
 
   asdf_plugin_add python https://github.com/asdf-community/asdf-python.git
   asdf_install_latest_global python
+}
+
+asdf_cleanup_python() {
+  asdf_cleanup_old_versions python
 }

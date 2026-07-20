@@ -72,3 +72,35 @@ asdf_install_latest_global() {
 
   echo "$name $latest set as global version"
 }
+
+# Uninstalls all but the N most recent installed versions of an
+# asdf-managed tool (default 2), so old compiled versions don't sit around
+# taking up space. `asdf list` reads installed versions off disk in
+# filename order (lexical, not version-aware - "10.0.0" would sort before
+# "9.0.0"), so this re-sorts with `sort -V` before deciding what's oldest.
+# Never uninstalls the currently active version, even if it somehow fell
+# outside the keep window.
+asdf_cleanup_old_versions() {
+  local name="$1"
+  local keep="${2:-2}"
+
+  local current
+  current="$(asdf current "$name" 2>/dev/null | tail -n1 | awk '{print $2}')"
+
+  local versions
+  versions="$(asdf list "$name" 2>/dev/null | sed 's/^[[:space:]*]*//' | sort -V)"
+
+  local total
+  total="$(grep -c . <<<"$versions")"
+
+  if ((total <= keep)); then
+    return 0
+  fi
+
+  local version
+  while IFS= read -r version; do
+    [[ -z "$version" || "$version" == "$current" ]] && continue
+    asdf uninstall "$name" "$version"
+    echo "Uninstalled $name $version"
+  done < <(head -n "$((total - keep))" <<<"$versions")
+}

@@ -42,8 +42,8 @@ sudo apt-get --yes install curl git ranger highlight silversearcher-ag \
 # and asdf-managed languages current - never a distro version upgrade, see
 # update_os_packages (lib/util.sh). One-time setup; edit
 # /etc/cron.d/dev_box_update directly to change the schedule later.
-install_unattended_apt_sudo
-install_update_cron_job
+# install_unattended_apt_sudo
+# install_update_cron_job
 
 
 ################################################################################
@@ -90,11 +90,18 @@ install_asdf
 ################################################################################
 # Each asdf_install_* function (lib/asdf_langs.sh) is idempotent, same as
 # install_asdf - used here and by update_ubuntu.sh to keep languages
-# current.
-asdf_install_ruby
-asdf_install_nodejs
-asdf_install_elixir
-asdf_install_python
+# current. asdf_cleanup_* prunes old versions down to the 2 most recent.
+asdf_install_latest_ruby
+asdf_cleanup_ruby
+
+asdf_install_latest_nodejs
+asdf_cleanup_nodejs
+
+asdf_install_latest_elixir
+asdf_cleanup_elixir
+
+asdf_install_latest_python
+asdf_cleanup_python
 
 
 ################################################################################

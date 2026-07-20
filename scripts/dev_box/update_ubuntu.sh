@@ -26,7 +26,14 @@ update_os_packages
 
 install_asdf
 
-asdf_install_ruby
-asdf_install_nodejs
-asdf_install_elixir
-asdf_install_python
+asdf_install_latest_ruby
+asdf_cleanup_ruby
+
+asdf_install_latest_nodejs
+asdf_cleanup_nodejs
+
+asdf_install_latest_elixir
+asdf_cleanup_elixir
+
+asdf_install_latest_python
+asdf_cleanup_python
