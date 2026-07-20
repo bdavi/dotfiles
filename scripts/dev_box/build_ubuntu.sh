@@ -19,6 +19,7 @@ source "$SCRIPT_DIR/lib/update_cron.sh"
 source "$SCRIPT_DIR/lib/debloat.sh"
 source "$SCRIPT_DIR/lib/configure_xfce.sh"
 source "$SCRIPT_DIR/lib/docker.sh"
+source "$SCRIPT_DIR/lib/browser_extensions.sh"
 
 ################################################################################
 # Sudo
@@ -54,6 +55,7 @@ sudo apt-get --yes install \
   fzf \
   git \
   highlight \
+  jq \
   ranger \
   pandoc \
   shellcheck \
@@ -92,6 +94,16 @@ sudo flatpak install --system --noninteractive flathub net.nokyan.Resources
 sudo flatpak install --system --noninteractive flathub io.github.linx_systems.ClamUI
 sudo flatpak install --system --noninteractive flathub com.slack.Slack
 sudo flatpak install --system --noninteractive flathub com.tomjwatson.Emote
+
+
+################################################################################
+# Browser extensions
+################################################################################
+# Force-installed into the Firefox/Chromium flatpaks above - see
+# lib/browser_extensions.sh for how and why this doesn't use the usual
+# host enterprise-policy paths.
+install_firefox_extensions
+install_chromium_extensions
 
 
 ################################################################################
