@@ -40,11 +40,23 @@ sudo apt-get --yes install curl git ranger highlight silversearcher-ag \
 # Unattended updates (cron)
 ################################################################################
 # Lets ubuntu_maintenance.sh run unattended on a schedule to keep OS packages
-# and asdf-managed languages current - never a distro version upgrade, see
-# update_os_packages (lib/util.sh). One-time setup; edit
-# /etc/cron.d/dev_box_update directly to change the schedule later.
+# and asdf-managed languages current - never a distro version upgrade (see
+# upgrade_os_distro below for that), see update_os_packages (lib/util.sh).
+# One-time setup; edit /etc/cron.d/dev_box_update directly to change the
+# schedule later.
 # install_unattended_apt_sudo
 # install_update_cron_job
+
+
+################################################################################
+# OS distro upgrade (manual)
+################################################################################
+# Upgrades to the next available Ubuntu release, interim included (see
+# configure_release_upgrade_prompt, lib/util.sh). Deliberately not run
+# automatically and not part of ubuntu_maintenance.sh's cron job - a
+# release upgrade needs you present, not running unattended while you
+# might be using the box. Uncomment and run yourself when you're ready.
+# upgrade_os_distro
 
 
 ################################################################################
@@ -114,5 +126,5 @@ asdf_cleanup_python
 #   sudo apt install ~/Downloads/claude-desktop_amd64.deb
 
 # Claude Code CLI
-curl -fsSL https://claude.ai/install.sh | bash
+# curl -fsSL https://claude.ai/install.sh | bash
 # Installs to ~/.local/bin - already on PATH via config_files/.bashrc

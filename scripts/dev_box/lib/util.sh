@@ -75,3 +75,29 @@ clean_os_packages() {
   sudo apt-get --yes autoremove --purge
   sudo apt-get autoclean
 }
+
+# Sets whether do-release-upgrade offers every release (interim included)
+# or only LTS-to-LTS. Ubuntu's own default is "lts", a much slower
+# cadence; "normal" upgrades to whatever release immediately succeeds the
+# one currently running, interim or not.
+configure_release_upgrade_prompt() {
+  local target="Prompt=normal"
+  local file="/etc/update-manager/release-upgrades"
+
+  grep -qx "$target" "$file" 2>/dev/null && return 0
+
+  sudo sed -i "s/^Prompt=.*/$target/" "$file"
+}
+
+# Upgrades to the next available Ubuntu release. Deliberately NOT called
+# from ubuntu_maintenance.sh / the cron job - a release upgrade can need a
+# reboot, hits interactive prompts for third-party repos (this box has
+# the claude-desktop apt source, for one) and config file conflicts, and
+# can fail partway. Run this yourself, in person, when you're ready for
+# it. update_os_packages first, since do-release-upgrade expects the
+# current release to already be fully up to date.
+upgrade_os_distro() {
+  configure_release_upgrade_prompt
+  update_os_packages
+  sudo do-release-upgrade
+}
