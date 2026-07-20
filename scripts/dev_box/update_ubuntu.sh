@@ -25,3 +25,6 @@ require_sudo
 install_asdf
 
 asdf_install_ruby
+asdf_install_nodejs
+asdf_install_elixir
+asdf_install_python

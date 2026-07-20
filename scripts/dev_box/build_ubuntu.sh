@@ -80,6 +80,9 @@ install_asdf
 # install_asdf - used here and by update_ubuntu.sh to keep languages
 # current.
 asdf_install_ruby
+asdf_install_nodejs
+asdf_install_elixir
+asdf_install_python
 
 
 ################################################################################
