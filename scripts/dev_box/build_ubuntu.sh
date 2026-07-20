@@ -21,18 +21,12 @@ source "$SCRIPT_DIR/lib/configure_xfce.sh"
 source "$SCRIPT_DIR/lib/docker.sh"
 source "$SCRIPT_DIR/lib/browser_extensions.sh"
 
-################################################################################
-# Sudo
-################################################################################
-# Run as your normal user (not root) - the dotfiles/vim/fzf steps below
-# write into $HOME and need to run as you, not root. This just makes sure
-# you *can* sudo, and caches the credential so the apt-get/apt calls further
-# down don't stop to prompt for a password in the middle of the script.
 require_sudo
 
 ################################################################################
-# Base packages
+# Updates
 ################################################################################
+# upgrade_os_distro
 update_os_packages
 clean_os_packages
 
@@ -40,9 +34,6 @@ clean_os_packages
 ################################################################################
 # Debloat
 ################################################################################
-# Telemetry/nag removal + snap removed in favor of flatpak (Flatpak
-# section below installs it and the browsers). See lib/debloat.sh for
-# what each of these actually does and why.
 disable_telemetry
 remove_snap
 
@@ -63,8 +54,9 @@ sudo apt-get --yes install \
   silversearcher-ag \
   tmux \
   tree \
+  ufw \
   wget \
-  xclip \
+  xclip
 
 
 ################################################################################
@@ -85,6 +77,10 @@ sudo apt-get --yes install \
   virtualbox \
   vlc
 
+
+################################################################################
+# Install Flatpack
+################################################################################
 install_flatpak
 
 sudo flatpak install --system --noninteractive flathub org.mozilla.firefox
@@ -99,9 +95,6 @@ sudo flatpak install --system --noninteractive flathub com.tomjwatson.Emote
 ################################################################################
 # Browser extensions
 ################################################################################
-# Force-installed into the Firefox/Chromium flatpaks above - see
-# lib/browser_extensions.sh for how and why this doesn't use the usual
-# host enterprise-policy paths.
 install_firefox_extensions
 install_chromium_extensions
 
@@ -109,8 +102,6 @@ install_chromium_extensions
 ################################################################################
 # Docker
 ################################################################################
-# Official apt repo, not Ubuntu's docker.io - see lib/docker.sh for why.
-# New docker group membership only takes effect in a new login session.
 install_docker
 
 
@@ -127,17 +118,6 @@ install_docker
 
 
 ################################################################################
-# OS distro upgrade (manual)
-################################################################################
-# Upgrades to the next available Ubuntu release, interim included (see
-# configure_release_upgrade_prompt, lib/util.sh). Deliberately not run
-# automatically and not part of ubuntu_maintenance.sh's cron job - a
-# release upgrade needs you present, not running unattended while you
-# might be using the box. Uncomment and run yourself when you're ready.
-# upgrade_os_distro
-
-
-################################################################################
 # Dotfiles
 ################################################################################
 # MANUAL prerequisite: clone this repo before running the rest of the script
@@ -151,8 +131,6 @@ install_docker
 ################################################################################
 # XFCE
 ################################################################################
-# Preferences that install_dotfiles.sh's symlinking can't keep in sync -
-# see lib/configure_xfce.sh for why.
 configure_xfce_theme
 configure_xfce_terminal
 configure_xfce_power_manager
@@ -171,6 +149,7 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 
 vim +'PlugInstall --sync' +qa
 
+
 ################################################################################
 # asdf
 ################################################################################
@@ -187,15 +166,28 @@ install_asdf
 # current. asdf_cleanup_* prunes old versions down to the 2 most recent.
 asdf_install_latest_ruby
 asdf_cleanup_ruby
-
 asdf_install_latest_nodejs
 asdf_cleanup_nodejs
-
 asdf_install_latest_elixir
 asdf_cleanup_elixir
-
 asdf_install_latest_python
 asdf_cleanup_python
+
+
+################################################################################
+# Firewall
+################################################################################
+sudo ufw enable
+sudo ufw logging low
+
+# sudo ufw status verbose
+# sudo ufw logging off
+# sudo ufw disable
+# sudo ufw reset
+# sudo ufw show raw
+
+
+
 
 
 ################################################################################
