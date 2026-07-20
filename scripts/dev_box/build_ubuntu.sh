@@ -16,6 +16,7 @@ source "$SCRIPT_DIR/lib/github.sh"
 source "$SCRIPT_DIR/lib/asdf_util.sh"
 source "$SCRIPT_DIR/lib/asdf_langs.sh"
 source "$SCRIPT_DIR/lib/update_cron.sh"
+source "$SCRIPT_DIR/lib/debloat.sh"
 
 ################################################################################
 # Sudo
@@ -31,6 +32,16 @@ require_sudo
 ################################################################################
 update_os_packages
 clean_os_packages
+
+
+################################################################################
+# Debloat
+################################################################################
+# Telemetry/nag removal + snap removed in favor of flatpak (Flatpak
+# section below installs it and the browsers). See lib/debloat.sh for
+# what each of these actually does and why.
+disable_telemetry
+remove_snap
 
 
 ################################################################################
@@ -51,13 +62,12 @@ sudo apt-get --yes install \
   wget \
   xclip \
 
+
 ################################################################################
 # Install Apps
 ################################################################################
 sudo apt-get --yes install \
-  chromium-browser \
   evince \
-  firefox \
   flameshot \
   gimp \
   keepassxc \
@@ -68,6 +78,13 @@ sudo apt-get --yes install \
   stacer \
   virtualbox \
   vlc
+
+install_flatpak
+
+sudo flatpak install --system --noninteractive flathub org.mozilla.firefox
+sudo flatpak install --system --noninteractive flathub org.chromium.Chromium
+sudo flatpak install --system --noninteractive flathub com.github.PintaProject.Pinta
+
 
 ################################################################################
 # Unattended updates (cron)
