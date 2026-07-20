@@ -69,10 +69,12 @@ sudo apt-get --yes install \
 ################################################################################
 sudo apt-get --yes install \
   evince \
+  filezilla \
   flameshot \
   gimp \
   keepassxc \
   libreoffice \
+  nemo \
   peek \
   sakura \
   speedcrunch \
@@ -85,6 +87,10 @@ install_flatpak
 sudo flatpak install --system --noninteractive flathub org.mozilla.firefox
 sudo flatpak install --system --noninteractive flathub org.chromium.Chromium
 sudo flatpak install --system --noninteractive flathub com.github.PintaProject.Pinta
+sudo flatpak install --system --noninteractive flathub net.nokyan.Resources
+sudo flatpak install --system --noninteractive flathub io.github.linx_systems.ClamUI
+sudo flatpak install --system --noninteractive flathub com.slack.Slack
+sudo flatpak install --system --noninteractive flathub com.tomjwatson.Emote
 
 
 ################################################################################
@@ -131,6 +137,7 @@ configure_xfce_terminal
 configure_xfce_power_manager
 configure_xfce_panel
 configure_xfce_keyboard_shortcuts
+configure_xfce_workspaces
 
 
 ################################################################################

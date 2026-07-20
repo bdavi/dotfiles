@@ -59,11 +59,12 @@ configure_xfce_power_manager() {
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/lid-action-on-ac -n -t uint -s 1
 }
 
-# Single top panel: thin (24px), full-width, autohide off, 9 plugins in
-# order - whiskermenu, separator, tasklist, expanding separator, systray,
-# notifications, power manager, pulseaudio, clock. whiskermenu's "recent"
-# list and systray's "known-items" are usage-history caches, not settings
-# - deliberately not reproduced here, they'll just repopulate on use.
+# Single top panel: thin (24px), full-width, autohide off, 10 plugins in
+# order - whiskermenu, separator, tasklist, expanding separator, workspace
+# switcher, systray, notifications, power manager, pulseaudio, clock.
+# whiskermenu's "recent" list and systray's "known-items" are usage-history
+# caches, not settings - deliberately not reproduced here, they'll just
+# repopulate on use.
 #
 # Restarts the panel at the end so plugins are actually instantiated from
 # these properties (xfce4-panel only reads /plugins/plugin-N to build
@@ -76,7 +77,7 @@ configure_xfce_panel() {
   xfconf-query -c xfce4-panel -p /panels/panel-1/length -n -t uint -s 100
   xfconf-query -c xfce4-panel -p /panels/panel-1/position-locked -n -t bool -s true
   xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -n \
-    -t int -s 1 -t int -s 2 -t int -s 3 -t int -s 4 -t int -s 5 -t int -s 6 -t int -s 7 -t int -s 8 -t int -s 9
+    -t int -s 1 -t int -s 2 -t int -s 3 -t int -s 4 -t int -s 10 -t int -s 5 -t int -s 6 -t int -s 7 -t int -s 8 -t int -s 9
   xfconf-query -c xfce4-panel -p /panels/panel-1/background-style -n -t uint -s 0
   xfconf-query -c xfce4-panel -p /panels/panel-1/size -n -t uint -s 24
   xfconf-query -c xfce4-panel -p /panels/panel-1/length-adjust -n -t bool -s true
@@ -115,6 +116,9 @@ configure_xfce_panel() {
   xfconf-query -c xfce4-panel -p /plugins/plugin-4 -n -t string -s separator
   xfconf-query -c xfce4-panel -p /plugins/plugin-4/style -n -t uint -s 0
   xfconf-query -c xfce4-panel -p /plugins/plugin-4/expand -n -t bool -s true
+
+  # plugin-10: workspace switcher, just left of the system tray/network icon
+  xfconf-query -c xfce4-panel -p /plugins/plugin-10 -n -t string -s pager
 
   # plugin-5: system tray
   xfconf-query -c xfce4-panel -p /plugins/plugin-5 -n -t string -s systray
@@ -159,13 +163,22 @@ configure_xfce_keyboard_shortcuts() {
   xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>space" -n -t string -s "xfce4-popup-whiskermenu"
 }
 
-# xfwm4.xml deliberately NOT covered here. Unlike the channels above,
-# xfwm4 has no shipped Xubuntu default file to diff against, and its
-# tracked xml dumps a real value for nearly every window-manager property
-# (~50 of them) - a known effect of opening the Window Manager Tweaks
-# dialog, which resaves the whole resolved property set, defaults
-# included. Skimming the list against remembered Xfce defaults, none of
+# Number of virtual desktops - pairs with the workspace switcher plugin
+# added in configure_xfce_panel. Workspace names aren't set explicitly;
+# xfwm4 auto-generates "Workspace N" for any workspace without a stored
+# name.
+configure_xfce_workspaces() {
+  xfconf-query -c xfwm4 -p /general/workspace_count -n -t int -s 2
+}
+
+# xfwm4.xml otherwise deliberately NOT covered here (workspace_count
+# above is the one confirmed exception). Unlike the channels above, xfwm4
+# has no shipped Xubuntu default file to diff against, and its tracked
+# xml dumps a real value for nearly every window-manager property (~50 of
+# them) - a known effect of opening the Window Manager Tweaks dialog,
+# which resaves the whole resolved property set, defaults included.
+# Skimming the rest of the list against remembered Xfce defaults, none of
 # it looks like a deliberate customization (e.g. double_click_action is
 # "maximize" and easy_click is "Alt", both stock) - so there's nothing
-# here to confidently script. Happy to add specific properties if there's
-# something in there you know you actually changed.
+# else here to confidently script. Happy to add specific properties if
+# there's something in there you know you actually changed.
