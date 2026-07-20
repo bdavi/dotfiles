@@ -33,7 +33,7 @@ update_os_packages
 clean_os_packages
 
 sudo apt-get --yes install curl git ranger highlight silversearcher-ag \
-  tmux tree wget xclip shellcheck keepassxc firefox sakura shfmt
+  tmux tree wget xclip shellcheck keepassxc firefox sakura shfmt fzf
 
 
 ################################################################################
@@ -79,16 +79,6 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
   https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 vim +'PlugInstall --sync' +qa
-
-
-################################################################################
-# fzf
-################################################################################
-# --no-update-rc: don't touch .bashrc/.zshrc, config_files/.bashrc and
-# config_files/.zshrc already source ~/.fzf.bash / ~/.fzf.zsh
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install --key-bindings --completion --no-update-rc
-
 
 ################################################################################
 # asdf
