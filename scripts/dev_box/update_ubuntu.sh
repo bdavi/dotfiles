@@ -23,6 +23,7 @@ source "$SCRIPT_DIR/lib/asdf_langs.sh"
 require_sudo
 
 update_os_packages
+sudo apt autoremove
 
 install_asdf
 
