@@ -32,9 +32,42 @@ require_sudo
 update_os_packages
 clean_os_packages
 
-sudo apt-get --yes install curl git ranger highlight silversearcher-ag \
-  tmux tree wget xclip shellcheck keepassxc firefox sakura shfmt fzf
 
+################################################################################
+# Install Tools
+################################################################################
+sudo apt-get --yes install \
+  curl \
+  fzf \
+  git \
+  highlight \
+  ranger \
+  pandoc \
+  shellcheck \
+  shfmt \
+  silversearcher-ag \
+  tmux \
+  tree \
+  wget \
+  xclip \
+
+################################################################################
+# Install Apps
+################################################################################
+sudo apt-get --yes install \
+  chromium-browser \
+  evince \
+  firefox \
+  flameshot \
+  gimp \
+  keepassxc \
+  libreoffice \
+  peek \
+  sakura \
+  speedcrunch \
+  stacer \
+  virtualbox \
+  vlc
 
 ################################################################################
 # Unattended updates (cron)
