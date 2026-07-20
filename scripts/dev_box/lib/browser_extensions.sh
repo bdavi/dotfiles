@@ -25,6 +25,7 @@
 declare -A FIREFOX_EXTENSIONS=(
   ["vimium-c@gdh1995.cn"]="vimium-c"
   ["uBlock0@raymondhill.net"]="ublock-origin"
+  ["jid1-MnnxcxisBPnSXQ@jetpack"]="privacy-badger17"
 )
 
 # Chrome Web Store extension ids.
