@@ -15,6 +15,7 @@ source "$SCRIPT_DIR/lib/util.sh"
 source "$SCRIPT_DIR/lib/github.sh"
 source "$SCRIPT_DIR/lib/asdf_util.sh"
 source "$SCRIPT_DIR/lib/asdf_langs.sh"
+source "$SCRIPT_DIR/lib/update_cron.sh"
 
 ################################################################################
 # Sudo
@@ -28,10 +29,21 @@ require_sudo
 ################################################################################
 # Base packages
 ################################################################################
-sudo apt-get update
+update_os_packages
 
 sudo apt-get --yes install curl git ranger highlight silversearcher-ag \
   tmux tree wget xclip shellcheck keepassxc firefox sakura shfmt
+
+
+################################################################################
+# Unattended updates (cron)
+################################################################################
+# Lets update_ubuntu.sh run unattended on a schedule to keep OS packages
+# and asdf-managed languages current - never a distro version upgrade, see
+# update_os_packages (lib/util.sh). One-time setup; edit
+# /etc/cron.d/dev_box_update directly to change the schedule later.
+install_unattended_apt_sudo
+install_update_cron_job
 
 
 ################################################################################

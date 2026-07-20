@@ -22,6 +22,8 @@ source "$SCRIPT_DIR/lib/asdf_langs.sh"
 # sudo - asdf itself doesn't (installs to ~/.local/bin).
 require_sudo
 
+update_os_packages
+
 install_asdf
 
 asdf_install_ruby
