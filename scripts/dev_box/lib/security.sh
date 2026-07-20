@@ -30,3 +30,16 @@ enable_ufw() {
   sudo ufw enable
   sudo ufw logging low
 }
+
+# Installs fail2ban and starts it. Its stock jail.conf ships every jail
+# (sshd included) disabled by default - nothing to ban until a jail is
+# enabled in jail.local, which needs the service whose log it watches
+# (e.g. openssh-server) actually installed. Harmless to run here even on
+# a box without one yet - ready to configure jails on once you add one.
+# Installed unconditionally now, ahead of need, so adding a jailable
+# service later (e.g. openssh-server) doesn't also require remembering
+# to come back and add fail2ban.
+enable_fail2ban() {
+  sudo apt-get --yes install fail2ban
+  sudo systemctl enable --now fail2ban
+}
