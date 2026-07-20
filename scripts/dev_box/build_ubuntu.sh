@@ -20,6 +20,7 @@ source "$SCRIPT_DIR/lib/debloat.sh"
 source "$SCRIPT_DIR/lib/configure_xfce.sh"
 source "$SCRIPT_DIR/lib/docker.sh"
 source "$SCRIPT_DIR/lib/browser_extensions.sh"
+source "$SCRIPT_DIR/lib/security.sh"
 
 require_sudo
 
@@ -54,7 +55,6 @@ sudo apt-get --yes install \
   silversearcher-ag \
   tmux \
   tree \
-  ufw \
   wget \
   xclip
 
@@ -113,8 +113,8 @@ install_docker
 # upgrade_os_distro below for that), see update_os_packages (lib/util.sh).
 # One-time setup; edit /etc/cron.d/dev_box_update directly to change the
 # schedule later.
-# install_unattended_apt_sudo
-# install_update_cron_job
+install_unattended_apt_sudo
+install_update_cron_job
 
 
 ################################################################################
@@ -177,17 +177,13 @@ asdf_cleanup_python
 ################################################################################
 # Firewall
 ################################################################################
-sudo ufw enable
-sudo ufw logging low
-
-# sudo ufw status verbose
-# sudo ufw logging off
-# sudo ufw disable
-# sudo ufw reset
-# sudo ufw show raw
+enable_ufw
 
 
-
+################################################################################
+# AppArmor
+################################################################################
+enable_apparmor
 
 
 ################################################################################
