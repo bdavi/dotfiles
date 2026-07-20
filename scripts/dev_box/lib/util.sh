@@ -4,7 +4,7 @@
 # Shared constants and functions for the dev_box build/update scripts
 ################################################################################
 # Not meant to be run directly - sourced by build_ubuntu.sh and
-# update_ubuntu.sh.
+# ubuntu_maintenance.sh.
 ################################################################################
 
 set -euo pipefail
@@ -60,4 +60,16 @@ update_os_packages() {
   if [[ -f /var/run/reboot-required ]]; then
     echo "A reboot is required to finish applying updates." >&2
   fi
+}
+
+# Removes packages left orphaned by upgrades - including old kernels no
+# longer needed, which apt's own dependency tracking handles safely on its
+# own (it won't touch the running kernel or the fallback one); a
+# hand-rolled "keep N kernels" script is a common way to end up unable to
+# boot, so this deliberately doesn't try to be cleverer than apt here.
+# Also clears out cached .deb files for packages no longer installable at
+# that version, freeing disk without touching anything still in use.
+clean_os_packages() {
+  sudo apt-get --yes autoremove --purge
+  sudo apt-get autoclean
 }

@@ -4,7 +4,7 @@
 # asdf install/update helpers
 ################################################################################
 # Not meant to be run directly - sourced by build_ubuntu.sh and
-# update_ubuntu.sh, after util.sh.
+# ubuntu_maintenance.sh, after util.sh.
 ################################################################################
 
 # Pinned to major version 0 - asdf hasn't cut a v1 yet, but when it does we

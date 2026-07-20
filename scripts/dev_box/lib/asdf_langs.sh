@@ -4,7 +4,7 @@
 # Install/update language runtimes via asdf
 ################################################################################
 # Not meant to be run directly - sourced by build_ubuntu.sh and
-# update_ubuntu.sh, after util.sh and asdf_util.sh.
+# ubuntu_maintenance.sh, after util.sh and asdf_util.sh.
 #
 # Each asdf_install_* function is self-contained: apt build deps, plugin
 # add, then asdf_install_latest_global (asdf_util.sh) to build/install the

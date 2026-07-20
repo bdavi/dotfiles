@@ -30,6 +30,7 @@ require_sudo
 # Base packages
 ################################################################################
 update_os_packages
+clean_os_packages
 
 sudo apt-get --yes install curl git ranger highlight silversearcher-ag \
   tmux tree wget xclip shellcheck keepassxc firefox sakura shfmt
@@ -38,7 +39,7 @@ sudo apt-get --yes install curl git ranger highlight silversearcher-ag \
 ################################################################################
 # Unattended updates (cron)
 ################################################################################
-# Lets update_ubuntu.sh run unattended on a schedule to keep OS packages
+# Lets ubuntu_maintenance.sh run unattended on a schedule to keep OS packages
 # and asdf-managed languages current - never a distro version upgrade, see
 # update_os_packages (lib/util.sh). One-time setup; edit
 # /etc/cron.d/dev_box_update directly to change the schedule later.
@@ -81,7 +82,7 @@ git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 # asdf
 ################################################################################
 # install_asdf (lib/asdf_util.sh) is idempotent - installing here is the
-# same operation update_ubuntu.sh uses to keep it current.
+# same operation ubuntu_maintenance.sh uses to keep it current.
 install_asdf
 
 
@@ -89,7 +90,7 @@ install_asdf
 # Languages (via asdf)
 ################################################################################
 # Each asdf_install_* function (lib/asdf_langs.sh) is idempotent, same as
-# install_asdf - used here and by update_ubuntu.sh to keep languages
+# install_asdf - used here and by ubuntu_maintenance.sh to keep languages
 # current. asdf_cleanup_* prunes old versions down to the 2 most recent.
 asdf_install_latest_ruby
 asdf_cleanup_ruby
