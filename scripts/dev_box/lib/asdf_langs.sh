@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-################################################################################
+######################################################################
 # Install/update language runtimes via asdf
-################################################################################
+######################################################################
 # Not meant to be run directly - sourced by build_ubuntu.sh and
 # ubuntu_maintenance.sh, after util.sh and asdf_util.sh.
 #
@@ -16,11 +16,11 @@
 # Each has a matching asdf_cleanup_* function (asdf_cleanup_old_versions,
 # asdf_util.sh) that removes old installed versions once a new one is in,
 # keeping the 2 most recent so compiled versions don't pile up on disk.
-################################################################################
+######################################################################
 
-################################################################################
+######################################################################
 # asdf Install Ruby
-################################################################################
+######################################################################
 asdf_install_latest_ruby() {
   sudo apt-get --yes install build-essential autoconf patch libssl-dev \
     libyaml-dev zlib1g-dev libffi-dev libgmp-dev rustc libreadline-dev \
@@ -34,9 +34,9 @@ asdf_cleanup_ruby() {
   asdf_cleanup_old_versions ruby
 }
 
-################################################################################
+######################################################################
 # asdf Install Node.js
-################################################################################
+######################################################################
 asdf_install_latest_nodejs() {
   # asdf-nodejs (via node-build) installs precompiled binaries, so nothing
   # is needed to build Node itself - unzip covers node-build's .zip
@@ -52,9 +52,9 @@ asdf_cleanup_nodejs() {
   asdf_cleanup_old_versions nodejs
 }
 
-################################################################################
+######################################################################
 # asdf Install Erlang
-################################################################################
+######################################################################
 # Not called directly from build/update scripts -
 # asdf_install_latest_elixir pulls this in, since Elixir needs a matching
 # Erlang/OTP version to build against.
@@ -82,9 +82,9 @@ asdf_cleanup_erlang() {
   asdf_cleanup_old_versions erlang
 }
 
-################################################################################
+######################################################################
 # asdf Install Elixir
-################################################################################
+######################################################################
 asdf_install_latest_elixir() {
   sudo apt-get --yes install unzip
 
@@ -117,9 +117,9 @@ asdf_cleanup_elixir() {
   asdf_cleanup_old_versions elixir
 }
 
-################################################################################
+######################################################################
 # asdf Install Python
-################################################################################
+######################################################################
 asdf_install_latest_python() {
   # asdf-python (via pyenv's python-build) always compiles from source.
   # List is pyenv's current recommended Ubuntu/Debian build environment,

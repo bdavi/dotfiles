@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-################################################################################
+######################################################################
 # Ubuntu debloat: telemetry off, snap removed, flatpak in its place
-################################################################################
+######################################################################
 # Not meant to be run directly - sourced by build_ubuntu.sh, after util.sh.
 #
 # Deliberately excludes anything GNOME-specific (vanilla GNOME session,
 # gsettings-based theming, appindicator extensions, etc.) - this box runs
 # XFCE, and there's no direct XFCE equivalent worth building for most of
 # it.
-################################################################################
+######################################################################
 
 # Disables Canonical/Ubuntu telemetry, crash reporting, and nagging.
 # Everything here is guarded, since most of these packages aren't

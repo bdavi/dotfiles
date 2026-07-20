@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-################################################################################
+######################################################################
 # OS-level security hardening (firewall, mandatory access control, etc.)
-################################################################################
+######################################################################
 # Not meant to be run directly - sourced by build_ubuntu.sh, after util.sh.
-################################################################################
+######################################################################
 
 # Ubuntu ships AppArmor installed and enabled by default, but this makes
 # that explicit and idempotent instead of relying on it silently staying

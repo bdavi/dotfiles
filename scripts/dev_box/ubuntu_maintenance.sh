@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-################################################################################
+######################################################################
 # Update pinned, GitHub-release-distributed dev tools
-################################################################################
+######################################################################
 # Safe to re-run any time - each call below resolves the latest release
 # within a pinned major version and reinstalls only if that's newer than
 # what's on disk. See lib/ for the install functions and version pins.
@@ -10,7 +10,7 @@
 # Add new tools here as they come up, following the same pattern: pin a
 # major version, resolve the latest matching release via
 # lib/github.sh:github_latest_release, skip if already current.
-################################################################################
+######################################################################
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/util.sh"

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-################################################################################
+######################################################################
 # Force-installed browser extensions (Firefox + Chromium flatpaks)
-################################################################################
+######################################################################
 # Not meant to be run directly - sourced by build_ubuntu.sh, after util.sh.
 #
 # Both browsers are installed via flatpak (see build_ubuntu.sh), which
@@ -16,7 +16,7 @@
 #   https://github.com/flathub/org.chromium.Chromium/blob/master/README.md
 #
 # Changes only take effect the next time each browser starts.
-################################################################################
+######################################################################
 
 # AMO (addons.mozilla.org) extension guid -> slug. The slug is used to
 # build a "latest.xpi" install URL, which always redirects to whatever

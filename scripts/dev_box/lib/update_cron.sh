@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-################################################################################
+######################################################################
 # Unattended ubuntu_maintenance.sh cron setup
-################################################################################
+######################################################################
 # Not meant to be run directly - sourced by build_ubuntu.sh, after util.sh
 # (needs DOTFILES_DIR).
-################################################################################
+######################################################################
 
 # Grants this user passwordless sudo for apt-get specifically (not ALL),
 # so ubuntu_maintenance.sh can run unattended via cron, which has no TTY to

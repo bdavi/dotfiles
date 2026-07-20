@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-################################################################################
+######################################################################
 # XFCE preferences, set directly via xfconf-query
-################################################################################
+######################################################################
 # Not meant to be run directly - sourced by build_ubuntu.sh, after util.sh.
 #
 # XFCE config files under ~/.config/xfce4 used to be symlinked in from
@@ -16,7 +16,7 @@
 # Each function is idempotent (xfconf-query -n only creates a property if
 # it doesn't already exist) - safe to re-run any time, same as the asdf_*
 # install functions.
-################################################################################
+######################################################################
 
 # GTK theme and icon theme - checked against Xubuntu's shipped defaults
 # (/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml: Greybird /
