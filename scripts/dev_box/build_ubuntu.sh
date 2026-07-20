@@ -17,6 +17,7 @@ source "$SCRIPT_DIR/lib/asdf_util.sh"
 source "$SCRIPT_DIR/lib/asdf_langs.sh"
 source "$SCRIPT_DIR/lib/update_cron.sh"
 source "$SCRIPT_DIR/lib/debloat.sh"
+source "$SCRIPT_DIR/lib/configure_xfce.sh"
 
 ################################################################################
 # Sudo
@@ -118,6 +119,18 @@ sudo flatpak install --system --noninteractive flathub com.github.PintaProject.P
 #   cd dotfiles
 
 "$DOTFILES_DIR/scripts/install_dotfiles.sh"
+
+
+################################################################################
+# XFCE
+################################################################################
+# Preferences that install_dotfiles.sh's symlinking can't keep in sync -
+# see lib/configure_xfce.sh for why.
+configure_xfce_theme
+configure_xfce_terminal
+configure_xfce_power_manager
+configure_xfce_panel
+configure_xfce_keyboard_shortcuts
 
 
 ################################################################################
