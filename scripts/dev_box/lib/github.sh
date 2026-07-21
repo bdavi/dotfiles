@@ -3,8 +3,7 @@
 ######################################################################
 # GitHub release helpers
 ######################################################################
-# Not meant to be run directly - sourced by build_ubuntu.sh and
-# ubuntu_maintenance.sh, after util.sh.
+# Not meant to be run directly - sourced by build_ubuntu.sh, after util.sh.
 ######################################################################
 
 # Latest release tag for a GitHub repo, pinned to a major version, e.g.

@@ -19,12 +19,12 @@
 disable_telemetry() {
   # apport generates crash reports (and the "send to Canonical?" popup);
   # whoopsie is the daemon that actually uploads them.
-  if dpkg -l apport 2>/dev/null | grep -q '^ii'; then
+  if pkg_installed apport; then
     sudo apt-get --yes purge apport apport-gtk apport-core-dump-handler \
       apport-symptoms python3-apport
   fi
 
-  if dpkg -l whoopsie 2>/dev/null | grep -q '^ii'; then
+  if pkg_installed whoopsie; then
     sudo systemctl disable --now whoopsie 2>/dev/null
     sudo apt-get --yes purge whoopsie
   fi
@@ -48,7 +48,7 @@ disable_telemetry() {
     sudo pro config set apt_news=false
   fi
 
-  if dpkg -l ubuntu-advantage-desktop-daemon 2>/dev/null | grep -q '^ii'; then
+  if pkg_installed ubuntu-advantage-desktop-daemon; then
     sudo apt-get --yes purge ubuntu-advantage-desktop-daemon
   fi
 }
@@ -83,11 +83,11 @@ remove_snap() {
   # call) since apt-get purge hard-fails on an unrecognized package name,
   # not just a not-installed one - keeps one going missing from ever
   # aborting the other's removal.
-  if dpkg -l firefox 2>/dev/null | grep -q '^ii'; then
+  if pkg_installed firefox; then
     sudo apt-get --yes purge firefox
   fi
 
-  if dpkg -l chromium-browser 2>/dev/null | grep -q '^ii'; then
+  if pkg_installed chromium-browser; then
     sudo apt-get --yes purge chromium-browser
   fi
 

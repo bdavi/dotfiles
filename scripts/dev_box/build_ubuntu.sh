@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
 ######################################################################
-# Xubuntu dev box bootstrap
+# Xubuntu dev box: initial setup, and the daily unattended cron target
 ######################################################################
 # Assumes a fresh install of Xubuntu using the "minimal install" option.
+# Every step is idempotent, so this is also what "Unattended updates
+# (cron)" below runs daily to keep the box current - same script, same
+# steps, whether you're running it by hand or it's running unattended.
 #
-# Not everything here can be run unattended - a few steps require a GUI or
-# a manual download and are left as comments describing exactly what to do.
-# Run the rest top-to-bottom.
+# A few one-time steps need a GUI or a manual download and can't run
+# unattended - left as comments describing exactly what to do, they're
+# inert otherwise. Run the rest top-to-bottom.
 ######################################################################
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -108,13 +111,13 @@ install_docker
 ######################################################################
 # Unattended updates (cron)
 ######################################################################
-# Lets ubuntu_maintenance.sh run unattended on a schedule to keep OS packages
-# and asdf-managed languages current - never a distro version upgrade (see
-# upgrade_os_distro below for that), see update_os_packages (lib/util.sh).
-# One-time setup; edit /etc/cron.d/dev_box_update directly to change the
-# schedule later.
-install_unattended_apt_sudo
-install_update_cron_job
+# Lets this same script run unattended on a schedule, reasserting
+# everything below - OS/asdf updates, security hardening, app installs,
+# XFCE config - not just re-running once at initial setup. Never a
+# distro version upgrade (see upgrade_os_distro below for that). One-time
+# setup; edit /etc/cron.d/dev_box_update directly to change the schedule.
+# install_unattended_sudo
+# install_update_cron_job
 
 
 ######################################################################
@@ -129,17 +132,6 @@ install_update_cron_job
 
 
 ######################################################################
-# XFCE
-######################################################################
-configure_xfce_theme
-configure_xfce_terminal
-configure_xfce_power_manager
-configure_xfce_panel
-configure_xfce_keyboard_shortcuts
-configure_xfce_workspaces
-
-
-######################################################################
 # Vim
 ######################################################################
 sudo apt-get --yes install vim-gtk3 # use this instead of just vim for clipboard integration
@@ -151,19 +143,9 @@ vim +'PlugInstall --sync' +qa
 
 
 ######################################################################
-# asdf
-######################################################################
-# install_asdf (lib/asdf_util.sh) is idempotent - installing here is the
-# same operation ubuntu_maintenance.sh uses to keep it current.
-install_asdf
-
-
-######################################################################
 # Languages (via asdf)
 ######################################################################
-# Each asdf_install_* function (lib/asdf_langs.sh) is idempotent, same as
-# install_asdf - used here and by ubuntu_maintenance.sh to keep languages
-# current. asdf_cleanup_* prunes old versions down to the 2 most recent.
+install_asdf
 asdf_install_latest_ruby
 asdf_cleanup_ruby
 asdf_install_latest_nodejs
@@ -175,21 +157,31 @@ asdf_cleanup_python
 
 
 ######################################################################
-# Firewall
+# Security
 ######################################################################
 enable_ufw
-
-
-######################################################################
-# AppArmor
-######################################################################
 enable_apparmor
-
-
-######################################################################
-# fail2ban
-######################################################################
 enable_fail2ban
+
+
+######################################################################
+# XFCE
+######################################################################
+# Needs a running desktop session - xfconf-query talks to xfconfd over
+# the session D-Bus, which doesn't exist under cron. Skipped there rather
+# than left to fail (which would trip set -e), and deliberately placed
+# last, after every step that matters for unattended maintenance - OS/
+# asdf updates, security hardening, app installs - so a skip here can't
+# take any of those down with it. Interactive runs (the desktop session
+# that's running this script) always have one.
+if pgrep -u "$USER" -x xfce4-session >/dev/null; then
+  configure_xfce_theme
+  configure_xfce_terminal
+  configure_xfce_power_manager
+  configure_xfce_panel
+  configure_xfce_keyboard_shortcuts
+  configure_xfce_workspaces
+fi
 
 
 ######################################################################
@@ -203,12 +195,3 @@ enable_fail2ban
 # Claude Code CLI
 # curl -fsSL https://claude.ai/install.sh | bash
 # Installs to ~/.local/bin - already on PATH via config_files/.bashrc
-
-
-######################################################################
-# Maintenance
-######################################################################
-# Final pass - everything in ubuntu_maintenance.sh is idempotent, so safe
-# to re-run here even though most of it (OS updates, asdf languages) was
-# already covered above.
-"$DOTFILES_DIR/scripts/dev_box/ubuntu_maintenance.sh"

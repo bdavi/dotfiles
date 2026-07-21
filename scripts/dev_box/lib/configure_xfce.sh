@@ -70,6 +70,10 @@ configure_xfce_power_manager() {
 # these properties (xfce4-panel only reads /plugins/plugin-N to build
 # panel-1's contents on startup/restart) - skipped if the panel isn't
 # running yet, e.g. during initial box setup before a desktop session exists.
+#
+# plugin-ids below and the per-plugin-N blocks are two separate lists
+# that have to stay in sync by hand - adding/reordering a plugin means
+# updating both.
 configure_xfce_panel() {
   xfconf-query -c xfce4-panel -p /panels -n -a -t int -s 1
 

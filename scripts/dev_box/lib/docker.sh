@@ -22,7 +22,7 @@ install_docker() {
   # lists and likely aren't present.
   local pkg
   for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do
-    if dpkg -l "$pkg" 2>/dev/null | grep -q '^ii'; then
+    if pkg_installed "$pkg"; then
       sudo apt-get --yes purge "$pkg"
     fi
   done
