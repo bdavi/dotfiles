@@ -28,9 +28,27 @@ declare -A FIREFOX_EXTENSIONS=(
   ["jid1-MnnxcxisBPnSXQ@jetpack"]="privacy-badger17"
 )
 
+# Zotero Connector isn't distributed through AMO (Mozilla's review process
+# can't keep up with its release cadence), so it has no AMO slug and no
+# version-agnostic "latest.xpi" redirect to build a URL from. Its guid and
+# the URL template below (guessable from Zotero's own downloads: the file
+# is named Zotero_Connector-<version>.xpi under /connector/firefox/release/)
+# were confirmed by fetching the actual xpi.
+ZOTERO_FIREFOX_GUID="zotero@chnm.gmu.edu"
+
+# The version is scraped from a JS config blob embedded in Zotero's
+# download page - there's no dedicated version endpoint.
+zotero_firefox_xpi_url() {
+  local version
+  version="$(curl -fsSL https://www.zotero.org/download/connectors \
+    | grep -oP '"firefoxVersion":"\K[^"]+')"
+  echo "https://download.zotero.org/connector/firefox/release/Zotero_Connector-${version}.xpi"
+}
+
 # Chrome Web Store extension ids.
 CHROMIUM_EXTENSIONS=(
   "hfjbmagddngcpeloejdejnfgbamkjaeg" # Vimium C
+  "ekhagklcjbdpajgpjgmbionohlpdbjgc" # Zotero Connector
 )
 
 # org.mozilla.firefox declares its "systemconfig" extension point on the
@@ -51,6 +69,9 @@ install_firefox_extensions() {
       --arg url "https://addons.mozilla.org/firefox/downloads/latest/$slug/latest.xpi" \
       '.[$guid] = {installation_mode: "force_installed", install_url: $url}' <<<"$settings")"
   done
+
+  settings="$(jq --arg guid "$ZOTERO_FIREFOX_GUID" --arg url "$(zotero_firefox_xpi_url)" \
+    '.[$guid] = {installation_mode: "force_installed", install_url: $url}' <<<"$settings")"
 
   jq -n --argjson settings "$settings" '{policies: {ExtensionSettings: $settings}}' \
     | sudo tee "$dir/policies.json" >/dev/null

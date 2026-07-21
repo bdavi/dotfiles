@@ -77,9 +77,9 @@ sudo apt-get --yes install \
   sakura \
   speedcrunch \
   stacer \
+  qimgv \
   virtualbox \
   vlc
-
 
 ######################################################################
 # Install Flatpack
@@ -93,6 +93,29 @@ sudo flatpak install --system --noninteractive flathub net.nokyan.Resources
 sudo flatpak install --system --noninteractive flathub io.github.linx_systems.ClamUI
 sudo flatpak install --system --noninteractive flathub com.slack.Slack
 sudo flatpak install --system --noninteractive flathub com.tomjwatson.Emote
+sudo flatpak install --system --noninteractive flathub org.gnome.baobab
+sudo flatpak install --system --noninteractive flathub com.github.johnfactotum.Foliate
+sudo flatpak install --system --noninteractive flathub org.kiwix.desktop
+
+
+######################################################################
+# Zotero
+######################################################################
+if ! dpkg -s zotero &>/dev/null; then
+  wget -qO- https://raw.githubusercontent.com/retorquere/zotero-pkg/master/install.sh | sudo bash
+  sudo apt-get update
+fi
+sudo apt-get --yes install zotero
+
+
+######################################################################
+# Balena Etcher
+######################################################################
+if ! dpkg -s balena-etcher &>/dev/null; then
+  curl -1sLf 'https://dl.cloudsmith.io/public/balena/etcher/setup.deb.sh' | sudo -E bash
+  sudo apt-get update
+fi
+sudo apt-get --yes install balena-etcher
 
 
 ######################################################################
