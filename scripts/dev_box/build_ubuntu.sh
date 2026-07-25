@@ -23,6 +23,7 @@ source "$SCRIPT_DIR/lib/debloat.sh"
 source "$SCRIPT_DIR/lib/configure_xfce.sh"
 source "$SCRIPT_DIR/lib/docker.sh"
 source "$SCRIPT_DIR/lib/browser_extensions.sh"
+source "$SCRIPT_DIR/lib/default_apps.sh"
 source "$SCRIPT_DIR/lib/security.sh"
 
 require_sudo
@@ -97,6 +98,7 @@ sudo flatpak install --system --noninteractive flathub org.gnome.baobab
 sudo flatpak install --system --noninteractive flathub com.github.johnfactotum.Foliate
 sudo flatpak install --system --noninteractive flathub org.kiwix.desktop
 
+configure_default_browser
 
 ######################################################################
 # Zotero
@@ -111,11 +113,11 @@ sudo apt-get --yes install zotero
 ######################################################################
 # Balena Etcher
 ######################################################################
-if ! dpkg -s balena-etcher &>/dev/null; then
-  curl -1sLf 'https://dl.cloudsmith.io/public/balena/etcher/setup.deb.sh' | sudo -E bash
-  sudo apt-get update
-fi
-sudo apt-get --yes install balena-etcher
+# if ! dpkg -s balena-etcher &>/dev/null; then
+#   curl -1sLf 'https://dl.cloudsmith.io/public/balena/etcher/setup.deb.sh' | sudo -E bash
+#   sudo apt-get update
+# fi
+# sudo apt-get --yes install balena-etcher
 
 
 ######################################################################

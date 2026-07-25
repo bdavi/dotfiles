@@ -163,8 +163,45 @@ configure_xfce_panel() {
 # against its default/ tree (xfconf-query -c xfce4-keyboard-shortcuts -l -v)
 # turned up exactly one real difference: this binding, added on top of the
 # existing default shortcuts rather than replacing any of them.
+#
+# Also clears the xfwm4 <Shift>Down -> tile_down_key binding: it steals
+# plain Shift+Down from apps (e.g. text selection) to tile the focused
+# window instead. -r removes the override outright rather than -n/-s'ing
+# a replacement, since there's no single-key binding worth keeping there;
+# it's harmless to re-run if the property is already gone.
+#
+# <Super>Left/Right -> tile_left_key/tile_right_key: half-screen tiling.
+# These already exist as xfwm4 defaults, but are re-asserted here because
+# of a real bug hit in practice: an earlier manual re-bind (via the
+# Keyboard settings dialog, likely triggered by NumLock being on at the
+# time) left a second custom binding, <Super>KP_Right -> tile_right_key,
+# alongside <Super>Right -> tile_right_key. Two custom key combos mapped
+# to the same action name breaks xfwm4's grab registration - it silently
+# failed to grab the plain arrow-key combo at all, so <Super>Right passed
+# straight through to whatever window had focus instead of tiling it,
+# while <Super>Left (which had no such duplicate) kept working. Confirmed
+# via xev that ungrabbed keys are delivered to the focused client rather
+# than intercepted, and that removing the duplicate + restarting xfwm4
+# fixed it. The -r calls below clear that duplicate (and its Left/Down/Up
+# counterparts, in case the same NumLock accident recurs) before -n/-s
+# (re)asserts the single arrow-key binding each is meant to have.
+#
+# Restarts xfwm4 at the end (same pattern as the panel restart in
+# configure_xfce_panel) so a fix here - or a fresh custom/KP_* duplicate
+# this script just cleared - takes effect immediately instead of needing
+# a logout. Skipped if xfwm4 isn't running yet, e.g. during initial box
+# setup before a desktop session exists.
 configure_xfce_keyboard_shortcuts() {
   xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>space" -n -t string -s "xfce4-popup-whiskermenu"
+  xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/<Shift>Down" -r 2>/dev/null || true
+
+  for kp in KP_Left KP_Right KP_Up KP_Down; do
+    xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/<Super>$kp" -r 2>/dev/null || true
+  done
+  xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/<Super>Left" -n -t string -s "tile_left_key"
+  xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/<Super>Right" -n -t string -s "tile_right_key"
+
+  pgrep -x xfwm4 >/dev/null && xfwm4 --replace &
 }
 
 # Number of virtual desktops - pairs with the workspace switcher plugin
