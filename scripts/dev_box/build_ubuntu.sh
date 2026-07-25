@@ -179,6 +179,8 @@ asdf_install_latest_elixir
 asdf_cleanup_elixir
 asdf_install_latest_python
 asdf_cleanup_python
+asdf_install_latest_pnpm
+asdf_cleanup_pnpm
 
 
 ######################################################################

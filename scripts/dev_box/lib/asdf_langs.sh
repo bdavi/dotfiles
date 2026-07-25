@@ -135,3 +135,16 @@ asdf_install_latest_python() {
 asdf_cleanup_python() {
   asdf_cleanup_old_versions python
 }
+
+######################################################################
+# asdf Install pnpm
+######################################################################
+asdf_install_latest_pnpm() {
+  # asdf-pnpm installs precompiled binaries, so no build deps are needed.
+  asdf_plugin_add pnpm https://github.com/jonathanmorley/asdf-pnpm.git
+  asdf_install_latest_global pnpm
+}
+
+asdf_cleanup_pnpm() {
+  asdf_cleanup_old_versions pnpm
+}
