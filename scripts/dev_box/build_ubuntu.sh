@@ -23,6 +23,7 @@ source "$SCRIPT_DIR/lib/update_cron.sh"
 source "$SCRIPT_DIR/lib/debloat.sh"
 source "$SCRIPT_DIR/lib/configure_xfce.sh"
 source "$SCRIPT_DIR/lib/docker.sh"
+source "$SCRIPT_DIR/lib/github_cli.sh"
 source "$SCRIPT_DIR/lib/browser_extensions.sh"
 source "$SCRIPT_DIR/lib/default_apps.sh"
 source "$SCRIPT_DIR/lib/security.sh"
@@ -134,6 +135,12 @@ install_chromium_extensions
 # Docker
 ######################################################################
 install_docker
+
+
+######################################################################
+# GitHub CLI
+######################################################################
+install_github_cli
 
 
 ######################################################################
