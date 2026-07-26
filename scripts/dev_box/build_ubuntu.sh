@@ -25,6 +25,7 @@ source "$SCRIPT_DIR/lib/docker.sh"
 source "$SCRIPT_DIR/lib/browser_extensions.sh"
 source "$SCRIPT_DIR/lib/default_apps.sh"
 source "$SCRIPT_DIR/lib/security.sh"
+source "$SCRIPT_DIR/lib/security_scanners.sh"
 
 require_sudo
 
@@ -50,6 +51,7 @@ sudo apt-get --yes install \
   curl \
   fzf \
   git \
+  gitleaks \
   highlight \
   jq \
   ranger \
@@ -183,6 +185,14 @@ asdf_install_latest_pnpm
 asdf_cleanup_pnpm
 asdf_install_latest_lefthook
 asdf_cleanup_lefthook
+
+
+######################################################################
+# Security scanners
+######################################################################
+install_latest_osv_scanner
+install_latest_bearer
+install_latest_semgrep
 
 
 ######################################################################
