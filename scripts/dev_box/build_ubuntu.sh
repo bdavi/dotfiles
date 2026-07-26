@@ -19,6 +19,7 @@ source "$SCRIPT_DIR/lib/github.sh"
 source "$SCRIPT_DIR/lib/asdf_util.sh"
 source "$SCRIPT_DIR/lib/asdf_langs.sh"
 source "$SCRIPT_DIR/lib/playwright.sh"
+source "$SCRIPT_DIR/lib/zizmor.sh"
 source "$SCRIPT_DIR/lib/update_cron.sh"
 source "$SCRIPT_DIR/lib/debloat.sh"
 source "$SCRIPT_DIR/lib/configure_xfce.sh"
@@ -190,6 +191,7 @@ asdf_install_latest_elixir
 asdf_cleanup_elixir
 asdf_install_latest_python
 asdf_cleanup_python
+install_latest_zizmor
 asdf_install_latest_pnpm
 asdf_cleanup_pnpm
 asdf_install_latest_lefthook
