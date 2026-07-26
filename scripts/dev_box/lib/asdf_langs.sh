@@ -148,3 +148,16 @@ asdf_install_latest_pnpm() {
 asdf_cleanup_pnpm() {
   asdf_cleanup_old_versions pnpm
 }
+
+######################################################################
+# asdf Install lefthook
+######################################################################
+asdf_install_latest_lefthook() {
+  # asdf-lefthook installs precompiled binaries, so no build deps are needed.
+  asdf_plugin_add lefthook https://github.com/jtzero/asdf-lefthook.git
+  asdf_install_latest_global lefthook
+}
+
+asdf_cleanup_lefthook() {
+  asdf_cleanup_old_versions lefthook
+}

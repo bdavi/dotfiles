@@ -181,6 +181,8 @@ asdf_install_latest_python
 asdf_cleanup_python
 asdf_install_latest_pnpm
 asdf_cleanup_pnpm
+asdf_install_latest_lefthook
+asdf_cleanup_lefthook
 
 
 ######################################################################
