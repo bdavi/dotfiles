@@ -195,6 +195,8 @@ asdf_cleanup_ruby
 asdf_install_latest_nodejs
 asdf_cleanup_nodejs
 install_latest_playwright
+asdf_install_latest_golang
+asdf_cleanup_golang
 asdf_install_latest_elixir
 asdf_cleanup_elixir
 asdf_install_latest_python

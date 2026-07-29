@@ -137,6 +137,19 @@ asdf_cleanup_python() {
 }
 
 ######################################################################
+# asdf Install Go
+######################################################################
+asdf_install_latest_golang() {
+  # asdf-golang installs precompiled binaries, so no build deps are needed.
+  asdf_plugin_add golang https://github.com/asdf-community/asdf-golang.git
+  asdf_install_latest_global golang
+}
+
+asdf_cleanup_golang() {
+  asdf_cleanup_old_versions golang
+}
+
+######################################################################
 # asdf Install pnpm
 ######################################################################
 asdf_install_latest_pnpm() {
