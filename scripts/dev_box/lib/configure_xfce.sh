@@ -18,15 +18,17 @@
 # install functions.
 ######################################################################
 
-# GTK theme and icon theme - checked against Xubuntu's shipped defaults
-# (/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml: Greybird /
-# elementary-xfce-dark) to confirm both actually differ from stock. The
-# xsettings channel also carries a live cursor theme/size, font, and
-# icon-size override beyond these two - out of scope here (this pass only
-# covers xfwm4/panel/power-manager), flagging for a follow-up pass.
+# GTK theme, icon theme, and 2x window scaling (HiDPI) - checked against
+# Xubuntu's shipped defaults (/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
+# xsettings.xml: Greybird / elementary-xfce-dark / scaling factor 1) to
+# confirm all three actually differ from stock. The xsettings channel
+# also carries a live cursor theme/size and font/icon-size override
+# beyond these - out of scope here (this pass only covers xfwm4/panel/
+# power-manager), flagging for a follow-up pass.
 configure_xfce_theme() {
   xfconf-query -c xsettings -p /Net/ThemeName -n -t string -s "Greybird-dark"
   xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s "elementary-xfce"
+  xfconf-query -c xsettings -p /Gdk/WindowScalingFactor -n -t int -s 2
 }
 
 # Terminal color scheme (dark navy background) and font - the rest of
