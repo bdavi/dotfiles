@@ -26,6 +26,7 @@ declare -A FIREFOX_EXTENSIONS=(
   ["vimium-c@gdh1995.cn"]="vimium-c"
   ["uBlock0@raymondhill.net"]="ublock-origin"
   ["jid1-MnnxcxisBPnSXQ@jetpack"]="privacy-badger17"
+  ["keepassxc-browser@keepassxc.org"]="keepassxc-browser"
 )
 
 # Zotero Connector isn't distributed through AMO (Mozilla's review process
@@ -49,6 +50,7 @@ zotero_firefox_xpi_url() {
 CHROMIUM_EXTENSIONS=(
   "hfjbmagddngcpeloejdejnfgbamkjaeg" # Vimium C
   "ekhagklcjbdpajgpjgmbionohlpdbjgc" # Zotero Connector
+  "oboonakemofpalcgghocfoadofidjkkk" # KeePassXC-Browser
 )
 
 # org.mozilla.firefox declares its "systemconfig" extension point on the
