@@ -241,6 +241,7 @@ if pgrep -u "$USER" -x xfce4-session >/dev/null; then
   configure_xfce_panel
   configure_xfce_keyboard_shortcuts
   configure_xfce_workspaces
+  configure_xfce_ensure_panel_visible
 fi
 
 

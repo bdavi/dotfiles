@@ -214,6 +214,20 @@ configure_xfce_workspaces() {
   xfconf-query -c xfwm4 -p /general/workspace_count -n -t int -s 2
 }
 
+# xfwm4 --replace in configure_xfce_keyboard_shortcuts hands window
+# management off to a fresh xfwm4 instance - this has repeatedly left the
+# top panel hidden behind other windows afterward, since the new instance
+# doesn't reliably pick up the panel's existing reserve-space/stacking
+# hints. Restarting the panel again here, as the last step of the whole
+# XFCE pass (after every function that can perturb it, not just the
+# keyboard-shortcuts one), reasserts those hints and guarantees it's
+# visible regardless of what ran before it - skipped if the panel isn't
+# running yet, e.g. during initial box setup before a desktop session
+# exists.
+configure_xfce_ensure_panel_visible() {
+  pgrep -x xfce4-panel >/dev/null && xfce4-panel -r
+}
+
 # xfwm4.xml otherwise deliberately NOT covered here (workspace_count
 # above is the one confirmed exception). Unlike the channels above, xfwm4
 # has no shipped Xubuntu default file to diff against, and its tracked
