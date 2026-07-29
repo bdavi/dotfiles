@@ -23,6 +23,7 @@ source "$SCRIPT_DIR/lib/zizmor.sh"
 source "$SCRIPT_DIR/lib/update_cron.sh"
 source "$SCRIPT_DIR/lib/debloat.sh"
 source "$SCRIPT_DIR/lib/configure_xfce.sh"
+source "$SCRIPT_DIR/lib/qt_scaling.sh"
 source "$SCRIPT_DIR/lib/docker.sh"
 source "$SCRIPT_DIR/lib/github_cli.sh"
 source "$SCRIPT_DIR/lib/vscode.sh"
@@ -243,6 +244,11 @@ if pgrep -u "$USER" -x xfce4-session >/dev/null; then
   configure_xfce_workspaces
   configure_xfce_ensure_panel_visible
 fi
+
+# Unlike the xfconf calls above, doesn't need a running desktop session -
+# /etc/environment is read at login regardless, so this is safe (and
+# useful) to run during initial box setup too.
+configure_qt_scale_factor
 
 
 ######################################################################

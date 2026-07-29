@@ -18,17 +18,28 @@
 # install functions.
 ######################################################################
 
-# GTK theme, icon theme, and 2x window scaling (HiDPI) - checked against
-# Xubuntu's shipped defaults (/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
-# xsettings.xml: Greybird / elementary-xfce-dark / scaling factor 1) to
-# confirm all three actually differ from stock. The xsettings channel
-# also carries a live cursor theme/size and font/icon-size override
-# beyond these - out of scope here (this pass only covers xfwm4/panel/
-# power-manager), flagging for a follow-up pass.
+# GTK theme and icon theme - checked against Xubuntu's shipped defaults
+# (/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml: Greybird /
+# elementary-xfce-dark) to confirm both actually differ from stock.
+#
+# HiDPI scaling is done via DPI, not Gdk/WindowScalingFactor - GTK3/X11's
+# window-scaling is integer-only pixel-doubling, so 2 was as close as it
+# gets to a desired 1.75x with no fractional option in between. /Xft/DPI
+# at 168 (96 * 1.75) scales fonts and DPI-aware layout continuously
+# instead, matched by QT_SCALE_FACTOR=1.75 (configure_qt_scale_factor,
+# qt_scaling.sh) for the Qt apps (KeePassXC, SpeedCrunch) that don't read
+# xsettings at all. Any prior Gdk/WindowScalingFactor override from that
+# approach is explicitly reset back to Xubuntu's shipped default (1)
+# rather than left stale at 2.
+#
+# The xsettings channel also carries a live cursor theme/size and
+# icon-size override beyond these - out of scope here (this pass only
+# covers xfwm4/panel/power-manager), flagging for a follow-up pass.
 configure_xfce_theme() {
   xfconf-query -c xsettings -p /Net/ThemeName -n -t string -s "Greybird-dark"
   xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s "elementary-xfce"
-  xfconf-query -c xsettings -p /Gdk/WindowScalingFactor -n -t int -s 2
+  xfconf-query -c xsettings -p /Xft/DPI -n -t int -s 168
+  xfconf-query -c xsettings -p /Gdk/WindowScalingFactor -r 2>/dev/null || true
 }
 
 # Terminal color scheme (dark navy background) and font - the rest of
