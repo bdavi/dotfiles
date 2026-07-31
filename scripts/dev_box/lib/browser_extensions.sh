@@ -27,6 +27,12 @@ declare -A FIREFOX_EXTENSIONS=(
   ["uBlock0@raymondhill.net"]="ublock-origin"
   ["jid1-MnnxcxisBPnSXQ@jetpack"]="privacy-badger17"
   ["keepassxc-browser@keepassxc.org"]="keepassxc-browser"
+  ["gdpr@cavi.au.dk"]="consent-o-matic"
+  ["{74145f27-f039-47ce-a470-a662b129930a}"]="clearurls"
+  ["CookieAutoDelete@kennydo.com"]="cookie-autodelete"
+  ["jid1-ZAdIEUB7XOzOJw@jetpack"]="duckduckgo-for-firefox"
+  ["{DDC359D1-844A-42a7-9AA1-88A850A938A8}"]="downthemall"
+  ["jid1-BoFifL9Vbdl2zQ@jetpack"]="decentraleyes"
 )
 
 # Zotero Connector isn't distributed through AMO (Mozilla's review process
