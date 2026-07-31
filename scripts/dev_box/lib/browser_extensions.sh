@@ -62,6 +62,12 @@ CHROMIUM_EXTENSIONS=(
 # org.mozilla.firefox declares its "systemconfig" extension point on the
 # "stable" branch (flathub's default channel for this app) - fixed, not
 # something that needs to track a version.
+#
+# policies.json isn't extension-specific - ExtensionSettings is just one
+# key in Firefox's enterprise policy schema, so any other policy (see
+# https://mozilla.github.io/policy-templates/) can live in the same file.
+# Homepage.URL/StartPage and NewTabPage below reproduce "Blank Page" for
+# both "Homepage and new windows" and "New tabs" in about:preferences.
 install_firefox_extensions() {
   local arch
   arch="$(flatpak --default-arch)"
@@ -81,7 +87,12 @@ install_firefox_extensions() {
   settings="$(jq --arg guid "$ZOTERO_FIREFOX_GUID" --arg url "$(zotero_firefox_xpi_url)" \
     '.[$guid] = {installation_mode: "force_installed", install_url: $url}' <<<"$settings")"
 
-  jq -n --argjson settings "$settings" '{policies: {ExtensionSettings: $settings}}' \
+  jq -n --argjson settings "$settings" \
+    '{policies: {
+        ExtensionSettings: $settings,
+        Homepage: {URL: "about:blank", StartPage: "homepage"},
+        NewTabPage: false
+      }}' \
     | sudo tee "$dir/policies.json" >/dev/null
 }
 
