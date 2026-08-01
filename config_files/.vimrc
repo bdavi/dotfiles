@@ -154,6 +154,17 @@ call plug#begin('~/.vim/plugged')
   Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 call plug#end()
 
+" vim-herdr-navigation (Ctrl-h/j/k/l across herdr panes and Vim splits,
+" https://github.com/paulbkim-dev/vim-herdr-navigation) - only takes over
+" the mapping inside a herdr pane (it guards on $HERDR_PANE_ID itself and
+" no-ops otherwise), so vim-tmux-navigator's own mapping still handles
+" plain tmux normally. Globbed since herdr installs plugins under a path
+" with a content hash in it.
+let s:herdr_nav_vim = glob('~/.config/herdr/plugins/github/vim-herdr-navigation-*/editor/vim.vim')
+if !empty(s:herdr_nav_vim)
+  execute 'source ' . fnameescape(s:herdr_nav_vim)
+endif
+
 " sass-lint
 let g:syntastic_sass_checkers=["sasslint"]
 let g:syntastic_scss_checkers=["sasslint"]
