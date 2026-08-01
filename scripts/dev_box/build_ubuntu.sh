@@ -31,6 +31,7 @@ source "$SCRIPT_DIR/lib/browser_extensions.sh"
 source "$SCRIPT_DIR/lib/default_apps.sh"
 source "$SCRIPT_DIR/lib/security.sh"
 source "$SCRIPT_DIR/lib/security_scanners.sh"
+source "$SCRIPT_DIR/lib/herdr.sh"
 
 require_sudo
 
@@ -215,6 +216,12 @@ asdf_cleanup_lefthook
 install_latest_osv_scanner
 install_latest_bearer
 install_latest_semgrep
+
+
+######################################################################
+# Herdr
+######################################################################
+install_latest_herdr
 
 
 ######################################################################
