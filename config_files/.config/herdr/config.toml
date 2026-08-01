@@ -9,6 +9,7 @@ auto_switch = false
 
 [keys]
 prefix = "ctrl+space"
+split_vertical = "prefix+\\"
 
 [[keys.command]]
 key = "ctrl+h"
