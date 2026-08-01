@@ -23,6 +23,37 @@ install_latest_herdr() {
   herdr update
 }
 
+# Prefix key (default ctrl+b, see `herdr --default-config`) - config.toml
+# is live, app-owned state (see install_herdr_vim_navigation_plugin
+# below), so this is appended idempotently rather than managing the whole
+# file. TOML requires a [keys] table's own scalar keys (prefix) to appear
+# before any [[keys.command]] array-of-tables under it - reopening [keys]
+# after one has already started (as install_herdr_vim_navigation_plugin's
+# blocks do) isn't valid TOML - so this inserts [keys] right before the
+# first [[keys.command]] line if one already exists, rather than blindly
+# appending at the end.
+configure_herdr_prefix_key() {
+  local config=~/.config/herdr/config.toml
+  grep -qx 'prefix = "ctrl+space"' "$config" 2>/dev/null && return 0
+
+  if grep -q '^\[\[keys\.command\]\]' "$config" 2>/dev/null; then
+    awk '
+      !done && /^\[\[keys\.command\]\]/ {
+        print "[keys]"
+        print "prefix = \"ctrl+space\""
+        print ""
+        done = 1
+      }
+      { print }
+    ' "$config" >"${config}.tmp"
+    mv -f "${config}.tmp" "$config"
+  else
+    printf '\n[keys]\nprefix = "ctrl+space"\n' >>"$config"
+  fi
+
+  herdr server reload-config 2>/dev/null || true
+}
+
 # vim-herdr-navigation (https://github.com/paulbkim-dev/vim-herdr-navigation)
 # - unofficial third-party plugin, Ctrl+h/j/k/l across herdr panes and
 # Vim/Neovim splits, vim-tmux-navigator ported to herdr. `herdr plugin

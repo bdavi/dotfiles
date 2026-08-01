@@ -222,6 +222,7 @@ install_latest_semgrep
 # Herdr
 ######################################################################
 install_latest_herdr
+configure_herdr_prefix_key
 install_herdr_vim_navigation_plugin
 
 
