@@ -165,6 +165,37 @@ if !empty(s:herdr_nav_vim)
   execute 'source ' . fnameescape(s:herdr_nav_vim)
 endif
 
+" vim-herdr-navigation bugfix override - the plugin's own HerdrFocus
+" (sourced above) calls `herdr pane focus --direction <dir> --current`,
+" but --current resolves to the server's globally focused pane, not the
+" pane Vim is actually running in: a confirmed upstream bug
+" (paulbkim-dev/vim-herdr-navigation#7) that can send focus to the wrong
+" pane when Vim hands off at a split edge. Its open fix PR covers
+" navigate.sh/nvim.lua but not this vim.vim file, so this redefines the
+" same Ctrl-h/j/k/l mappings here using --pane $HERDR_PANE_ID instead -
+" takes priority since it's mapped after the plugin's own source above.
+" Not a fork of the plugin - just overriding one buggy call locally.
+" Drop this once upstream fixes editor/vim.vim.
+if !empty($HERDR_PANE_ID)
+  function! s:HerdrFocusFixed(dir) abort
+    let l:herdr = empty($HERDR_BIN_PATH) ? 'herdr' : $HERDR_BIN_PATH
+    call system(shellescape(l:herdr) . ' pane focus --direction ' . a:dir . ' --pane ' . shellescape($HERDR_PANE_ID))
+  endfunction
+
+  function! s:NavigateFixed(wincmd, dir) abort
+    let l:prev = winnr()
+    execute 'wincmd ' . a:wincmd
+    if winnr() == l:prev
+      call s:HerdrFocusFixed(a:dir)
+    endif
+  endfunction
+
+  nnoremap <silent> <C-h> :call <SID>NavigateFixed('h', 'left')<CR>
+  nnoremap <silent> <C-j> :call <SID>NavigateFixed('j', 'down')<CR>
+  nnoremap <silent> <C-k> :call <SID>NavigateFixed('k', 'up')<CR>
+  nnoremap <silent> <C-l> :call <SID>NavigateFixed('l', 'right')<CR>
+endif
+
 " sass-lint
 let g:syntastic_sass_checkers=["sasslint"]
 let g:syntastic_scss_checkers=["sasslint"]
