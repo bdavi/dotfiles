@@ -154,47 +154,60 @@ call plug#begin('~/.vim/plugged')
   Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 call plug#end()
 
-" vim-herdr-navigation (Ctrl-h/j/k/l across herdr panes and Vim splits,
-" https://github.com/paulbkim-dev/vim-herdr-navigation) - only takes over
-" the mapping inside a herdr pane (it guards on $HERDR_PANE_ID itself and
-" no-ops otherwise), so vim-tmux-navigator's own mapping still handles
-" plain tmux normally. Globbed since herdr installs plugins under a path
-" with a content hash in it.
-let s:herdr_nav_vim = glob('~/.config/herdr/plugins/github/vim-herdr-navigation-*/editor/vim.vim')
-if !empty(s:herdr_nav_vim)
-  execute 'source ' . fnameescape(s:herdr_nav_vim)
-endif
+" vim-herdr-navigation (Ctrl-h/j/k/l across herdr panes and Vim splits) -
+" the herdr side (`herdr plugin install`, install_herdr_vim_navigation_plugin
+" in lib/herdr.sh) decides whether to forward a keystroke into Vim at
+" all; this is the Vim side, which decides whether to move within Vim's
+" own splits or hand off to herdr at an edge. Reimplemented here instead
+" of sourcing the plugin's own editor/vim.vim, for two independent
+" reasons:
+"   1. Its HerdrFocus calls `herdr pane focus --direction <dir> --current`,
+"      which resolves to the server's globally focused pane rather than
+"      the pane Vim is actually running in - a confirmed upstream bug
+"      (paulbkim-dev/vim-herdr-navigation#7; the open fix PR covers
+"      navigate.sh/nvim.lua but not this file). Uses --pane
+"      $HERDR_PANE_ID instead.
+"   2. A plain top-level nnoremap here (or the plugin's own vim.vim,
+"      sourced the same way) gets silently overwritten: :scriptnames
+"      shows vim-tmux-navigator's plugin/ file - and its own
+"      unconditional nnoremap for these same keys - actually sourced
+"      *after* this point in the file, despite plug#end() appearing
+"      earlier in .vimrc and vim-tmux-navigator being a normal, non-lazy
+"      Plug. A VimEnter autocmd doesn't fix it either (verified via
+"      :verbose autocmd VimEnter that vim-tmux-navigator's mapping isn't
+"      itself VimEnter-deferred, so ordering vim-plug's internal loading
+"      against a VimEnter hook here doesn't help). The 0ms timer below
+"      sidesteps whatever vim-plug's actual ordering is: it fires on the
+"      next event-loop tick, strictly after all synchronous startup
+"      processing has completed.
+" Not a fork of the plugin - the herdr-side dispatcher (navigate.sh)
+" still comes from the real plugin install; only its Vim-side
+" counterpart is reimplemented, and only because sourcing it unmodified
+" wouldn't reliably apply at all (issue 2), bug or no bug (issue 1).
+function! s:HerdrFocusFixed(dir) abort
+  let l:herdr = empty($HERDR_BIN_PATH) ? 'herdr' : $HERDR_BIN_PATH
+  call system(shellescape(l:herdr) . ' pane focus --direction ' . a:dir . ' --pane ' . shellescape($HERDR_PANE_ID))
+endfunction
 
-" vim-herdr-navigation bugfix override - the plugin's own HerdrFocus
-" (sourced above) calls `herdr pane focus --direction <dir> --current`,
-" but --current resolves to the server's globally focused pane, not the
-" pane Vim is actually running in: a confirmed upstream bug
-" (paulbkim-dev/vim-herdr-navigation#7) that can send focus to the wrong
-" pane when Vim hands off at a split edge. Its open fix PR covers
-" navigate.sh/nvim.lua but not this vim.vim file, so this redefines the
-" same Ctrl-h/j/k/l mappings here using --pane $HERDR_PANE_ID instead -
-" takes priority since it's mapped after the plugin's own source above.
-" Not a fork of the plugin - just overriding one buggy call locally.
-" Drop this once upstream fixes editor/vim.vim.
-if !empty($HERDR_PANE_ID)
-  function! s:HerdrFocusFixed(dir) abort
-    let l:herdr = empty($HERDR_BIN_PATH) ? 'herdr' : $HERDR_BIN_PATH
-    call system(shellescape(l:herdr) . ' pane focus --direction ' . a:dir . ' --pane ' . shellescape($HERDR_PANE_ID))
-  endfunction
+function! s:NavigateFixed(wincmd, dir) abort
+  let l:prev = winnr()
+  execute 'wincmd ' . a:wincmd
+  if winnr() == l:prev
+    call s:HerdrFocusFixed(a:dir)
+  endif
+endfunction
 
-  function! s:NavigateFixed(wincmd, dir) abort
-    let l:prev = winnr()
-    execute 'wincmd ' . a:wincmd
-    if winnr() == l:prev
-      call s:HerdrFocusFixed(a:dir)
-    endif
-  endfunction
-
+function! s:ApplyHerdrNavMappings() abort
+  if empty($HERDR_PANE_ID)
+    return
+  endif
   nnoremap <silent> <C-h> :call <SID>NavigateFixed('h', 'left')<CR>
   nnoremap <silent> <C-j> :call <SID>NavigateFixed('j', 'down')<CR>
   nnoremap <silent> <C-k> :call <SID>NavigateFixed('k', 'up')<CR>
   nnoremap <silent> <C-l> :call <SID>NavigateFixed('l', 'right')<CR>
-endif
+endfunction
+
+call timer_start(0, {-> s:ApplyHerdrNavMappings()})
 
 " sass-lint
 let g:syntastic_sass_checkers=["sasslint"]
