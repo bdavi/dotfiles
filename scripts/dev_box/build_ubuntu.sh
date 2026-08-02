@@ -60,6 +60,7 @@ sudo apt-get --yes install \
   gitleaks \
   highlight \
   jq \
+  neovim \
   ranger \
   pandoc \
   shellcheck \
@@ -186,6 +187,15 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
   https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 vim +'PlugInstall --sync' +qa
+
+
+######################################################################
+# Neovim
+######################################################################
+curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
+  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+nvim +'PlugInstall --sync' +qa
 
 
 ######################################################################
