@@ -92,6 +92,29 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   {
+    "mason-org/mason-lspconfig.nvim",
+    dependencies = {
+      { "mason-org/mason.nvim", opts = {} },
+      "neovim/nvim-lspconfig",
+    },
+    opts = {
+      -- lspconfig server names, not Mason package names (mason-lspconfig
+      -- translates between the two) -- e.g. ruby_lsp <-> ruby-lsp.
+      ensure_installed = { "elixirls", "cssls", "ts_ls", "ruby_lsp" },
+    },
+    config = function(_, opts)
+      -- Neovim 0.11+'s native vim.lsp.config replaces the old
+      -- require('lspconfig').server.setup{} pattern (deprecated/removed).
+      -- '*' applies to every server config as a default, so blink.cmp's
+      -- completion capabilities reach whichever server attaches.
+      vim.lsp.config("*", {
+        capabilities = require("blink.cmp").get_lsp_capabilities(),
+      })
+      -- Installs ensure_installed above, then vim.lsp.enable()'s each one.
+      require("mason-lspconfig").setup(opts)
+    end,
+  },
+  {
     "nvim-treesitter/nvim-treesitter",
     -- nvim-treesitter's `main` branch requires Neovim 0.12+; `master` is the
     -- frozen-but-supported branch for 0.10/0.11 and is what this box runs.
