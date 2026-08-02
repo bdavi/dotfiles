@@ -12,6 +12,30 @@ prefix = "ctrl+space"
 split_vertical = "prefix+\\"
 
 [[keys.command]]
+key = "shift+left"
+type = "shell"
+command = "herdr pane resize --direction left --current --amount 0.02"
+description = "resize pane left (tmux-style)"
+
+[[keys.command]]
+key = "shift+right"
+type = "shell"
+command = "herdr pane resize --direction right --current --amount 0.02"
+description = "resize pane right (tmux-style)"
+
+[[keys.command]]
+key = "shift+up"
+type = "shell"
+command = "herdr pane resize --direction up --current --amount 0.02"
+description = "resize pane up (tmux-style)"
+
+[[keys.command]]
+key = "shift+down"
+type = "shell"
+command = "herdr pane resize --direction down --current --amount 0.02"
+description = "resize pane down (tmux-style)"
+
+[[keys.command]]
 key = "ctrl+h"
 type = "plugin_action"
 command = "vim-herdr-navigation.left"
