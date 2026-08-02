@@ -1,3 +1,5 @@
+vim.g.mapleader = " "
+
 --------------------------------------------------------------------------
 -- Plugin manager (lazy.nvim)
 --------------------------------------------------------------------------
@@ -29,6 +31,20 @@ require("lazy").setup({
       { "<C-p>", "<cmd>FzfLua files<cr>", desc = "Find files" },
     },
     opts = {},
+  },
+  {
+    "stevearc/oil.nvim",
+    keys = {
+      -- oil takes over the current window/buffer rather than opening a
+      -- split or float, so open a fresh tab first to keep it out of the
+      -- way of whatever's already open.
+      { "<leader>n", "<cmd>tabnew | Oil<cr>", desc = "Open oil (new tab)" },
+    },
+    opts = {
+      view_options = {
+        show_hidden = true,
+      },
+    },
   },
 })
 
