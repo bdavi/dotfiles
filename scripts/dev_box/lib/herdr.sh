@@ -54,3 +54,29 @@ install_latest_herdr() {
 install_herdr_vim_navigation_plugin() {
   herdr plugin install paulbkim-dev/vim-herdr-navigation -y
 }
+
+# spaces-pr-status (https://github.com/jmarbutt/herdr-spaces-pr-status) -
+# unofficial third-party plugin, shows GitHub PR status (checks/review/
+# merged) on herdr spaces plus a PR board. Needs herdr >= 0.7.4, `gh`
+# authenticated (shells out to it), and Node >= 20 - all pre-existing
+# requirements of this dev box, so not re-checked here. Idempotent on its
+# own, same as vim-herdr-navigation above. The required
+# [ui.sidebar.spaces] rows live in config_files/.config/herdr/config.toml,
+# not here - without them the plugin computes status but has nowhere to
+# render it.
+install_herdr_spaces_pr_status_plugin() {
+  herdr plugin install jmarbutt/herdr-spaces-pr-status -y
+}
+
+# gitview (https://github.com/ChmaraX/herdr-gitview) - unofficial
+# third-party plugin, git status/diff panel with in-place nvim editing,
+# stage/commit/discard, and commit history. Ships prebuilt Rust binaries
+# for macOS/Linux, so the plugin's own [[build]] step just downloads one -
+# no toolchain needed here. Needs herdr >= 0.7.0 (>= 0.7.4 for native
+# floating dialogs), git, and nvim - all already present on this dev box.
+# Idempotent on its own, same as the other herdr_install_* functions. The
+# cmd+g toggle keybinding lives in config_files/.config/herdr/config.toml,
+# not here.
+install_herdr_gitview_plugin() {
+  herdr plugin install ChmaraX/herdr-gitview -y
+}

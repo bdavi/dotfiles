@@ -233,6 +233,8 @@ install_latest_semgrep
 ######################################################################
 install_latest_herdr
 install_herdr_vim_navigation_plugin
+install_herdr_spaces_pr_status_plugin
+install_herdr_gitview_plugin
 
 
 ######################################################################
