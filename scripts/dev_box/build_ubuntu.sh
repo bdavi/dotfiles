@@ -54,6 +54,7 @@ remove_snap
 # Install Tools
 ######################################################################
 sudo apt-get --yes install \
+  build-essential \
   curl \
   fzf \
   git \
@@ -69,6 +70,7 @@ sudo apt-get --yes install \
   silversearcher-ag \
   tmux \
   tree \
+  tree-sitter-cli \
   wget \
   xclip
 

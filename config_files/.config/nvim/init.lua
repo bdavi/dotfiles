@@ -92,6 +92,33 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   {
+    "nvim-treesitter/nvim-treesitter",
+    -- nvim-treesitter's `main` branch requires Neovim 0.12+; `master` is the
+    -- frozen-but-supported branch for 0.10/0.11 and is what this box runs.
+    branch = "master",
+    lazy = false,
+    build = ":TSUpdate",
+    dependencies = {
+      -- Treesitter-aware replacement for tpope/vim-endwise -- auto-inserts
+      -- "end"/"endif"/etc. by reading the real syntax tree instead of
+      -- regex, so it works reliably for Ruby and Lua under Neovim.
+      "RRethy/nvim-treesitter-endwise",
+    },
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = {
+          "bash", "css", "elixir", "embedded_template", "erlang", "go",
+          "html", "javascript", "json", "lua", "markdown", "markdown_inline",
+          "perl", "python", "query", "ruby", "tsx", "typescript", "vim",
+          "vimdoc", "yaml",
+        },
+        auto_install = true,
+        highlight = { enable = true },
+        indent = { enable = true },
+      })
+    end,
+  },
+  {
     "christoomey/vim-tmux-navigator",
     lazy = false,
     init = function()
@@ -116,6 +143,43 @@ require("lazy").setup({
           { buffer = bufnr, desc = "Toggle git blame" })
       end,
     },
+  },
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    opts = {},
+  },
+  {
+    "kylechui/nvim-surround",
+    version = "^4.0.0",
+    event = "VeryLazy",
+    opts = {},
+  },
+  {
+    "saghen/blink.cmp",
+    -- v2 is under active development with breaking changes; pin to the
+    -- stable v1 line (ships prebuilt fuzzy-matcher binaries).
+    version = "1.*",
+    dependencies = { "rafamadriz/friendly-snippets" },
+    ---@module 'blink.cmp'
+    ---@type blink.cmp.Config
+    opts = {
+      -- "enter" preset maps <CR> to accept the selected item (falling back
+      -- to a normal newline when nothing's selected/menu is closed).
+      keymap = { preset = "enter" },
+      appearance = { nerd_font_variant = "mono" },
+      completion = {
+        documentation = { auto_show = false },
+        -- Auto-highlight the top match so <CR> accepts it immediately,
+        -- without needing to navigate to it first.
+        list = { selection = { preselect = true } },
+      },
+      -- No LSP servers configured yet, so the "lsp" source is a harmless
+      -- no-op for now; path/snippets/buffer already work standalone.
+      sources = { default = { "lsp", "path", "snippets", "buffer" } },
+      fuzzy = { implementation = "prefer_rust_with_warning" },
+    },
+    opts_extend = { "sources.default" },
   },
   {
     "stevearc/oil.nvim",
