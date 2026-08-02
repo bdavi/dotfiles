@@ -134,6 +134,21 @@ calls (Mason/LSP status messages, etc.). Nothing else from snacks.nvim
 Theme is `"auto"` - derived from afterglow's own highlight groups, since
 afterglow doesn't ship a dedicated lualine theme.
 
+Sections, left to right: mode, then git branch/diff/diagnostics, then
+filename - then file progress %, then cursor line:column. The default
+`encoding`/`fileformat`/`filetype` section is dropped.
+
+## Icons / Nerd Font
+
+lualine's branch/diagnostic icons, blink.cmp's completion kind icons, and
+fzf-lua/oil.nvim's file icons ([nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons))
+are all Nerd Font glyphs. `build_ubuntu.sh` installs **JetBrainsMono Nerd
+Font** to `~/.local/share/fonts/JetBrainsMonoNerdFont` (`install_nerd_font`
+in `scripts/dev_box/lib/neovim.sh`), but installing the font is as far as
+a script can go - selecting it as your terminal emulator's font is a
+separate, terminal-specific manual step. If icons render as blank boxes,
+that's the font not being selected there, not a Neovim config problem.
+
 ## Not ported from the old Vim setup (why)
 
 - **NERDTree** - skipped; oil.nvim owns `<leader>n` instead.

@@ -54,7 +54,7 @@ configure_xfce_terminal() {
   xfconf-query -c xfce4-terminal -p /color-bold-use-default -n -t bool -s false
   xfconf-query -c xfce4-terminal -p /color-palette -n -t string \
     -s "#000000;#aa0000;#44aa44;#aa5500;#0039aa;#aa22aa;#1a92aa;#aaaaaa;#777777;#ff8787;#4ce64c;#ded82c;#295fcc;#cc58cc;#4ccce6;#ffffff"
-  xfconf-query -c xfce4-terminal -p /font-name -n -t string -s "DejaVu Sans Mono 10"
+  xfconf-query -c xfce4-terminal -p /font-name -n -t string -s "JetBrainsMono Nerd Font Mono 10"
   xfconf-query -c xfce4-terminal -p /tab-activity-color -n -t string -s "#0f4999"
 }
 

@@ -195,6 +195,14 @@ require("lazy").setup({
     opts_extend = { "sources.default" },
   },
   {
+    -- File-type icons for fzf-lua and oil.nvim (both auto-detect and use
+    -- this if it's present -- no extra config needed on their end).
+    -- Needs a Nerd Font selected as the terminal's font to render
+    -- correctly; see lib/neovim.sh's install_nerd_font.
+    "nvim-tree/nvim-web-devicons",
+    opts = {},
+  },
+  {
     "stevearc/oil.nvim",
     keys = {
       -- oil takes over the current window/buffer rather than opening a
@@ -210,10 +218,15 @@ require("lazy").setup({
   },
   {
     "nvim-lualine/lualine.nvim",
-    -- "auto" derives a theme from the current colorscheme's own highlight
-    -- groups (Normal, StatusLine, etc.) -- afterglow doesn't ship a
-    -- dedicated lualine theme, so this is what picks up its palette.
-    opts = { options = { theme = "auto" } },
+    opts = {
+      -- "auto" derives a theme from the current colorscheme's own highlight
+      -- groups (Normal, StatusLine, etc.) -- afterglow doesn't ship a
+      -- dedicated lualine theme, so this is what picks up its palette.
+      options = { theme = "auto" },
+      -- Drop encoding/fileformat/filetype (the default lualine_x); keep
+      -- mode, branch/diff/diagnostics, filename, progress, and location.
+      sections = { lualine_x = {} },
+    },
   },
   {
     "stevearc/conform.nvim",

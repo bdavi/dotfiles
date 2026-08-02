@@ -32,6 +32,34 @@
 # e.g. ruby_lsp <-> ruby-lsp).
 NEOVIM_MASON_PACKAGES=(elixir-ls css-lsp typescript-language-server ruby-lsp)
 
+# lualine's default branch/diagnostic icons, blink.cmp's completion kind
+# icons, and fzf-lua/oil.nvim's file icons (via nvim-web-devicons) are all
+# Nerd Font glyphs (private-use-area codepoints) -- without this installed
+# they render as blank boxes, not just plain text. Only installs the font
+# itself; selecting it as your terminal emulator's font is a separate,
+# terminal-specific manual step this can't do for you.
+install_nerd_font() {
+  local font_dir="$HOME/.local/share/fonts/JetBrainsMonoNerdFont"
+  if compgen -G "$font_dir/*.ttf" >/dev/null; then
+    return 0
+  fi
+
+  local version
+  version="$(curl -fsSL https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest \
+    | grep -o '"tag_name": *"[^"]*"' | sed -E 's/.*"([^"]+)"$/\1/')"
+
+  local tmp_zip
+  tmp_zip="$(mktemp --suffix=.zip)"
+  trap 'rm -f "$tmp_zip"' RETURN
+  curl -fLo "$tmp_zip" \
+    "https://github.com/ryanoasis/nerd-fonts/releases/download/${version}/JetBrainsMono.zip"
+
+  mkdir -p "$font_dir"
+  unzip -o -q "$tmp_zip" -d "$font_dir"
+
+  fc-cache -f "$font_dir"
+}
+
 install_neovim() {
   sudo apt-get --yes install \
     build-essential \
@@ -39,7 +67,10 @@ install_neovim() {
     neovim \
     ripgrep \
     tree-sitter-cli \
+    unzip \
     xclip
+
+  install_nerd_font
 
   # Installs/updates every plugin lazy.nvim manages.
   nvim --headless "+Lazy! sync" +qa
