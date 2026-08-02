@@ -1,20 +1,6 @@
 "##########################################################
 " General settings
 "##########################################################
-" herdr panes report &term as xterm-256color (not the screen-256color
-" $TERM env var) via termresponse auto-detection, which matches vim's
-" default 'keyprotocol' xterm:mok2 rule (see :help keyprotocol) - Vim
-" then negotiates xterm's modifyOtherKeys level 2 to disambiguate
-" Ctrl+key chords from legacy control characters. herdr's own terminal
-" emulation doesn't fully round-trip that negotiation, which is the
-" likely source of stray ^[[... sequences showing up as literal text
-" (only possible in insert mode - the Ctrl-h/j/k/l navigation mapping
-" below is normal-mode-only and unaffected either way). Disabled here
-" since nothing in this config needs mok2/kitty Ctrl-key disambiguation.
-if !empty($HERDR_PANE_ID)
-  set keyprotocol=xterm:none
-endif
-
 " Decrease this value so gitgutter refreshes faster
 set updatetime=250
 
