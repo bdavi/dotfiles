@@ -31,6 +31,7 @@ source "$SCRIPT_DIR/lib/browser_extensions.sh"
 source "$SCRIPT_DIR/lib/default_apps.sh"
 source "$SCRIPT_DIR/lib/security.sh"
 source "$SCRIPT_DIR/lib/security_scanners.sh"
+source "$SCRIPT_DIR/lib/neovim.sh"
 source "$SCRIPT_DIR/lib/herdr.sh"
 
 require_sudo
@@ -54,23 +55,18 @@ remove_snap
 # Install Tools
 ######################################################################
 sudo apt-get --yes install \
-  build-essential \
   curl \
-  fzf \
   git \
   gitleaks \
   highlight \
   jq \
-  neovim \
   ranger \
   pandoc \
-  ripgrep \
   shellcheck \
   shfmt \
   silversearcher-ag \
   tmux \
   tree \
-  tree-sitter-cli \
   wget \
   xclip
 
@@ -193,14 +189,6 @@ vim +'PlugInstall --sync' +qa
 
 
 ######################################################################
-# Neovim
-######################################################################
-# init.lua bootstraps lazy.nvim (the plugin manager) itself on first run,
-# so headlessly launching nvim is enough to install everything.
-nvim --headless "+Lazy! sync" +qa
-
-
-######################################################################
 # Languages (via asdf)
 ######################################################################
 install_asdf
@@ -220,6 +208,16 @@ asdf_install_latest_pnpm
 asdf_cleanup_pnpm
 asdf_install_latest_lefthook
 asdf_cleanup_lefthook
+
+
+######################################################################
+# Neovim
+######################################################################
+# After "Languages (via asdf)" above, not before - ruby_lsp/elixirls/
+# ts_ls/css-lsp need Ruby/Elixir+Erlang/Node already on PATH before
+# Mason can install them. See lib/neovim.sh for why this needs to be
+# more than just a `Lazy sync`.
+install_neovim
 
 
 ######################################################################
