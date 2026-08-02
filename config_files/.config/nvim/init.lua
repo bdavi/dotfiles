@@ -1,6 +1,63 @@
 vim.g.mapleader = " "
 
 --------------------------------------------------------------------------
+-- General settings
+--------------------------------------------------------------------------
+vim.opt.updatetime = 250
+
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.softtabstop = 2
+vim.opt.expandtab = true
+
+vim.opt.number = true
+
+vim.opt.listchars = { trail = "·", tab = "»·" }
+vim.opt.list = true
+
+vim.opt.swapfile = false
+
+-- Route the unnamed register to the system clipboard so yank/delete/paste
+-- always hits it -- no separate register to think about, and it's what
+-- lets you move text between vim buffers and other tmux/herdr panes.
+vim.opt.clipboard = "unnamed,unnamedplus"
+
+vim.opt.scrolloff = 3
+
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+
+vim.keymap.set({ "n", "x", "o" }, "j", "gj", { desc = "Move by display line" })
+vim.keymap.set({ "n", "x", "o" }, "k", "gk", { desc = "Move by display line" })
+
+vim.keymap.set("n", "<Space>", ":nohlsearch<Bar>:echo<CR>", { silent = true, desc = "Clear search highlight" })
+
+vim.keymap.set("n", "<leader>d", '"=strftime("%a %m/%e/%Y")<CR>P', { desc = "Insert timestamp" })
+
+vim.keymap.set("n", "<leader>e", "a<%=  %><esc>hhi", { desc = "Insert ERB output tag" })
+vim.keymap.set("n", "<leader>E", "a<%  %><esc>hhi", { desc = "Insert ERB tag" })
+
+--------------------------------------------------------------------------
+-- Colors
+--------------------------------------------------------------------------
+-- No colorscheme chosen yet, so this rides on Neovim's built-in default
+-- theme. termguicolors makes that theme (and whatever replaces it later)
+-- render in full 24-bit color instead of being downsampled to the
+-- terminal's 256-color palette.
+vim.opt.termguicolors = true
+
+vim.opt.cursorline = true
+vim.opt.cursorcolumn = true
+vim.opt.colorcolumn = "80,100,120"
+
+-- The default theme's ColorColumn is nearly as bright as regular text --
+-- fine for one column, but three of them read as loud vertical bars. Soften
+-- it to sit between Normal and CursorLine instead. Whenever a real
+-- colorscheme is picked, this will need to move into a ColorScheme autocmd
+-- (colorscheme changes wipe highlight overrides set this way).
+vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#1e2025" })
+
+--------------------------------------------------------------------------
 -- Resolve symlinked buffers to their real path (e.g. ~/.config/nvim/init.lua,
 -- symlinked from this dotfiles repo via install_dotfiles.sh). Without this,
 -- opening a file through a symlink and later reaching the same file by its
