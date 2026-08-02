@@ -25,8 +25,24 @@
 # officially documented way to keep an install-script build current
 # (distinct from just re-running install.sh, which the docs reserve for
 # the initial install).
+#
+# `herdr update` replaces the running binary out from under the herdr
+# process managing the current session, which fails when this script is
+# itself run from inside a herdr pane (the same thing --handoff exists
+# for, per `herdr update --help` - not used here, we just skip). $HERDR_ENV
+# is set for any shell running inside herdr, same signal .vimrc/.commonrc
+# key off via $HERDR_PANE_ID/$HERDR_WORKSPACE_ID. Skipped rather than left
+# to fail (which would trip set -e and take the rest of the build down
+# with it) - the next run from outside a herdr session (e.g. the
+# unattended cron job) picks the update back up.
 install_latest_herdr() {
   command -v herdr >/dev/null || curl -fsSL https://herdr.dev/install.sh | sh
+
+  if [[ -n "${HERDR_ENV:-}" ]]; then
+    echo "Running inside herdr - skipping herdr update"
+    return 0
+  fi
+
   herdr update
 }
 
