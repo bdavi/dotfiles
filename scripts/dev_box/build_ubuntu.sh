@@ -63,6 +63,7 @@ sudo apt-get --yes install \
   neovim \
   ranger \
   pandoc \
+  ripgrep \
   shellcheck \
   shfmt \
   silversearcher-ag \
@@ -192,10 +193,9 @@ vim +'PlugInstall --sync' +qa
 ######################################################################
 # Neovim
 ######################################################################
-curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
-  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
-nvim +'PlugInstall --sync' +qa
+# init.lua bootstraps lazy.nvim (the plugin manager) itself on first run,
+# so headlessly launching nvim is enough to install everything.
+nvim --headless "+Lazy! sync" +qa
 
 
 ######################################################################
