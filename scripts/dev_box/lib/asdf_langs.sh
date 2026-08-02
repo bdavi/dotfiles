@@ -15,7 +15,8 @@
 #
 # Each has a matching asdf_cleanup_* function (asdf_cleanup_old_versions,
 # asdf_util.sh) that removes old installed versions once a new one is in,
-# keeping the 2 most recent so compiled versions don't pile up on disk.
+# keeping only the latest (plus anything listed in
+# asdf_pinned_versions.conf) so compiled versions don't pile up on disk.
 ######################################################################
 
 ######################################################################
