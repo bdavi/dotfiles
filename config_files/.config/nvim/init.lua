@@ -189,8 +189,6 @@ require("lazy").setup({
         -- without needing to navigate to it first.
         list = { selection = { preselect = true } },
       },
-      -- No LSP servers configured yet, so the "lsp" source is a harmless
-      -- no-op for now; path/snippets/buffer already work standalone.
       sources = { default = { "lsp", "path", "snippets", "buffer" } },
       fuzzy = { implementation = "prefer_rust_with_warning" },
     },
@@ -210,7 +208,61 @@ require("lazy").setup({
       },
     },
   },
+  {
+    "nvim-lualine/lualine.nvim",
+    -- "auto" derives a theme from the current colorscheme's own highlight
+    -- groups (Normal, StatusLine, etc.) -- afterglow doesn't ship a
+    -- dedicated lualine theme, so this is what picks up its palette.
+    opts = { options = { theme = "auto" } },
+  },
+  {
+    "stevearc/conform.nvim",
+    event = { "BufWritePre" },
+    cmd = { "ConformInfo" },
+    opts = {
+      formatters_by_ft = {
+        elixir = { "mix" },
+      },
+      -- Falls back to the attached LSP server's formatter for filetypes
+      -- with no formatter configured above.
+      format_on_save = { timeout_ms = 500, lsp_format = "fallback" },
+    },
+  },
+  {
+    "folke/snacks.nvim",
+    lazy = false,
+    priority = 1000,
+    ---@type snacks.Config
+    opts = {
+      -- Only the notifier module -- nicer vim.notify() popups. Every other
+      -- snacks.nvim feature (dashboard, picker, etc.) stays off since it's
+      -- not listed here.
+      notifier = {},
+    },
+  },
 })
+
+--------------------------------------------------------------------------
+-- LSP keybindings and diagnostics
+--------------------------------------------------------------------------
+vim.api.nvim_create_autocmd("LspAttach", {
+  desc = "LSP keybindings, buffer-local so they only exist where a server actually attaches",
+  callback = function(args)
+    local b = { buffer = args.buf }
+    vim.keymap.set("n", "gd", "<cmd>FzfLua lsp_definitions<cr>", vim.tbl_extend("force", b, { desc = "Go to definition" }))
+    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", b, { desc = "Go to declaration" }))
+    vim.keymap.set("n", "gi", "<cmd>FzfLua lsp_implementations<cr>", vim.tbl_extend("force", b, { desc = "Go to implementation" }))
+    vim.keymap.set("n", "gr", "<cmd>FzfLua lsp_references<cr>", vim.tbl_extend("force", b, { desc = "Go to references" }))
+    vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", b, { desc = "Hover docs" }))
+    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", b, { desc = "Rename symbol" }))
+    vim.keymap.set({ "n", "x" }, "<leader>ca", "<cmd>FzfLua lsp_code_actions<cr>", vim.tbl_extend("force", b, { desc = "Code action" }))
+    vim.keymap.set("n", "<leader>cs", "<cmd>FzfLua lsp_document_symbols<cr>", vim.tbl_extend("force", b, { desc = "Document symbols" }))
+  end,
+})
+
+vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Previous diagnostic" })
+vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Next diagnostic" })
+vim.keymap.set("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line diagnostics" })
 
 --------------------------------------------------------------------------
 -- vim-herdr-navigation (Ctrl-h/j/k/l across herdr panes, tmux panes, and
