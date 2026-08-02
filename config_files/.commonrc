@@ -13,6 +13,10 @@ alias ll="ls -lah"
 alias rename='tmux rename-window'
 alias vc='vim -p ~/.vimrc ~/.commonrc ~/.tmux.conf ~/.zshrc ~/.bashrc'
 
+function rename-herdr() {
+  herdr workspace rename "$HERDR_WORKSPACE_ID" "$@"
+}
+
 
 ###############################################################################
 # Safety
