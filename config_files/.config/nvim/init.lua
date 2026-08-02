@@ -40,22 +40,14 @@ vim.keymap.set("n", "<leader>E", "a<%  %><esc>hhi", { desc = "Insert ERB tag" })
 --------------------------------------------------------------------------
 -- Colors
 --------------------------------------------------------------------------
--- No colorscheme chosen yet, so this rides on Neovim's built-in default
--- theme. termguicolors makes that theme (and whatever replaces it later)
--- render in full 24-bit color instead of being downsampled to the
--- terminal's 256-color palette.
 vim.opt.termguicolors = true
+
+-- Hand-extracted from danilo-augusto/vim-afterglow -- see colors/afterglow.lua
+vim.cmd.colorscheme("afterglow")
 
 vim.opt.cursorline = true
 vim.opt.cursorcolumn = true
 vim.opt.colorcolumn = "80,100,120"
-
--- The default theme's ColorColumn is nearly as bright as regular text --
--- fine for one column, but three of them read as loud vertical bars. Soften
--- it to sit between Normal and CursorLine instead. Whenever a real
--- colorscheme is picked, this will need to move into a ColorScheme autocmd
--- (colorscheme changes wipe highlight overrides set this way).
-vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#1e2025" })
 
 --------------------------------------------------------------------------
 -- Resolve symlinked buffers to their real path (e.g. ~/.config/nvim/init.lua,
