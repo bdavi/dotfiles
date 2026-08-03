@@ -37,6 +37,26 @@ source "$SCRIPT_DIR/lib/herdr.sh"
 require_sudo
 
 ######################################################################
+# APT repo hygiene
+######################################################################
+# do-release-upgrade rewrites third-party repos into its own .sources
+# files without Signed-By. Once install_docker's docker.list exists,
+# that leaves the docker repo defined twice with different signing
+# config, and every apt call - including this script's first one -
+# hard-fails with "Conflicting values set for option Signed-By". Must
+# run before anything touches apt.
+sudo rm -f /etc/apt/sources.list.d/download_docker_com_linux_ubuntu.sources
+
+# Same conflict, other direction: the code package's postinst maintains
+# its own vscode.sources (different keyring), so install_vscode's
+# bootstrap entry has to go once that exists. install_vscode cleans up
+# after itself too; this covers a run that died between the two.
+if [[ -f /etc/apt/sources.list.d/vscode.sources ]]; then
+  sudo rm -f /etc/apt/sources.list.d/vscode.list \
+    /etc/apt/keyrings/packages.microsoft.gpg
+fi
+
+######################################################################
 # Updates
 ######################################################################
 # upgrade_os_distro
@@ -49,6 +69,7 @@ clean_os_packages
 ######################################################################
 disable_telemetry
 remove_snap
+remove_virtualbox
 
 
 ######################################################################
@@ -88,7 +109,6 @@ sudo apt-get --yes install \
   speedcrunch \
   stacer \
   qimgv \
-  virtualbox \
   vlc
 
 ######################################################################

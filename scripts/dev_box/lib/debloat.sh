@@ -101,6 +101,26 @@ remove_snap() {
     | sudo tee /etc/apt/preferences.d/nosnap.pref >/dev/null
 }
 
+# Purges VirtualBox. It was installed by hand at one point and isn't
+# needed; worse, Ubuntu's virtualbox-dkms 7.0.16 no longer compiles
+# against the current HWE kernel (modpost symbol-namespace errors on
+# linux 7.0), which leaves dpkg with a half-configured package that
+# fails every subsequent apt run - including this script's.
+# Can't use pkg_installed here: it matches only "install ok installed",
+# and a wedged package sits in a half-configured/unpacked state instead.
+remove_virtualbox() {
+  local pkgs=() pkg
+  for pkg in virtualbox-qt virtualbox virtualbox-dkms; do
+    if dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q '^install'; then
+      pkgs+=("$pkg")
+    fi
+  done
+
+  [[ ${#pkgs[@]} -eq 0 ]] && return 0
+
+  sudo apt-get --yes purge "${pkgs[@]}"
+}
+
 # Installs flatpak and adds the flathub remote. CLI-only, deliberately -
 # no GNOME Software or other GUI store bundled.
 install_flatpak() {

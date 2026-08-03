@@ -64,6 +64,8 @@ Cmnd_Alias DEVBOX_WRITE = /usr/bin/tee /etc/apt/preferences.d/nosnap.pref, \\
   /usr/bin/tee /var/lib/flatpak/extension/org.chromium.Chromium.Extension.dotfiles/$flatpak_arch/$CHROMIUM_EXTENSION_POINT_VERSION/policies/managed/extensions.json, \\
   /usr/bin/sed -i s/ENABLED\=1/ENABLED\=0/ /etc/default/motd-news, \\
   /usr/bin/rm -rf /snap /var/lib/snapd $HOME/snap, \\
+  /usr/bin/rm -f /etc/apt/sources.list.d/download_docker_com_linux_ubuntu.sources, \\
+  /usr/bin/rm -f /etc/apt/sources.list.d/vscode.list /etc/apt/keyrings/packages.microsoft.gpg, \\
   /usr/bin/install -d -m 0755 /var/lib/flatpak/extension/org.mozilla.firefox.systemconfig/$flatpak_arch/stable/policies, \\
   /usr/bin/install -d -m 0755 /var/lib/flatpak/extension/org.chromium.Chromium.Extension.dotfiles/$flatpak_arch/$CHROMIUM_EXTENSION_POINT_VERSION/policies/managed, \\
   /usr/bin/install -m 0755 -d /etc/apt/keyrings, \\
