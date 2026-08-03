@@ -56,12 +56,6 @@ export PS1="\e[0;32m\u@\h\e[m \e[0;36m \w\e[m  \$(git_prompt)\n$"
 ###############################################################################
 # asdf (version manager)
 ###############################################################################
-# Old asdf
-# if [ -d "$HOME/.asdf" ] 
-# then
-#   . $HOME/.asdf/asdf.sh
-#   . $HOME/.asdf/completions/asdf.bash
-# fi
 
 # New asdf
 PATH="$HOME/.asdf:$PATH"
@@ -85,8 +79,23 @@ source ~/.commonrc
 ################################################################################
 alias source!='source ~/.bashrc; tmux source-file ~/.tmux.conf; tmux display-message "SOURCED!"'
 
-source /usr/share/google-cloud-sdk/completion.bash.inc
-source ~/monorepo/zlaverse/support/bash_functions.sh
-source /home/brian/monorepo/zlaverse/dev/../../zlaverse/support/bash_functions.sh
+# source /usr/share/google-cloud-sdk/completion.bash.inc
+# source ~/monorepo/zlaverse/support/bash_functions.sh
+# source /home/brian/monorepo/zlaverse/dev/../../zlaverse/support/bash_functions.sh
 
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+
+#######################################################################
+# Path
+#######################################################################
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+
+[ -f /usr/share/doc/fzf/examples/key-bindings.bash ] && source /usr/share/doc/fzf/examples/key-bindings.bash
+[ -f /usr/share/doc/fzf/examples/completion.bash ] && source /usr/share/doc/fzf/examples/completion.bash
+
+
+###############################################################################
+# asdf (version manager)
+###############################################################################
+command -v asdf >/dev/null && . <(asdf completion bash)

@@ -26,14 +26,14 @@ alias source!='source ~/.zshrc; tmux source-file ~/.tmux.conf; tmux display-mess
 ###############################################################################
 # asdf (version manager)
 ###############################################################################
-# if [ -d "$HOME/.asdf" ]
-# then
-#   . $HOME/.asdf/asdf.sh
-# 
-#   # append completions to fpath
-#   fpath=(${ASDF_DIR}/completions $fpath)
-#   # initialise completions with ZSH's compinit
-#   autoload -Uz compinit && compinit
-# fi
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+if command -v asdf >/dev/null; then
+  # append completions to fpath
+  fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+  # initialise completions with ZSH's compinit
+  autoload -Uz compinit && compinit
+fi
+
+[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ] && source /usr/share/doc/fzf/examples/key-bindings.zsh
+[ -f /usr/share/doc/fzf/examples/completion.zsh ] && source /usr/share/doc/fzf/examples/completion.zsh

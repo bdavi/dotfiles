@@ -1,0 +1,77 @@
+onboarding = false
+
+[ui.toast]
+delivery = "system"
+
+# Required by the jmarbutt.spaces-pr-status plugin (lib/herdr.sh) - without
+# these rows it computes PR status but has nowhere to render it. A row
+# disappears when none of its tokens have a value, so spaces without a PR
+# cost no extra height.
+[ui.sidebar.spaces]
+rows = [
+  ["state_icon", "workspace"],
+  ["branch", "git_status"],
+  ["$pr", "$pr_checks", "$pr_review"],
+]
+
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+[keys]
+prefix = "ctrl+space"
+split_vertical = "prefix+\\"
+
+[[keys.command]]
+key = "shift+left"
+type = "shell"
+command = "herdr pane resize --direction left --current --amount 0.02"
+description = "resize pane left (tmux-style)"
+
+[[keys.command]]
+key = "shift+right"
+type = "shell"
+command = "herdr pane resize --direction right --current --amount 0.02"
+description = "resize pane right (tmux-style)"
+
+[[keys.command]]
+key = "shift+up"
+type = "shell"
+command = "herdr pane resize --direction up --current --amount 0.02"
+description = "resize pane up (tmux-style)"
+
+[[keys.command]]
+key = "shift+down"
+type = "shell"
+command = "herdr pane resize --direction down --current --amount 0.02"
+description = "resize pane down (tmux-style)"
+
+[[keys.command]]
+key = "ctrl+h"
+type = "plugin_action"
+command = "vim-herdr-navigation.left"
+description = "navigate left (vim/herdr)"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "plugin_action"
+command = "vim-herdr-navigation.down"
+description = "navigate down (vim/herdr)"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "plugin_action"
+command = "vim-herdr-navigation.up"
+description = "navigate up (vim/herdr)"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "plugin_action"
+command = "vim-herdr-navigation.right"
+description = "navigate right (vim/herdr)"
+
+[[keys.command]]
+key = "cmd+g"
+type = "plugin_action"
+command = "chmarax.gitview.toggle"
+description = "git view"

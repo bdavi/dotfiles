@@ -91,6 +91,12 @@ noremap k gk
 " https://github.com/junegunn/vim-plug
 " (Install new with `:PlugInstall`)
 "##########################################################
+" vim-herdr-navigation needs this set before vim-tmux-navigator loads, or
+" vim-tmux-navigator's own Ctrl-h/j/k/l mappings win instead (unlike the
+" plain-Vim side, editor/nvim.lua below maps unconditionally rather than
+" guarding on herdr - see .vimrc for that version's comment).
+let g:tmux_navigator_no_mappings = 1
+
 call plug#begin()
   " 100% NON-NEGOTIABLE
   Plug 'christoomey/vim-tmux-navigator'
@@ -133,6 +139,19 @@ call plug#begin()
   "Plug 'simrat39/symbols-outline.nvim'
 
 call plug#end()
+
+"##########################################################
+" vim-herdr-navigation (Ctrl-h/j/k/l across herdr panes and Neovim splits,
+" https://github.com/paulbkim-dev/vim-herdr-navigation) - falls back to
+" tmux-navigator's own commands when outside herdr, so a plain tmux
+" session still works. Globbed since herdr installs plugins under a path
+" with a content hash in it.
+"##########################################################
+let s:herdr_nav_lua = glob('~/.config/herdr/plugins/github/vim-herdr-navigation-*/editor/nvim.lua')
+if !empty(s:herdr_nav_lua)
+  execute 'luafile ' . fnameescape(s:herdr_nav_lua)
+endif
+
 
 "##########################################################
 " Everforest theme settings
