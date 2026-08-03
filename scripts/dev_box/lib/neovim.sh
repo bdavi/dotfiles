@@ -60,15 +60,80 @@ install_nerd_font() {
   fc-cache -f "$font_dir"
 }
 
+# Ubuntu's apt package lags plugins' minimum-version requirements badly -
+# noble's "neovim" is stuck at 0.9.5, but current plugins (e.g.
+# snacks.nvim's `nvim_get_hl(..., { create = false })`) call APIs only
+# added in 0.10+. Downloads the official release tarball straight to
+# ~/.local/bin instead, same approach lib/security_scanners.sh and
+# install_asdf (asdf_util.sh) use for tools apt can't keep current. The
+# tarball is a full runtime tree, not a standalone binary - `nvim` looks
+# up its runtime files relative to its own path - so it's extracted whole
+# rather than just lifting the binary out, then symlinked into
+# ~/.local/bin so it shadows apt's copy (~/.local/bin precedes /usr/bin
+# on PATH). Not removing any existing apt-installed neovim - harmless
+# leftover once shadowed, and removing packages out from under a script
+# that didn't install them is riskier than leaving them be.
+install_neovim_binary() {
+  local latest
+  latest="$(github_latest_release neovim/neovim 0)"
+
+  if [[ -z "$latest" ]]; then
+    echo "Could not resolve latest neovim v0 release" >&2
+    exit 1
+  fi
+
+  local installed=""
+  if [[ -x ~/.local/bin/nvim ]]; then
+    installed="$(~/.local/bin/nvim --version | head -n1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')"
+  fi
+
+  if [[ "$installed" == "$latest" ]]; then
+    echo "neovim $latest already installed"
+    return 0
+  fi
+
+  # Neovim's own release asset naming (x86_64/arm64) doesn't match
+  # release_arch's Go-style amd64/arm64, so this maps uname -m directly
+  # rather than reusing that helper.
+  local nvim_arch
+  case "$(uname -m)" in
+    x86_64) nvim_arch="x86_64" ;;
+    aarch64) nvim_arch="arm64" ;;
+    *)
+      echo "Unsupported architecture: $(uname -m)" >&2
+      exit 1
+      ;;
+  esac
+
+  local install_dir="$HOME/.local/share/nvim-linux-${nvim_arch}"
+  local tmp
+  tmp="$(mktemp -d)"
+  trap 'rm -rf "$tmp"' RETURN
+
+  curl -fsSL \
+    "https://github.com/neovim/neovim/releases/download/${latest}/nvim-linux-${nvim_arch}.tar.gz" \
+    -o "$tmp/nvim.tar.gz"
+
+  rm -rf "$install_dir"
+  mkdir -p "$install_dir"
+  tar -xzf "$tmp/nvim.tar.gz" -C "$install_dir" --strip-components=1
+
+  mkdir -p ~/.local/bin
+  ln -sf "$install_dir/bin/nvim" ~/.local/bin/nvim
+
+  echo "Installed neovim $latest to $install_dir (symlinked at ~/.local/bin/nvim, was: ${installed:-not installed})"
+}
+
 install_neovim() {
   sudo apt-get --yes install \
     build-essential \
     fzf \
-    neovim \
     ripgrep \
     tree-sitter-cli \
     unzip \
     xclip
+
+  install_neovim_binary
 
   install_nerd_font
 
