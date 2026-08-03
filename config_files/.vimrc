@@ -152,7 +152,15 @@ call plug#begin('~/.vim/plugged')
   Plug 'scrooloose/syntastic'
   Plug 'gcorne/vim-sass-lint'
   Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+  Plug 'augmentcode/augment.vim'
 call plug#end()
+
+
+" Augment
+let g:augment_workspace_folders = ['/home/brian/monorepo']
+
+
+
 
 " sass-lint
 let g:syntastic_sass_checkers=["sasslint"]
@@ -272,3 +280,52 @@ function FormatAndRedraw()
     redraw!
   endif
 endfunction
+
+" #######################################################
+" TODO
+" #######################################################
+
+" function! CreateTodoFromSelection()
+"   let [lnum1, col1] = getpos("'<")[1:2]
+"   let [lnum2, col2] = getpos("'>")[1:2]
+"   let lines = getline(lnum1, lnum2)
+
+"   if empty(lines)
+"     echom "todo: no selection"
+"     return
+"   endif
+
+"   " Trim to exact visual selection bounds
+"   let lines[-1] = lines[-1][:col2 - 1]
+"   let lines[0] = lines[0][col1 - 1:]
+
+"   " Collapse multi-line selection to a single title
+"   let title = join(map(lines, 'trim(v:val)'), ' ')
+
+"   let result = system('todo-add ' . shellescape(title))
+"   echom trim(result)
+" endfunction
+
+" vnoremap <leader>t :<C-u>call CreateTodoFromSelection()<CR>
+
+function! CreateTodoFromSelection()
+  let [lnum1, col1] = getpos("'<")[1:2]
+  let [lnum2, col2] = getpos("'>")[1:2]
+  let lines = getline(lnum1, lnum2)
+
+  if empty(lines)
+    echom "todo: no selection"
+    return
+  endif
+
+  " Trim to exact visual selection bounds
+  let lines[-1] = lines[-1][:col2 - 1]
+  let lines[0] = lines[0][col1 - 1:]
+
+  " Pass raw lines via stdin: first line = title, rest = description
+  let input = join(lines, "\n")
+  let result = system('todo-add', input)
+  echom trim(result)
+endfunction
+
+vnoremap <leader>t :<C-u>call CreateTodoFromSelection()<CR>

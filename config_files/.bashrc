@@ -56,11 +56,21 @@ export PS1="\e[0;32m\u@\h\e[m \e[0;36m \w\e[m  \$(git_prompt)\n$"
 ###############################################################################
 # asdf (version manager)
 ###############################################################################
-if [ -d "$HOME/.asdf" ] 
-then
-  . $HOME/.asdf/asdf.sh
-  . $HOME/.asdf/completions/asdf.bash
-fi
+# Old asdf
+# if [ -d "$HOME/.asdf" ] 
+# then
+#   . $HOME/.asdf/asdf.sh
+#   . $HOME/.asdf/completions/asdf.bash
+# fi
+
+# New asdf
+PATH="$HOME/.asdf:$PATH"
+PATH="$HOME/.asdf/shims:$PATH"
+
+################################################################################
+# Path for Claude
+################################################################################
+export PATH="$HOME/.local/bin:$PATH"
 
 
 ################################################################################

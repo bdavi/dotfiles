@@ -7,7 +7,6 @@ export ZSH_THEME="avit"
 HYPHEN_INSENSITIVE="true"
 
 plugins=(
-  asdf
   colored-man-pages
   command-not-found
   gem
@@ -27,14 +26,14 @@ alias source!='source ~/.zshrc; tmux source-file ~/.tmux.conf; tmux display-mess
 ###############################################################################
 # asdf (version manager)
 ###############################################################################
-if [ -d "$HOME/.asdf" ]
-then
-  . $HOME/.asdf/asdf.sh
-
-  # append completions to fpath
-  fpath=(${ASDF_DIR}/completions $fpath)
-  # initialise completions with ZSH's compinit
-  autoload -Uz compinit && compinit
-fi
+# if [ -d "$HOME/.asdf" ]
+# then
+#   . $HOME/.asdf/asdf.sh
+# 
+#   # append completions to fpath
+#   fpath=(${ASDF_DIR}/completions $fpath)
+#   # initialise completions with ZSH's compinit
+#   autoload -Uz compinit && compinit
+# fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
