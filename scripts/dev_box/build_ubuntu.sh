@@ -22,6 +22,7 @@ source "$SCRIPT_DIR/lib/playwright.sh"
 source "$SCRIPT_DIR/lib/zizmor.sh"
 source "$SCRIPT_DIR/lib/update_cron.sh"
 source "$SCRIPT_DIR/lib/debloat.sh"
+source "$SCRIPT_DIR/lib/journald.sh"
 source "$SCRIPT_DIR/lib/configure_xfce.sh"
 source "$SCRIPT_DIR/lib/qt_scaling.sh"
 source "$SCRIPT_DIR/lib/docker.sh"
@@ -70,6 +71,12 @@ clean_os_packages
 disable_telemetry
 remove_snap
 remove_virtualbox
+
+
+######################################################################
+# Journald
+######################################################################
+configure_journald_limits
 
 
 ######################################################################

@@ -48,7 +48,8 @@ Cmnd_Alias DEVBOX_APT = /usr/bin/apt-get update, \\
 
 Cmnd_Alias DEVBOX_SYSTEMD = /usr/bin/systemctl enable --now *, \\
   /usr/bin/systemctl disable --now *, \\
-  /usr/bin/systemctl mask *
+  /usr/bin/systemctl mask *, \\
+  /usr/bin/systemctl restart systemd-journald
 
 Cmnd_Alias DEVBOX_PKG_MGRS = /usr/sbin/ufw enable, \\
   /usr/sbin/ufw logging low, \\
@@ -60,6 +61,8 @@ Cmnd_Alias DEVBOX_PKG_MGRS = /usr/sbin/ufw enable, \\
 Cmnd_Alias DEVBOX_WRITE = /usr/bin/tee /etc/apt/preferences.d/nosnap.pref, \\
   /usr/bin/tee /etc/apt/sources.list.d/docker.list, \\
   /usr/bin/tee /etc/cron.d/dev_box_update, \\
+  /usr/bin/tee /etc/systemd/journald.conf.d/size-limit.conf, \\
+  /usr/bin/install -d -m 0755 /etc/systemd/journald.conf.d, \\
   /usr/bin/tee /var/lib/flatpak/extension/org.mozilla.firefox.systemconfig/$flatpak_arch/stable/policies/policies.json, \\
   /usr/bin/tee /var/lib/flatpak/extension/org.chromium.Chromium.Extension.dotfiles/$flatpak_arch/$CHROMIUM_EXTENSION_POINT_VERSION/policies/managed/extensions.json, \\
   /usr/bin/sed -i s/ENABLED\=1/ENABLED\=0/ /etc/default/motd-news, \\
