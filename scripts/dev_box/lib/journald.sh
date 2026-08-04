@@ -22,8 +22,15 @@ configure_journald_limits() {
   rule="$(
     cat <<'EOF'
 [Journal]
+# Hard cap on total persistent journal storage. Unset, journald
+# defaults to up to 10% of the filesystem it's stored on (with a 15%
+# keep-free floor) - far more than a workstation needs to keep around.
 SystemMaxUse=500M
+# Size of each individual rotated file - keeps ~10 files under the cap
+# above instead of one unwieldy 500M file to grep through.
 SystemMaxFileSize=50M
+# Age-based backstop independent of size - nothing older than this
+# sticks around even if SystemMaxUse is never reached.
 MaxRetentionSec=30day
 EOF
   )"
