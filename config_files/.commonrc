@@ -17,6 +17,10 @@ function rename-herdr() {
   herdr workspace rename "$HERDR_WORKSPACE_ID" "$@"
 }
 
+# HERDR_AGENT hints herdr that this pane's foreground process (ssh/gh) is
+# fronting a claude session, since it can't see the remote process directly.
+alias csclaude='HERDR_AGENT=claude gh cs ssh'
+
 
 ###############################################################################
 # Safety
