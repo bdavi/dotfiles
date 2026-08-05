@@ -22,15 +22,12 @@
 # (/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml: Greybird /
 # elementary-xfce-dark) to confirm both actually differ from stock.
 #
-# HiDPI scaling is done via DPI, not Gdk/WindowScalingFactor - GTK3/X11's
-# window-scaling is integer-only pixel-doubling, so 2 was as close as it
-# gets to a desired 1.75x with no fractional option in between. /Xft/DPI
-# at 168 (96 * 1.75) scales fonts and DPI-aware layout continuously
-# instead, matched by QT_SCALE_FACTOR=1.75 (configure_qt_scale_factor,
-# qt_scaling.sh) for the Qt apps (KeePassXC, SpeedCrunch) that don't read
-# xsettings at all. Any prior Gdk/WindowScalingFactor override from that
-# approach is explicitly reset back to Xubuntu's shipped default (1)
-# rather than left stale at 2.
+# HiDPI scaling (/Xft/DPI here, QT_SCALE_FACTOR in qt_scaling.sh for Qt
+# apps) was tried at 1.75x and reverted - too large in practice
+# (KeePassXC especially). Both are explicitly reset back to Xubuntu's
+# shipped defaults rather than left stale at the old override, same as
+# the Gdk/WindowScalingFactor reset below (an even earlier, 2x integer
+# attempt at the same goal).
 #
 # The xsettings channel also carries a live cursor theme/size and
 # icon-size override beyond these - out of scope here (this pass only
@@ -38,7 +35,7 @@
 configure_xfce_theme() {
   xfconf-query -c xsettings -p /Net/ThemeName -n -t string -s "Greybird-dark"
   xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s "elementary-xfce"
-  xfconf-query -c xsettings -p /Xft/DPI -n -t int -s 168
+  xfconf-query -c xsettings -p /Xft/DPI -r 2>/dev/null || true
   xfconf-query -c xsettings -p /Gdk/WindowScalingFactor -r 2>/dev/null || true
 }
 

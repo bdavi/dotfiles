@@ -24,8 +24,10 @@ source "$SCRIPT_DIR/lib/update_cron.sh"
 source "$SCRIPT_DIR/lib/debloat.sh"
 source "$SCRIPT_DIR/lib/journald.sh"
 source "$SCRIPT_DIR/lib/fstrim.sh"
+source "$SCRIPT_DIR/lib/inotify.sh"
 source "$SCRIPT_DIR/lib/configure_xfce.sh"
 source "$SCRIPT_DIR/lib/qt_scaling.sh"
+source "$SCRIPT_DIR/lib/console_font.sh"
 source "$SCRIPT_DIR/lib/docker.sh"
 source "$SCRIPT_DIR/lib/github_cli.sh"
 source "$SCRIPT_DIR/lib/vscode.sh"
@@ -84,6 +86,12 @@ configure_journald_limits
 # SSD TRIM
 ######################################################################
 enable_fstrim
+
+
+######################################################################
+# inotify limits
+######################################################################
+configure_inotify_limits
 
 
 ######################################################################
@@ -305,6 +313,10 @@ fi
 # useful) to run during initial box setup too.
 configure_qt_scale_factor
 
+# Same story - the virtual console exists independent of any desktop
+# session, so this is safe during initial box setup too.
+configure_console_font
+
 
 ######################################################################
 # Claude
@@ -317,13 +329,3 @@ configure_qt_scale_factor
 # Claude Code CLI
 # curl -fsSL https://claude.ai/install.sh | bash
 # Installs to ~/.local/bin - already on PATH via config_files/.bashrc
-
-# Superpowers plugin (https://github.com/obra/superpowers) - skills
-# framework/methodology for Claude Code, installed from Anthropic's official
-# plugin marketplace (pre-registered by Claude Code itself, so no
-# `plugin marketplace add` needed first). Idempotent - re-running against an
-# already-installed plugin is a no-op. Guarded on the CLI being present since
-# its own install is the manual step just above, not scripted here.
-if command -v claude >/dev/null; then
-  claude plugin install superpowers@claude-plugins-official
-fi

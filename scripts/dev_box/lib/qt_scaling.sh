@@ -6,19 +6,16 @@
 # Not meant to be run directly - sourced by build_ubuntu.sh, after
 # util.sh.
 #
-# Qt apps (KeePassXC, SpeedCrunch, ...) don't read the xsettings
-# /Xft/DPI bump set in configure_xfce_theme (configure_xfce.sh) - Qt has
-# its own, separate HiDPI mechanism. QT_SCALE_FACTOR (a fixed float,
-# rather than QT_AUTO_SCREEN_SCALE_FACTOR's auto-detection from the
-# monitor's reported physical size) keeps Qt apps locked to the same
-# 1.75x ratio chosen for /Xft/DPI.
+# Was QT_SCALE_FACTOR=1.75, matching a since-reverted 1.75x /Xft/DPI
+# bump (configure_xfce_theme, configure_xfce.sh) - too large in practice
+# (KeePassXC especially). Removes the line from /etc/environment if
+# present rather than leaving it stale, same as the DPI/window-scaling
+# resets above.
 #
 # /etc/environment is read by PAM at login, before the desktop session
-# starts, so every Qt app in the session inherits it - unlike the
-# xfconf settings above, this only takes effect on the next login, not
-# immediately. Idempotent via the grep guard - safe to re-run.
+# starts - unlike the xfconf settings above, this only takes effect on
+# the next login, not immediately. Idempotent - safe to re-run.
 ######################################################################
 configure_qt_scale_factor() {
-  local line="QT_SCALE_FACTOR=1.75"
-  grep -qxF "$line" /etc/environment 2>/dev/null || echo "$line" | sudo tee -a /etc/environment >/dev/null
+  sudo sed -i '/^QT_SCALE_FACTOR=/d' /etc/environment
 }

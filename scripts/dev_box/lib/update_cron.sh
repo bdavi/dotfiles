@@ -56,16 +56,21 @@ Cmnd_Alias DEVBOX_PKG_MGRS = /usr/sbin/ufw enable, \\
   /usr/bin/flatpak install --system --noninteractive flathub *, \\
   /usr/bin/flatpak remote-add --if-not-exists flathub https\://flathub.org/repo/flathub.flatpakrepo, \\
   /usr/bin/snap remove --purge *, \\
-  /usr/bin/pro config set apt_news\=false
+  /usr/bin/pro config set apt_news\=false, \\
+  /usr/sbin/sysctl --system, \\
+  /usr/bin/setupcon
 
 Cmnd_Alias DEVBOX_WRITE = /usr/bin/tee /etc/apt/preferences.d/nosnap.pref, \\
   /usr/bin/tee /etc/apt/sources.list.d/docker.list, \\
   /usr/bin/tee /etc/cron.d/dev_box_update, \\
   /usr/bin/tee /etc/systemd/journald.conf.d/size-limit.conf, \\
   /usr/bin/install -d -m 0755 /etc/systemd/journald.conf.d, \\
+  /usr/bin/tee /etc/sysctl.d/60-inotify.conf, \\
+  /usr/bin/install -d -m 0755 /etc/sysctl.d, \\
   /usr/bin/tee /var/lib/flatpak/extension/org.mozilla.firefox.systemconfig/$flatpak_arch/stable/policies/policies.json, \\
   /usr/bin/tee /var/lib/flatpak/extension/org.chromium.Chromium.Extension.dotfiles/$flatpak_arch/$CHROMIUM_EXTENSION_POINT_VERSION/policies/managed/extensions.json, \\
   /usr/bin/sed -i s/ENABLED\=1/ENABLED\=0/ /etc/default/motd-news, \\
+  /usr/bin/tee /etc/default/console-setup, \\
   /usr/bin/rm -rf /snap /var/lib/snapd $HOME/snap, \\
   /usr/bin/rm -f /etc/apt/sources.list.d/download_docker_com_linux_ubuntu.sources, \\
   /usr/bin/rm -f /etc/apt/sources.list.d/vscode.list /etc/apt/keyrings/packages.microsoft.gpg, \\
