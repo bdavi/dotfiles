@@ -303,13 +303,3 @@ configure_qt_scale_factor
 # Claude Code CLI
 # curl -fsSL https://claude.ai/install.sh | bash
 # Installs to ~/.local/bin - already on PATH via config_files/.bashrc
-
-# Superpowers plugin (https://github.com/obra/superpowers) - skills
-# framework/methodology for Claude Code, installed from Anthropic's official
-# plugin marketplace (pre-registered by Claude Code itself, so no
-# `plugin marketplace add` needed first). Idempotent - re-running against an
-# already-installed plugin is a no-op. Guarded on the CLI being present since
-# its own install is the manual step just above, not scripted here.
-if command -v claude >/dev/null; then
-  claude plugin install superpowers@claude-plugins-official
-fi
