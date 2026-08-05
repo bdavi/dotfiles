@@ -22,6 +22,24 @@ vim.opt.swapfile = false
 -- lets you move text between vim buffers and other tmux/herdr panes.
 vim.opt.clipboard = "unnamed,unnamedplus"
 
+-- Copy via OSC 52 (forced, since autodetection is unreliable through
+-- ssh + herdr), but paste from the local unnamed register: herdr forwards
+-- OSC 52 writes but doesn't answer reads, so the stock osc52 paste would
+-- stall ~10s on every p/P waiting for a response that never comes.
+-- External content comes in via the terminal's own paste (bracketed
+-- paste) instead.
+vim.g.clipboard = {
+  name = "OSC 52",
+  copy = {
+    ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+    ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+  },
+  paste = {
+    ["+"] = function() return vim.split(vim.fn.getreg('"'), "\n") end,
+    ["*"] = function() return vim.split(vim.fn.getreg('"'), "\n") end,
+  },
+}
+
 vim.opt.scrolloff = 3
 
 vim.opt.ignorecase = true
