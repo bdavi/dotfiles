@@ -96,6 +96,7 @@ sudo apt-get --yes install \
 # Install Apps
 ######################################################################
 sudo apt-get --yes install \
+  blueman \
   evince \
   filezilla \
   flameshot \
