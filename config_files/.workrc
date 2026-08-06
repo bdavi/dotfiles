@@ -30,12 +30,6 @@ then
   alias fixit='cd ~/monorepo && docker compose down && docker volume remove zla_cg-deps zla_jp-deps zla_rz-deps zla_cg-build zla_jp-build zla_rz-build && docker compose pull && docker-compose up --scale jobs=1 --scale admin=1 --scale ecom_api=1 -d'
   alias nf='git checkout master redline/apps/redline_store_portal/package-lock.json && git checkout master redline/apps/redline_web_store/package-lock.json'
   alias dcb='docker compose down && docker compose up --scale jobs=1 --scale admin=1 --scale ecom_api=1 -d'
-
-  dcb() {
-    local prev_dir="$PWD"
-    cd ~/monorepo && docker compose down && docker compose up --scale jobs=1 --scale admin=1 --scale ecom_api=1 -d
-    cd "$prev_dir"
-  }
 fi
 
 if [ -d "$COMOTO_PROJECT_ROOT/code/comoto/scripts" ]
