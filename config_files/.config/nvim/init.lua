@@ -225,8 +225,25 @@ require("lazy").setup({
     keys = {
       -- oil takes over the current window/buffer rather than opening a
       -- split or float, so open a fresh tab first to keep it out of the
-      -- way of whatever's already open.
-      { "<leader>n", "<cmd>tabnew | Oil<cr>", desc = "Open oil (new tab)" },
+      -- way of whatever's already open. Seed it with the directory of the
+      -- buffer that was current beforehand -- tabnew's new buffer is
+      -- unnamed, so a bare `:Oil` there would fall back to nvim's launch
+      -- cwd instead. If oil's already the current buffer (i.e. its own
+      -- tab), close that tab instead of stacking another one -- symmetric
+      -- with the tabnew that opened it.
+      {
+        "<leader>n",
+        function()
+          if vim.bo.filetype == "oil" then
+            vim.cmd("tabclose")
+            return
+          end
+          local dir = vim.fn.expand("%:p:h")
+          vim.cmd("tabnew")
+          vim.cmd("Oil " .. vim.fn.fnameescape(dir))
+        end,
+        desc = "Open oil (new tab)",
+      },
     },
     opts = {
       view_options = {
