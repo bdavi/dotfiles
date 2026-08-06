@@ -83,6 +83,12 @@ alias dc='docker-compose'
 export EDITOR=nvim
 export VISUAL=nvim
 
+alias vim='nvim'
+# `command` skips alias lookup (unlike a plain `vim` here, which would just
+# re-expand to the alias above) and resolves straight to the real vim
+# binary on PATH - old vim, still reachable when you need it.
+alias ovim='command vim'
+
 
 ###############################################################################
 # Path
