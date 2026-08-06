@@ -14,6 +14,7 @@
 	whitespace = red reverse
 [core]
 	pager = diff-so-fancy | less --tabs=4 -RFX
+	editor = nvim
 [user]
 	email = brian@briandavies.me
 	name = Brian Davies
