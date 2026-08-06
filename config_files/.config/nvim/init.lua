@@ -189,6 +189,25 @@ require("lazy").setup({
     opts = {},
   },
   {
+    -- Single animated line marking the indent scope under the cursor
+    -- (dedent-aware, so it works in Python/YAML/ERB too, not just
+    -- brace languages) -- lighter than indent-blankline, which draws a
+    -- line per indent level instead of just the current scope. Also
+    -- throws in ii/ai text objects and [i/]i motions for free.
+    "echasnovski/mini.indentscope",
+    event = { "BufReadPost", "BufNewFile" },
+    -- opts as a function, not a table: a table is evaluated immediately
+    -- while lazy.nvim builds the spec (before the plugin's installed on a
+    -- fresh setup, and eagerly on every run after, defeating `event`
+    -- above) -- a function is only called once the plugin actually loads.
+    opts = function()
+      return {
+        symbol = "│",
+        draw = { animation = require("mini.indentscope").gen_animation.none() },
+      }
+    end,
+  },
+  {
     "saghen/blink.cmp",
     -- v2 is under active development with breaking changes; pin to the
     -- stable v1 line (ships prebuilt fuzzy-matcher binaries).
