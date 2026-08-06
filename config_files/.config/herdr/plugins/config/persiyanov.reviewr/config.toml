@@ -1,0 +1,16 @@
+# reviewr's own config - separate from herdr's ~/.config/herdr/config.toml,
+# which it never reads. Re-read on every refresh/toggle, so edits apply
+# live without a herdr restart. See lib/herdr.sh and
+# https://github.com/persiyanov/herdr-reviewr#pane-placement.
+
+# Both "overlay" and "zoomed" open a real, running reviewr pane over a
+# Claude pane (confirmed via herdr-server.log: plugin.pane.open always
+# succeeds, pid spawned) but never render visibly - reviewr painting into
+# the same screen region Claude's own alt-screen TUI already occupies,
+# with something in that stacking not repainting correctly. "tab" sidesteps
+# the collision entirely - a genuinely separate screen region, nothing to
+# render over - and still auto-focuses on toggle (unlike "split", which
+# explicitly leaves focus with the agent per herdr/pane.sh). One extra
+# tab-switch back to Claude vs. true floating, but it's visible, which
+# overlay/zoomed weren't over a Claude pane specifically.
+toggle_placement = "tab"

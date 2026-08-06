@@ -80,3 +80,20 @@ install_herdr_spaces_pr_status_plugin() {
 install_herdr_gitview_plugin() {
   herdr plugin install ChmaraX/herdr-gitview -y
 }
+
+# reviewr (https://github.com/persiyanov/herdr-reviewr) - unofficial
+# third-party plugin, review panel for an agent's diff (comment, send
+# feedback back) plus a read-only PR/checks/comments view - complements
+# gitview above, which is edit/stage/commit focused, not review focused.
+# Needs herdr >= 0.7.5, git, and (for the PR tab) an authenticated `gh` -
+# all already present on this dev box. Idempotent on its own, same as the
+# other install_herdr_*_plugin functions. Its own settings (theme,
+# base_branches, default_scope, ...) live in a separate file reviewr owns -
+# ~/.config/herdr/plugins/config/persiyanov.reviewr/config.toml, unrelated
+# to config.toml's [keys]/[theme]/etc - toggle_placement set to "tab"
+# there. The prefix+r toggle keybinding (which also moves the built-in
+# resize_mode off its default prefix+r onto prefix+v) lives in
+# config_files/.config/herdr/config.toml, not here.
+install_herdr_reviewr_plugin() {
+  herdr plugin install persiyanov/herdr-reviewr -y
+}

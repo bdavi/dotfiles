@@ -21,6 +21,10 @@ auto_switch = false
 [keys]
 prefix = "ctrl+space"
 split_vertical = "prefix+\\"
+# Moved off its default prefix+r (see `herdr --default-config`) to free
+# that up for the reviewr toggle below - resize is used less often and
+# doesn't need a mnemonic letter the way reviewr's "r" does.
+resize_mode = "prefix+v"
 
 [[keys.command]]
 key = "shift+left"
@@ -75,3 +79,14 @@ key = "cmd+g"
 type = "plugin_action"
 command = "chmarax.gitview.toggle"
 description = "git view"
+
+[[keys.command]]
+# resize_mode above was moved off prefix+r onto prefix+v to make room for
+# this. (The earlier "doesn't work in the Claude pane" turned out to be
+# unrelated to any of this - reviewr correctly refuses outside a git repo,
+# and this session's cwd is ~/code, not a repo itself: `herdr plugin log
+# list --plugin persiyanov.reviewr` showed the real stderr.)
+key = "prefix+r"
+type = "plugin_action"
+command = "persiyanov.reviewr.toggle"
+description = "review panel"
