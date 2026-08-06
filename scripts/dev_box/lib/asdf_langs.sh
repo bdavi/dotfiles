@@ -111,6 +111,8 @@ asdf_install_latest_elixir() {
   fi
 
   asdf set --home elixir "$elixir_version"
+
+  asdf_install_pinned_versions elixir
 }
 
 asdf_cleanup_elixir() {

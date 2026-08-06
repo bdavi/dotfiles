@@ -78,7 +78,9 @@ asdf_plugin_add() {
 }
 
 # Installs the latest version of an asdf-managed tool (no-op if that
-# version is already installed) and sets it as the global/home version.
+# version is already installed), sets it as the global/home version, and
+# makes sure every version pinned for it is installed too (asdf_util.sh's
+# asdf_install_pinned_versions).
 asdf_install_latest_global() {
   local name="$1"
 
@@ -89,6 +91,8 @@ asdf_install_latest_global() {
   asdf set --home "$name" "$latest"
 
   echo "$name $latest set as global version"
+
+  asdf_install_pinned_versions "$name"
 }
 
 # Versions of $name listed in asdf_pinned_versions.conf (one per line as
@@ -100,6 +104,24 @@ asdf_pinned_versions() {
   [[ -f "$SCRIPT_DIR/asdf_pinned_versions.conf" ]] || return 0
 
   awk -v tool="$name" '$1 == tool { print $2 }' "$SCRIPT_DIR/asdf_pinned_versions.conf"
+}
+
+# Installs every version of $name pinned in asdf_pinned_versions.conf that
+# isn't already on disk (no-op for ones that are already installed).
+# asdf_cleanup_old_versions only ever protects a pinned version from
+# removal - it doesn't install one in the first place - so without this, a
+# pin does nothing until something else (e.g. a project's .tool-versions)
+# happens to install that exact version first. Doesn't touch the
+# global/home version; asdf_install_latest_global (or, for tools that set
+# it some other way, the caller) already handled that.
+asdf_install_pinned_versions() {
+  local name="$1"
+
+  local version
+  while IFS= read -r version; do
+    [[ -z "$version" ]] && continue
+    asdf install "$name" "$version"
+  done < <(asdf_pinned_versions "$name")
 }
 
 # Uninstalls all but the N most recent installed versions of an
