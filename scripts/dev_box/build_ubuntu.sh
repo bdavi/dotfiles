@@ -37,6 +37,7 @@ source "$SCRIPT_DIR/lib/security.sh"
 source "$SCRIPT_DIR/lib/security_scanners.sh"
 source "$SCRIPT_DIR/lib/neovim.sh"
 source "$SCRIPT_DIR/lib/herdr.sh"
+source "$SCRIPT_DIR/lib/nimbalyst.sh"
 
 require_sudo
 
@@ -279,6 +280,12 @@ install_herdr_vim_navigation_plugin
 install_herdr_spaces_pr_status_plugin
 install_herdr_gitview_plugin
 install_herdr_reviewr_plugin
+
+
+######################################################################
+# Nimbalyst
+######################################################################
+install_nimbalyst
 
 
 ######################################################################
