@@ -240,6 +240,16 @@ require("lazy").setup({
     opts = {},
   },
   {
+    -- Symbol outline sidebar (backed by LSP when attached, treesitter
+    -- otherwise) -- orienting fast in a large/unfamiliar file without
+    -- hunting line by line, e.g. after an AI-generated edit.
+    "stevearc/aerial.nvim",
+    keys = {
+      { "<leader>a", "<cmd>AerialToggle<cr>", desc = "Toggle symbol outline" },
+    },
+    opts = {},
+  },
+  {
     "stevearc/oil.nvim",
     keys = {
       -- oil takes over the current window/buffer rather than opening a
