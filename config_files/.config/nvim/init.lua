@@ -306,6 +306,17 @@ require("lazy").setup({
     },
   },
   {
+    "iamcco/markdown-preview.nvim",
+    ft = { "markdown" },
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    build = function() vim.fn["mkdp#util#install"]() end,
+    keys = {
+      -- <leader>m, not the plugin's own suggested <C-p> -- that's already
+      -- bound to fzf-lua's file finder above.
+      { "<leader>m", "<cmd>MarkdownPreviewToggle<cr>", desc = "Toggle markdown preview" },
+    },
+  },
+  {
     "folke/snacks.nvim",
     lazy = false,
     priority = 1000,
