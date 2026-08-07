@@ -1,5 +1,14 @@
 onboarding = false
 
+[ui]
+# The scrollbar column sits at the pane's right edge and gets captured by
+# terminal-native (shift+drag) selections, clipping the last characters of
+# anything copied that way - bitten by this copying an auth URL out of a
+# mirrored Codespace pane, where shift+drag is the only mouse selection
+# that works while a TUI holds the pane (the mirror forwards plain mouse
+# events to TUIs by design). Wheel scrolling still works without it.
+pane_scrollbars = false
+
 [ui.toast]
 delivery = "system"
 
@@ -20,7 +29,15 @@ auto_switch = false
 
 [keys]
 prefix = "ctrl+space"
-split_vertical = "prefix+\\"
+# Core split bindings are unbound in favor of the mirror plugin's
+# context-aware split actions below (prefix+\ and prefix+minus, the same
+# keys) - those split the *remote* pane when invoked inside a mirrored
+# Codespace workspace and fall back to a plain local split everywhere
+# else, so nothing changes for local work. split_vertical's default was
+# prefix+v (remapped to prefix+\ before this), split_horizontal's was
+# prefix+minus.
+split_vertical = ""
+split_horizontal = ""
 # Moved off its default prefix+r (see `herdr --default-config`) to free
 # that up for the reviewr toggle below - resize is used less often and
 # doesn't need a mnemonic letter the way reviewr's "r" does.
@@ -49,6 +66,22 @@ key = "shift+down"
 type = "shell"
 command = "herdr pane resize --direction down --current --amount 0.02"
 description = "resize pane down (tmux-style)"
+
+[[keys.command]]
+# Replaces core split_vertical (unbound above): remote-aware split via the
+# mirror plugin - splits the remote pane inside a mirrored workspace,
+# plain local split anywhere else.
+key = "prefix+\\"
+type = "plugin_action"
+command = "mirror.remote-split-right"
+description = "split right (remote-aware)"
+
+[[keys.command]]
+# Replaces core split_horizontal (unbound above), same remote-aware deal.
+key = "prefix+minus"
+type = "plugin_action"
+command = "mirror.remote-split-down"
+description = "split down (remote-aware)"
 
 [[keys.command]]
 key = "ctrl+h"
