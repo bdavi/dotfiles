@@ -5,6 +5,34 @@ vim.g.mapleader = " "
 --------------------------------------------------------------------------
 vim.opt.updatetime = 250
 
+-- Reload a buffer from disk when another process changes the underlying
+-- file, as long as this buffer has no unsaved local edits - `checktime`'s
+-- own behavior, not reimplemented here, so a modified buffer still gets
+-- the usual "changed since editing started" prompt instead of being
+-- silently overwritten. `autoread` alone is a no-op in terminal Vim/Neovim
+-- without something to actually trigger `checktime` - it only checks on
+-- specific events, it doesn't poll. FocusGained catches switching back to
+-- the terminal from outside (if the terminal forwards focus events - not
+-- guaranteed through tmux/herdr panes), BufEnter catches switching
+-- buffers/windows inside Neovim itself, and CursorHold/CursorHoldI (after
+-- `updatetime` ms idle, set above) catches sitting on an unchanged buffer
+-- while another process edits the file underneath it.
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
+  desc = "Reload buffers changed on disk by another process",
+  callback = function()
+    if vim.fn.mode() ~= "c" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  desc = "Notify after a buffer is auto-reloaded from disk",
+  callback = function()
+    vim.notify("File changed on disk, buffer reloaded", vim.log.levels.WARN)
+  end,
+})
+
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.softtabstop = 2
