@@ -28,9 +28,11 @@ cs-sync() {
   # gh codespace ssh --config can exit non-zero if it skipped an
   # unavailable/stopped codespace while still writing a usable config for
   # the rest - don't let `set -e` (if the caller has it on) treat that as
-  # fatal.
+  # fatal. Capture stdout only: the "skipping unavailable codespace" notes
+  # go to stderr, and merging them in corrupts the SSH config file (ssh
+  # then rejects the whole file with "Bad configuration option").
   local gh_output
-  if ! gh_output="$(gh codespace ssh --config 2>&1)"; then
+  if ! gh_output="$(gh codespace ssh --config)"; then
     _cs_log "gh codespace ssh --config exited non-zero (likely a stopped codespace was skipped) - continuing with what it did produce"
   fi
   printf '%s\n' "$gh_output" > "$CS_SSH_ALIASES"
@@ -62,13 +64,29 @@ cs-sync() {
     echo "# END codespaces"
   } > "$CS_HOSTS_TOML.new"
 
-  mv "$CS_HOSTS_TOML.new" "$CS_HOSTS_TOML"
-  rm -f "$tmp"
+  # `command ... -f` sidesteps .commonrc's `alias mv='mv -i'`, which gets
+  # baked in at function-definition time (aliases expand when a function is
+  # *read*, and .commonrc defines the alias before sourcing this file) and
+  # otherwise turns this into an interactive overwrite prompt on every sync.
+  command mv -f "$CS_HOSTS_TOML.new" "$CS_HOSTS_TOML"
+  command rm -f "$tmp"
 
   if herdr server reload-config 2>&1; then
     _cs_log "herdr-mirror hosts.toml updated and server reloaded"
   else
     _cs_log "hosts.toml updated, but 'herdr server reload-config' failed - is herdr running locally?"
+  fi
+
+  # reload-config alone doesn't (re)start the mirror plugin's polling
+  # daemon, and the plugin's autostart only fires once at herdr launch - if
+  # hosts.toml didn't exist yet at that point (exactly the first-run case,
+  # confirmed live 2026-08-07), nothing ever polls and no codespace shows
+  # up. The start action is documented as "Start (or resume)", so it's safe
+  # to invoke unconditionally.
+  if herdr plugin action invoke start --plugin mirror >/dev/null 2>&1; then
+    _cs_log "mirror daemon started/resumed"
+  else
+    _cs_log "couldn't invoke the mirror plugin's start action - check 'herdr plugin list'"
   fi
 }
 
@@ -168,6 +186,50 @@ cs-connect() {
   # become "you, inside the codespace shell", matching how csclaude
   # already behaves for the plain-ssh case in .commonrc.
   exec env HERDR_AGENT=claude gh codespace ssh -c "$target_name"
+}
+
+# Copies the most recent URL printed in the codespace's panes into the
+# local clipboard, reading the *remote* herdr's pane buffers over SSH.
+# The mirror rendering bug that originally motivated this (each wrapped
+# row losing its last character) is fixed by the patched plugin build
+# (install_herdr_mirror_plugin, lib/herdr.sh), but this stays useful:
+# mirror panes still drop OSC 52 (upstream issue #25), so remote-side
+# "copy to clipboard" offers like Claude Code's never reach the local
+# clipboard, and a wrapped URL selected by hand still needs its line
+# breaks removed - this does both in one shot. Assumes the
+# single-codespace workflow: uses the first SSH alias in
+# ~/.ssh/codespaces.
+cs-copy-url() {
+  local ssh_alias
+  ssh_alias="$(grep '^Host cs\.' "$CS_SSH_ALIASES" 2>/dev/null | awk '{print $2; exit}')"
+  if [[ -z "$ssh_alias" ]]; then
+    _cs_log "No codespace SSH alias found - run cs-sync first"
+    return 1
+  fi
+
+  # Last URL block in the remote panes' buffers (focused pane first, then
+  # the rest): from a line containing https:// through the next blank
+  # line, rows joined (the remote wraps mid-token with no spaces, so
+  # plain concatenation is safe). pane read returns only the current
+  # screen on this build (its --lines/--source flags are advertised but
+  # rejected), so this finds the URL only while it's still displayed.
+  local url
+  url="$(ssh -o BatchMode=yes "$ssh_alias" '
+    bin=~/.local/bin/herdr
+    cur=$($bin pane current 2>/dev/null | grep -o "\"pane_id\":\"[^\"]*\"" | head -1 | cut -d"\"" -f4)
+    for p in $cur $($bin pane list 2>/dev/null | grep -o "\"pane_id\":\"[^\"]*\"" | cut -d"\"" -f4 | grep -v "^$cur\$"); do
+      out=$($bin pane read "$p" 2>/dev/null | awk "/https?:\\/\\//{rec=\"\"; on=1} on{if (\$0 ~ /^[[:space:]]*\$/) on=0; else rec=rec \$0} END{print rec}")
+      if [ -n "$out" ]; then printf "%s" "$out"; exit 0; fi
+    done
+  ' 2>/dev/null | tr -d ' ')"
+
+  if [[ -z "$url" ]]; then
+    _cs_log "No URL on any codespace pane's screen right now - it only sees what's currently displayed, so run this while the URL is visible"
+    return 1
+  fi
+
+  printf '%s' "$url" | xclip -selection clipboard
+  _cs_log "Copied ${#url} chars to clipboard: ${url:0:60}..."
 }
 
 # Fallback path for when the mirror isn't cooperating (or you just want
