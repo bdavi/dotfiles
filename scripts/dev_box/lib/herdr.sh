@@ -14,11 +14,15 @@
 # ~/.local/bin, no sudo needed.
 #
 # config.toml itself (prefix key, theme, vim-herdr-navigation
-# keybindings) isn't managed here - unlike XFCE's xfconf state, herdr
-# only *reads* config.toml; the one thing that writes to it
-# (first-run onboarding) is permanently skipped by setting
-# onboarding = false, so it's safe to track and symlink normally, same
-# as .vimrc. See config_files/.config/herdr/config.toml.
+# keybindings) isn't managed here - herdr mostly just *reads* config.toml,
+# and the two things that write to it are both settled: first-run
+# onboarding is permanently skipped by setting onboarding = false, and
+# `herdr channel set` writes an [update] channel block (discovered
+# 2026-08-06 when switch_herdr_to_preview_channel ran) - that block is now
+# tracked in the repo copy, so the switch is a no-op on any box built from
+# these dotfiles and nothing rewrites the file day to day. Safe to track
+# and symlink normally, same as .vimrc. See
+# config_files/.config/herdr/config.toml.
 ######################################################################
 
 # Installs herdr on first run, then always calls `herdr update` - the
@@ -90,15 +94,117 @@ switch_herdr_to_preview_channel() {
 # local view. Needs herdr on the preview channel (see
 # switch_herdr_to_preview_channel above) - install this after that function
 # has run, not before. The remote side (each Codespace) needs no plugin,
-# just herdr itself - see comoto-codespaces-dotfiles/script/setup. Idempotent
-# on its own, same as the other install_herdr_*_plugin functions. Its own
+# just herdr itself - see comoto-codespaces-dotfiles/script/setup. Its own
 # config - ~/.config/herdr-mirror/hosts.toml, a non-standard location the
 # plugin's README specifies directly rather than the usual
 # `herdr plugin config-dir` path other plugins use - is managed by cs-sync
 # in config_files/.workrc-codespaces, not here; that needs to re-run
 # whenever the Codespace list changes, not just at build time.
+#
+# TEMPORARY PATCHED BUILD (2026-08-07): the released plugin (v0.1.16) has a
+# rendering bug that drops the last character of every wrapped row in
+# mirror panes, corrupting anything copied out of them (found live copying
+# a Claude auth URL - see misc/herdr_codespaces.md). Upstream PR
+# nikok6/herdr-mirror#27 fixes it but is unmerged, so until the fix ships
+# in a release this builds the PR branch from source (cargo via asdf rust,
+# asdf_langs.sh) and links it in place of the GitHub install. Once the fix
+# is released, the same function detects that automatically, removes the
+# patched build, and switches back to the normal GitHub install - at that
+# point everything from HERDR_MIRROR_FIX_PR down through
+# _remove_patched_herdr_mirror can be deleted and the last line restored to
+# a bare `herdr plugin install`.
+HERDR_MIRROR_UPSTREAM="nikok6/herdr-mirror"
+HERDR_MIRROR_FIX_PR=27
+HERDR_MIRROR_BROKEN_RELEASE="v0.1.16" # newest release WITHOUT the fix
+HERDR_MIRROR_FORK_URL="https://github.com/finafisken/herdr-mirror.git"
+HERDR_MIRROR_FIX_BRANCH="fix/full-width-row-el"
+HERDR_MIRROR_LOCAL_DIR="$HOME/code/herdr-mirror"
+
+# True once upstream has both merged PR #27 and cut a release newer than
+# the known-broken one (merge alone isn't enough - `herdr plugin install`
+# fetches the latest *release* binary, which would still be broken until a
+# new one is tagged). Network/API failures return false, i.e. "keep
+# whatever is installed now" - the safe answer for the unattended cron run.
+_herdr_mirror_fix_released() {
+  local merged latest
+  merged="$(gh api "repos/${HERDR_MIRROR_UPSTREAM}/pulls/${HERDR_MIRROR_FIX_PR}" --jq .merged 2>/dev/null)" || return 1
+  [[ "$merged" == "true" ]] || return 1
+
+  latest="$(github_latest_release "$HERDR_MIRROR_UPSTREAM" 0)"
+  [[ -n "$latest" && "$latest" != "$HERDR_MIRROR_BROKEN_RELEASE" ]] || return 1
+  [[ "$(printf '%s\n%s\n' "$HERDR_MIRROR_BROKEN_RELEASE" "$latest" | sort -V | tail -n1)" == "$latest" ]]
+}
+
+# Clones/updates the PR branch at HERDR_MIRROR_LOCAL_DIR, rebuilds when the
+# checkout changed (or the binary is missing), and links it as the mirror
+# plugin. Idempotent: an up-to-date, already-linked build is a no-op.
+_ensure_patched_herdr_mirror() {
+  if ! command -v cargo >/dev/null; then
+    echo "herdr-mirror: cargo not found - asdf_install_latest_rust (asdf_langs.sh) must run before this" >&2
+    return 1
+  fi
+
+  if [[ ! -d "$HERDR_MIRROR_LOCAL_DIR" ]]; then
+    git clone --branch "$HERDR_MIRROR_FIX_BRANCH" "$HERDR_MIRROR_FORK_URL" \
+      "$HERDR_MIRROR_LOCAL_DIR" || return 1
+  fi
+
+  local before after
+  before="$(git -C "$HERDR_MIRROR_LOCAL_DIR" rev-parse HEAD)"
+  # Offline/pull failure isn't fatal - build whatever is checked out.
+  git -C "$HERDR_MIRROR_LOCAL_DIR" pull --ff-only 2>/dev/null \
+    || echo "herdr-mirror: git pull failed (offline?), building the existing checkout"
+  after="$(git -C "$HERDR_MIRROR_LOCAL_DIR" rev-parse HEAD)"
+
+  local bin="$HERDR_MIRROR_LOCAL_DIR/target/release/herdr-mirror"
+  if [[ ! -x "$bin" || "$before" != "$after" ]]; then
+    (cd "$HERDR_MIRROR_LOCAL_DIR" && cargo build --release) || return 1
+    echo "herdr-mirror: built patched plugin at $after"
+    # A running mirror daemon keeps executing the old binary - restart it
+    # if the local herdr server is up (best-effort; harmless when it isn't:
+    # the next daemon start uses the new binary anyway).
+    if herdr status >/dev/null 2>&1; then
+      herdr plugin action invoke teardown --plugin mirror >/dev/null 2>&1 || true
+      herdr plugin action invoke start --plugin mirror >/dev/null 2>&1 || true
+    fi
+  fi
+
+  if herdr plugin list 2>/dev/null | grep -q "local:${HERDR_MIRROR_LOCAL_DIR}"; then
+    echo "herdr-mirror: patched build already linked (upstream PR #${HERDR_MIRROR_FIX_PR} still unreleased)"
+    return 0
+  fi
+
+  # A GitHub-installed copy occupies the same plugin id - remove it first.
+  if herdr plugin list 2>/dev/null | grep -q "github:${HERDR_MIRROR_UPSTREAM}"; then
+    herdr plugin uninstall mirror
+  fi
+  herdr plugin link "$HERDR_MIRROR_LOCAL_DIR" --enabled >/dev/null
+  echo "herdr-mirror: linked patched build from $HERDR_MIRROR_LOCAL_DIR"
+}
+
+# Unlinks the patched build and deletes its clone - only if the directory
+# really is our clone of the fix fork, never someone's unrelated checkout.
+_remove_patched_herdr_mirror() {
+  if herdr plugin list 2>/dev/null | grep -q "local:${HERDR_MIRROR_LOCAL_DIR}"; then
+    herdr plugin unlink mirror
+  fi
+  if [[ -d "$HERDR_MIRROR_LOCAL_DIR" ]] \
+    && [[ "$(git -C "$HERDR_MIRROR_LOCAL_DIR" remote get-url origin 2>/dev/null)" == "$HERDR_MIRROR_FORK_URL" ]]; then
+    rm -rf "$HERDR_MIRROR_LOCAL_DIR"
+    echo "herdr-mirror: removed patched build clone at $HERDR_MIRROR_LOCAL_DIR"
+  fi
+}
+
 install_herdr_mirror_plugin() {
-  herdr plugin install nikok6/herdr-mirror --yes
+  if _herdr_mirror_fix_released; then
+    if herdr plugin list 2>/dev/null | grep -q "local:${HERDR_MIRROR_LOCAL_DIR}"; then
+      echo "herdr-mirror: upstream PR #${HERDR_MIRROR_FIX_PR} fix is released - switching from the patched build to the GitHub install"
+      _remove_patched_herdr_mirror
+    fi
+    herdr plugin install "$HERDR_MIRROR_UPSTREAM" --yes
+    return
+  fi
+  _ensure_patched_herdr_mirror
 }
 
 # vim-herdr-navigation (https://github.com/paulbkim-dev/vim-herdr-navigation)
