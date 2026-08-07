@@ -153,6 +153,25 @@ asdf_cleanup_golang() {
 }
 
 ######################################################################
+# asdf Install Rust
+######################################################################
+asdf_install_latest_rust() {
+  # asdf-rust installs official precompiled toolchains (rustc + cargo), so
+  # no build deps are needed. Added for building the patched herdr-mirror
+  # plugin from source (install_herdr_mirror_plugin, lib/herdr.sh) while
+  # upstream PR nikok6/herdr-mirror#27 is unmerged; kept unconditionally
+  # since a Rust toolchain is generally useful. Note ruby's build deps
+  # above apt-install rustc (for YJIT) - the asdf shim wins in PATH, so
+  # that older system rustc doesn't interfere.
+  asdf_plugin_add rust https://github.com/asdf-community/asdf-rust.git
+  asdf_install_latest_global rust
+}
+
+asdf_cleanup_rust() {
+  asdf_cleanup_old_versions rust
+}
+
+######################################################################
 # asdf Install pnpm
 ######################################################################
 asdf_install_latest_pnpm() {
