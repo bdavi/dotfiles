@@ -15,6 +15,21 @@ CS_REPO="Comoto-Tech/dev-hub"
 CS_HOSTS_TOML="$HOME/.config/herdr-mirror/hosts.toml"
 CS_SSH_ALIASES="$HOME/.ssh/codespaces"
 
+# Files that make up "being logged into gcloud" - deliberately not the
+# whole ~/.config/gcloud tree (which also holds logs/, .metrics.uuid,
+# cached CLI surveys, etc.), just the credential/config material cs-sync-
+# gcloud actually needs to reproduce the local login state elsewhere.
+# application_default_credentials.json (a separate login,
+# `gcloud auth application-default login`) is handled on its own in
+# cs-sync-gcloud since it may not exist. See
+# misc/codespaces_tool_auth.md for the full design rationale.
+GCLOUD_CONFIG_DIR="$HOME/.config/gcloud"
+GCLOUD_SYNC_FILES=(
+  "credentials.db"
+  "active_config"
+  "configurations/config_default"
+)
+
 _cs_log() { echo "[cs] $*" >&2; }
 
 # Regenerates ~/.ssh/codespaces and the managed [hosts.*] block in
@@ -88,6 +103,69 @@ cs-sync() {
   else
     _cs_log "couldn't invoke the mirror plugin's start action - check 'herdr plugin list'"
   fi
+}
+
+# Pushes this machine's gcloud auth state - both `gcloud auth login`'s own
+# credentials and (if present) Application Default Credentials - to every
+# currently running Comoto-Tech/dev-hub codespace, overwriting
+# ~/.config/gcloud there so each one authenticates exactly as if
+# `gcloud auth login`/`gcloud auth application-default login` had been run
+# on it directly. Manual, by design - run it yourself any time after
+# re-authenticating locally. See misc/codespaces_tool_auth.md for the full
+# design rationale (why a file push over the existing SSH transport rather
+# than a Codespaces secret or a short-lived-token relay, why this is a
+# manual trigger rather than a background watcher, and the security
+# tradeoffs of copying credential material to several remote machines).
+cs-sync-gcloud() {
+  if [[ ! -d "$GCLOUD_CONFIG_DIR" ]]; then
+    _cs_log "No local gcloud config at $GCLOUD_CONFIG_DIR - run 'gcloud auth login' first"
+    return 1
+  fi
+
+  cs-sync
+
+  local -a targets
+  mapfile -t targets < <(grep '^Host cs\.' "$CS_SSH_ALIASES" 2>/dev/null | awk '{print $2}')
+
+  if [[ ${#targets[@]} -eq 0 ]]; then
+    _cs_log "No codespace SSH aliases found"
+    return 1
+  fi
+
+  local adc_file="$GCLOUD_CONFIG_DIR/application_default_credentials.json"
+  local target f ok
+  for target in "${targets[@]}"; do
+    _cs_log "Pushing gcloud auth to $target..."
+    ok=1
+
+    ssh -o BatchMode=yes "$target" "mkdir -p ~/.config/gcloud/configurations" 2>/dev/null || {
+      _cs_log "  couldn't reach $target - skipping"
+      continue
+    }
+
+    for f in "${GCLOUD_SYNC_FILES[@]}"; do
+      [[ -f "$GCLOUD_CONFIG_DIR/$f" ]] || continue
+      scp -o BatchMode=yes -q "$GCLOUD_CONFIG_DIR/$f" "$target:.config/gcloud/$f" || ok=0
+    done
+    if [[ -f "$adc_file" ]]; then
+      scp -o BatchMode=yes -q "$adc_file" "$target:.config/gcloud/application_default_credentials.json" || ok=0
+    fi
+
+    # Match gcloud's own restrictive file permissions - these are
+    # credential material, and anything else running under the codespace's
+    # user account (an installed dependency, a devcontainer feature, ...)
+    # can otherwise read them same as you can. Errors suppressed: a file
+    # that didn't get copied above (missing locally) has nothing to chmod.
+    ssh -o BatchMode=yes "$target" \
+      'chmod 600 ~/.config/gcloud/credentials.db ~/.config/gcloud/application_default_credentials.json 2>/dev/null' \
+      || true
+
+    if [[ "$ok" == 1 ]]; then
+      _cs_log "  done"
+    else
+      _cs_log "  one or more files failed to copy to $target"
+    fi
+  done
 }
 
 # Lists open Comoto-Tech/dev-hub codespaces as tab-separated
