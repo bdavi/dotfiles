@@ -1,16 +1,17 @@
 # Unifying local + GitHub Codespaces workspaces in herdr
 
-Status: **implemented and live-tested end to end (2026-08-07)** — the full
-mechanism (cs-sync → BatchMode SSH → preview herdr on the Codespace →
-mirror daemon → Codespace workspace in the local sidebar) was verified
-against a real `dev-hub` Codespace, including real interactive use
+Status: **implemented, live-tested end to end, and committed (2026-08-07)**
+— the full mechanism (cs-sync → BatchMode SSH → preview herdr on the
+Codespace → mirror daemon → Codespace workspace in the local sidebar) was
+verified against a real `dev-hub` Codespace, including real interactive use
 (splits, copy/paste, a Claude login). Three bugs were found and fixed in
 `.workrc-codespaces`, and a mirror-plugin rendering bug that corrupted
 every copy out of a mirrored pane is fixed via a source-built upstream PR,
 provisioned end to end by `build_ubuntu.sh` (asdf rust + patched build,
 auto-reverting once upstream releases the fix) — see
-[Live test results](#live-test-results-2026-08-07). Changes still
-uncommitted in both repos. See
+[Live test results](#live-test-results-2026-08-07). All of it is committed
+in `dotfiles` (`df0c82b`..`9972426`); `comoto-codespaces-dotfiles` has no
+further changes beyond what was already committed as of 2026-08-06. See
 [Implementation status](#implementation-status) for exactly what changed.
 Supersedes an earlier draft of this file. Everything below has now been checked
 against one of: the `herdr` binary actually installed on this machine (`herdr
@@ -676,15 +677,12 @@ escalation/release); `cs-remote`.
 
 ## Still open
 
-All script changes are applied to both repos and the core mechanism is now
-live-verified (see [Live test results](#live-test-results-2026-08-07) —
-step 4's mechanism check is resolved, and the `codespace` scope step is
-done). Remaining open items:
+All script changes are applied to both repos, committed, and the core
+mechanism is now live-verified (see
+[Live test results](#live-test-results-2026-08-07) — step 4's mechanism
+check is resolved, and the `codespace` scope step is done). Remaining open
+items:
 
-- **Commit the changes** — `dotfiles` (`.workrc-codespaces` fixes,
-  `config.toml` keybindings/scrollbars, `lib/herdr.sh` patched-build
-  lifecycle, `lib/asdf_langs.sh` rust, `build_ubuntu.sh` wiring, this doc)
-  and `comoto-codespaces-dotfiles` are both still uncommitted.
 - **Upstream housekeeping** — watch
   [PR #27](https://github.com/nikok6/herdr-mirror/pull/27): once merged
   and released, the next build-script run switches back to the GitHub
