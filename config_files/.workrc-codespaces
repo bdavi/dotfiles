@@ -14,6 +14,9 @@
 CS_REPO="Comoto-Tech/dev-hub"
 CS_HOSTS_TOML="$HOME/.config/herdr-mirror/hosts.toml"
 CS_SSH_ALIASES="$HOME/.ssh/codespaces"
+# herdr-add-cs won't create a codespace beyond this many existing ones
+# (any state) - a cost/quota guardrail, not a herdr-mirror or gh limit.
+CS_MAX_CODESPACES=3
 
 # Files that make up "being logged into gcloud" - deliberately not the
 # whole ~/.config/gcloud tree (which also holds logs/, .metrics.uuid,
@@ -340,4 +343,108 @@ cs-remote() {
 
   _cs_log "Attaching herdr --remote to $ssh_alias..."
   herdr --remote "$ssh_alias"
+}
+
+# One-shot "grow the mirror by one": finds a Comoto-Tech/dev-hub codespace
+# not already mirrored into this herdr session and gets herdr running there
+# (creating a new codespace if every existing one is already mirrored), so
+# it shows up in the local sidebar within herdr-mirror's poll_seconds - no
+# manual gh codespace ssh/typing herdr required. Unlike cs-connect, this
+# never drops you into an interactive session - it's meant to be run
+# unattended, e.g. bound to a herdr keybinding later if that's useful.
+#
+# No-op outside a local herdr pane, by design: a no-op if $HERDR_ENV isn't
+# set (not inside herdr at all), and also a no-op if $CODESPACE_NAME is set
+# - that means this shell is actually running on a Codespace, whether
+# reached by a direct `gh codespace ssh`/cs-connect session or by typing
+# into a *mirrored* pane (mirror only renders the remote pane locally;
+# anything typed into one executes on the remote shell, same as SSHing in
+# directly - there's no separate "local" shell context to distinguish
+# there). Either way `herdr workspace list` there would show that
+# Codespace's own workspaces, not this machine's mirror state, so the
+# "which codespaces are already connected" check below would be
+# meaningless if allowed to run there.
+herdr-add-cs() {
+  if [[ -z "${HERDR_ENV:-}" ]]; then
+    return 0
+  fi
+  if [[ -n "${CODESPACE_NAME:-}" ]]; then
+    _cs_log "herdr-add-cs: running inside a Codespace shell (direct SSH or a mirrored pane), not the local machine's own herdr - doing nothing"
+    return 0
+  fi
+
+  cs-sync
+
+  # Labels of every workspace this herdr session currently knows about,
+  # mirrored ones included - herdr-mirror prefixes each with
+  # "<codespace-name>: <workspace-name>" (confirmed live, see
+  # misc/herdr_codespaces.md's live test results). grep, not jq - matches
+  # this file's existing lightweight-JSON-field-extraction style (see
+  # cs-copy-url) rather than adding a new dependency.
+  local -a labels
+  mapfile -t labels < <(herdr workspace list 2>/dev/null | grep -o '"label":"[^"]*"' | cut -d'"' -f4)
+
+  local -a names states
+  local name state ref
+  while IFS=$'\t' read -r name state ref; do
+    [[ -z "$name" ]] && continue
+    names+=("$name")
+    states+=("$state")
+  done < <(_cs_list_raw)
+
+  # First codespace not already mirrored, preferring one already running
+  # (Available) over a stopped one - avoids extra resume latency when
+  # there's a choice. Doesn't break out of the loop on a non-Available
+  # match, so a later Available-and-unmirrored codespace still wins.
+  local target_name="" i label already
+  for i in "${!names[@]}"; do
+    already=0
+    for label in "${labels[@]}"; do
+      [[ "$label" == "${names[$i]}: "* ]] && { already=1; break; }
+    done
+    [[ "$already" == 1 ]] && continue
+
+    if [[ "${states[$i]}" == "Available" ]]; then
+      target_name="${names[$i]}"
+      break
+    elif [[ -z "$target_name" ]]; then
+      target_name="${names[$i]}"
+    fi
+  done
+
+  if [[ -z "$target_name" ]]; then
+    if [[ ${#names[@]} -ge $CS_MAX_CODESPACES ]]; then
+      _cs_log "herdr-add-cs: ERROR: every existing codespace is already mirrored, and there are already ${#names[@]}/$CS_MAX_CODESPACES - not creating another"
+      return 1
+    fi
+    _cs_log "herdr-add-cs: every existing codespace is already mirrored - creating a new one"
+    target_name="$(_cs_create)" || return 1
+    cs-sync
+  else
+    _cs_log "herdr-add-cs: found an unmirrored codespace, $target_name"
+  fi
+
+  local ssh_alias
+  ssh_alias="$(grep '^Host cs\.' "$CS_SSH_ALIASES" | awk -v n="$target_name" '$2 ~ "^cs\\."n"\\." {print $2; exit}')"
+  if [[ -z "$ssh_alias" ]]; then
+    _cs_log "herdr-add-cs: couldn't find an SSH alias for $target_name - try cs-sync"
+    return 1
+  fi
+
+  # Non-interactive: start herdr's headless server on the codespace and
+  # detach, rather than an interactive `gh codespace ssh` session (that's
+  # cs-connect's job - this function is meant to be run unattended).
+  # NEEDS LIVE VERIFICATION: `herdr server`'s exact flags and whether it
+  # self-daemonizes were never confirmed against a real Codespace (see
+  # misc/herdr_codespaces.md's live test results, which only exercised
+  # plain interactive `herdr`) - nohup+disown handles "survive the SSH
+  # session closing" at the shell level regardless of that, but if `herdr
+  # server` turns out to need different flags this is the line to fix.
+  if ssh -o BatchMode=yes "$ssh_alias" \
+    'nohup ~/.local/bin/herdr server </dev/null >/tmp/herdr-add-cs.log 2>&1 & disown'; then
+    _cs_log "herdr-add-cs: started herdr on $target_name - should appear in the mirror within ~20s"
+  else
+    _cs_log "herdr-add-cs: couldn't reach $target_name over SSH"
+    return 1
+  fi
 }

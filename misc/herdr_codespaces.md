@@ -469,6 +469,55 @@ useful on the personal machine too, just not the Codespaces-specific parts).
 `install_latest_herdr` itself also stays unconditional, both machines use
 herdr day to day.
 
+#### `herdr-add-cs` (added 2026-08-07)
+
+One-shot "grow the mirror by one," meant to be run unattended (not
+interactive like `cs-connect`): finds a `Comoto-Tech/dev-hub` codespace not
+already mirrored into the current herdr session, non-interactively starts
+herdr on it over SSH so it shows up in the local sidebar within
+`poll_seconds`, or creates a new codespace first if every existing one is
+already mirrored.
+
+- **No-op outside a local herdr pane, by design.** Silent no-op if
+  `$HERDR_ENV` is unset (not inside herdr at all). Logged no-op if
+  `$CODESPACE_NAME` is set — that means the shell is actually running on a
+  Codespace, whether reached by direct `gh codespace ssh`/`cs-connect` *or*
+  by typing into a **mirrored pane**: mirror only renders the remote pane
+  locally, anything typed into one executes on the remote shell, same as
+  SSHing in directly — there's no separate "local" shell context to
+  distinguish there, so `$CODESPACE_NAME` is the only reliable signal (same
+  check `.workrc`/`.commonrc` already use elsewhere for "is this shell on a
+  Codespace").
+- **"Already mirrored" is determined from `herdr workspace list`**, not
+  from `hosts.toml` membership — a host can be registered there without
+  actually showing a mirrored workspace (e.g. unreachable, or registered
+  but no herdr server running yet). Matches on each codespace name against
+  `herdr workspace list`'s `label` field, which herdr-mirror prefixes
+  `<codespace-name>: <workspace-name>` (confirmed live, see
+  [Live test results](#live-test-results-2026-08-07)). Parsed with
+  `grep`/`cut`, not `jq` — matches this file's existing lightweight-JSON
+  style (`cs-copy-url`) rather than adding a new dependency.
+- **Prefers an already-`Available` (running) unmirrored codespace** over a
+  stopped one, to skip the extra resume latency when there's a choice —
+  falls back to the first unmirrored one regardless of state if none are
+  running.
+- **Won't create a codespace past `CS_MAX_CODESPACES` (3)** — a cost/quota
+  guardrail, not a `gh`/herdr-mirror limit. Counts *every* existing
+  codespace regardless of state (mirrored or not, running or stopped), so
+  it also refuses if there are already 3 sitting around even if none of
+  them are mirrored yet. Logs an `ERROR:`-prefixed message and returns 1
+  rather than creating a 4th.
+- **NEEDS LIVE VERIFICATION**: connects via `ssh -o BatchMode=yes ... 'nohup
+  ~/.local/bin/herdr server </dev/null >/tmp/herdr-add-cs.log 2>&1 &
+  disown'` — i.e. `herdr server` (the "Run as headless server" advanced
+  command, confirmed to exist via `herdr --help`) rather than plain `herdr`
+  (which is what every previous live test in this doc actually exercised,
+  always interactively). Its exact flags and whether it self-daemonizes on
+  its own were never confirmed against a real Codespace — `nohup ... &
+  disown` handles "survive the SSH session closing" at the shell level
+  regardless, but if `herdr server` needs different flags, that line is
+  where to fix it.
+
 ## Applied changes — `comoto-codespaces-dotfiles` (Codespaces side)
 
 **Applied 2026-08-06.** One change, to `script/setup` (the dotfiles
@@ -696,6 +745,10 @@ items:
   and the `_cs_create` new-Codespace path are still never exercised
   (typing into a mirrored workspace has now been used for real).
 - **Picker UX** — revisit the fzf default if it's not what you want.
+- **`herdr-add-cs`, entirely unverified** — `herdr server`'s exact flags
+  and self-daemonizing behavior over a non-interactive SSH connection were
+  never confirmed against a real Codespace; see the caveat in its writeup
+  above. First real run is the test.
 
 ## Implementation status
 
