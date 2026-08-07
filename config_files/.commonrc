@@ -113,4 +113,9 @@ fi
 ###############################################################################
 if [ -d "/home/brian/monorepo" ]; then
   source ~/.workrc
+
+  # Codespaces-only, not personal-machine - ~/monorepo is the signal this
+  # is the work machine (this dotfiles repo is shared between both). See
+  # misc/herdr_codespaces.md.
+  source ~/.workrc-codespaces
 fi

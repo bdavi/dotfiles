@@ -35,6 +35,10 @@
 # to fail (which would trip set -e and take the rest of the build down
 # with it) - the next run from outside a herdr session (e.g. the
 # unattended cron job) picks the update back up.
+#
+# Must run before switch_herdr_to_preview_channel below - on a genuinely
+# fresh box there's no herdr binary yet for `herdr channel` to run
+# against, and this is the function that installs one.
 install_latest_herdr() {
   command -v herdr >/dev/null || curl -fsSL https://herdr.dev/install.sh | sh
 
@@ -44,6 +48,57 @@ install_latest_herdr() {
   fi
 
   herdr update
+}
+
+# herdr-mirror (nikok6/herdr-mirror, installed below) needs both ends of
+# the mirror connection on herdr's preview channel - specifically a
+# preview build dated 2026-06-30 or newer, per the plugin's own README
+# (see ../../../misc/herdr_codespaces.md for the full verification). This
+# switches the channel and re-runs `herdr update` so the binary actually
+# matches - `channel set` alone only changes which channel *future*
+# updates pull from, it doesn't itself fetch anything.
+#
+# Same $HERDR_ENV skip as install_latest_herdr, for the same reason -
+# only the update half needs to skip; the channel switch itself doesn't
+# touch the running binary and is safe to always run.
+switch_herdr_to_preview_channel() {
+  local current
+  current="$(herdr channel show)"
+
+  if [[ "$current" == "preview" ]]; then
+    echo "herdr already on preview channel ($(herdr --version))"
+    return 0
+  fi
+
+  echo "Switching herdr from $current to preview channel"
+  herdr channel set preview
+
+  if [[ -n "${HERDR_ENV:-}" ]]; then
+    echo "Running inside herdr - skipping herdr update (re-run the build outside a herdr pane to actually pick up a preview build)"
+    return 0
+  fi
+
+  herdr update
+  echo "herdr now on preview channel: $(herdr --version)"
+  echo "herdr-mirror needs a preview build dated 2026-06-30 or newer - if the plugin ever reports a version/compatibility mismatch, check that date against this version"
+}
+
+# herdr-mirror (https://github.com/nikok6/herdr-mirror) - unofficial
+# third-party plugin, mirrors several remote herdr servers' workspaces into
+# the local sidebar simultaneously (prefixed "<host>: <name>"), unlike core
+# herdr's own `--remote` which attaches to one remote 1:1 and replaces the
+# local view. Needs herdr on the preview channel (see
+# switch_herdr_to_preview_channel above) - install this after that function
+# has run, not before. The remote side (each Codespace) needs no plugin,
+# just herdr itself - see comoto-codespaces-dotfiles/script/setup. Idempotent
+# on its own, same as the other install_herdr_*_plugin functions. Its own
+# config - ~/.config/herdr-mirror/hosts.toml, a non-standard location the
+# plugin's README specifies directly rather than the usual
+# `herdr plugin config-dir` path other plugins use - is managed by cs-sync
+# in config_files/.workrc-codespaces, not here; that needs to re-run
+# whenever the Codespace list changes, not just at build time.
+install_herdr_mirror_plugin() {
+  herdr plugin install nikok6/herdr-mirror --yes
 }
 
 # vim-herdr-navigation (https://github.com/paulbkim-dev/vim-herdr-navigation)

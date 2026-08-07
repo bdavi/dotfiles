@@ -90,3 +90,6 @@ key = "prefix+r"
 type = "plugin_action"
 command = "persiyanov.reviewr.toggle"
 description = "review panel"
+
+[update]
+channel = "preview"

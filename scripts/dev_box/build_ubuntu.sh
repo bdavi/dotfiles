@@ -37,6 +37,7 @@ source "$SCRIPT_DIR/lib/security.sh"
 source "$SCRIPT_DIR/lib/security_scanners.sh"
 source "$SCRIPT_DIR/lib/neovim.sh"
 source "$SCRIPT_DIR/lib/herdr.sh"
+source "$SCRIPT_DIR/lib/herdr_codespaces.sh"
 source "$SCRIPT_DIR/lib/nimbalyst.sh"
 
 require_sudo
@@ -280,6 +281,22 @@ install_herdr_vim_navigation_plugin
 install_herdr_spaces_pr_status_plugin
 install_herdr_gitview_plugin
 install_herdr_reviewr_plugin
+
+# This dotfiles repo is shared between a personal machine and a work
+# machine; ~/monorepo only exists on the work machine, so it's the same
+# signal .commonrc already uses to gate .workrc/.workrc-codespaces. The
+# GitHub Codespaces integration (preview channel, herdr-mirror, gh cs
+# wiring) is Comoto-specific and has no reason to run anywhere else - see
+# misc/herdr_codespaces.md.
+if [ -d "$HOME/monorepo" ]; then
+  switch_herdr_to_preview_channel
+  install_herdr_mirror_plugin
+
+  # Not fatal if the codespace scope is missing, just logs instructions
+  # and moves on.
+  ensure_gh_codespace_scope || true
+  ensure_ssh_config_includes_codespaces
+fi
 
 
 ######################################################################
