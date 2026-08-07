@@ -1,10 +1,17 @@
 # Unifying local + GitHub Codespaces workspaces in herdr
 
-Status: **implemented (Option A / herdr-mirror, 2026-08-06) — changes
-applied to both `dotfiles` and `comoto-codespaces-dotfiles`, neither
-committed nor run live.** See
-[Implementation status](#implementation-status) for exactly what changed and
-[Still open](#still-open) for what's left before a real test.
+Status: **implemented and live-tested end to end (2026-08-07)** — the full
+mechanism (cs-sync → BatchMode SSH → preview herdr on the Codespace →
+mirror daemon → Codespace workspace in the local sidebar) was verified
+against a real `dev-hub` Codespace, including real interactive use
+(splits, copy/paste, a Claude login). Three bugs were found and fixed in
+`.workrc-codespaces`, and a mirror-plugin rendering bug that corrupted
+every copy out of a mirrored pane is fixed via a source-built upstream PR,
+provisioned end to end by `build_ubuntu.sh` (asdf rust + patched build,
+auto-reverting once upstream releases the fix) — see
+[Live test results](#live-test-results-2026-08-07). Changes still
+uncommitted in both repos. See
+[Implementation status](#implementation-status) for exactly what changed.
 Supersedes an earlier draft of this file. Everything below has now been checked
 against one of: the `herdr` binary actually installed on this machine (`herdr
 0.7.5`), the `gh` CLI actually installed on this machine (`gh 2.97.0`), the
@@ -491,24 +498,206 @@ that "the remote needs no plugin — just herdr."
 | `poll_seconds` | **Tuned to 20s** (from herdr-mirror's 60s default) |
 | `build_ubuntu.sh` gating | Same `~/monorepo` check now wraps `switch_herdr_to_preview_channel`, `install_herdr_mirror_plugin`, `ensure_gh_codespace_scope`, `ensure_ssh_config_includes_codespaces` — the base herdr install and its non-Codespaces plugins stay unconditional |
 
+Added 2026-08-07:
+
+| Question | Decision |
+|---|---|
+| Broken mirror rendering (PR #27 unreleased) | **Build the PR branch from source in the build script** (`install_herdr_mirror_plugin`, `lib/herdr.sh`) — clone/build/link idempotently, auto-revert to the GitHub install once the fix is merged *and* released |
+| Rust toolchain for that build | **asdf, matching the existing language pattern** (`asdf_install_latest_rust`, `asdf_langs.sh`) — installed unconditionally on both machines; the one-off rustup install was removed |
+| Preview channel now effectively on both machines | **Accepted** — `herdr channel set` wrote `[update] channel = "preview"` into the tracked `config.toml`, which both machines symlink; keeping it tracked beats a per-machine untracked file that herdr rewrites (see Implementation status) |
+| Mirror split/copy ergonomics | `prefix+\`/`prefix+minus` rebound to the mirror plugin's remote-aware split actions; `[ui] pane_scrollbars = false`; `cs-copy-url` kept for the OSC 52 gap (upstream #25) |
+
+## Live test results (2026-08-07)
+
+Run non-interactively (Claude-driven) against a real, freshly created
+`dev-hub` Codespace (`improved-computing-machine-qj7wqrvqwr397qq`) from the
+work machine. Everything below is observed, not predicted.
+
+**What worked, in order:**
+
+1. `gh auth` now has the `codespace` scope (the one-time refresh listed as
+   outstanding on 2026-08-06 had been done by 2026-08-07).
+2. `cs-sync` generated `~/.ssh/codespaces` + the managed `hosts.toml` block
+   correctly, including the researched non-fatal skip of a stopped
+   Codespace (`curly-halibut`) — after the two bug fixes below.
+3. `ssh -o BatchMode=yes cs.<name>.main true` succeeded with no prompt; the
+   `codespaces.auto` identity key was generated lazily on first connect,
+   exactly as the `cli/cli` source promised.
+4. The Codespace's dotfiles bootstrap (`comoto-codespaces-dotfiles/script/setup`)
+   worked: its herdr was already on **preview
+   `0.8.0-preview.2026-08-04`** — identical build to local, clearing the
+   mirror's `2026-06-30` floor.
+5. With a herdr server running on the Codespace and the mirror daemon
+   running locally, the Codespace workspace appeared in the local sidebar
+   as `improved-computing-machine-…: cstest` about **4 seconds** after
+   daemon start (well under the 20s poll worst case). Transport was the
+   normal SSH socket path — **no exec-relay fallback, so `socat` is not
+   needed** on the Alpine image after all.
+
+**Three real bugs found and fixed in `.workrc-codespaces`:**
+
+1. **`alias mv='mv -i'` breakage** — `.commonrc` defines that alias before
+   it sources `.workrc-codespaces`, and bash expands aliases at
+   function-*definition* time, so `cs-sync`'s `mv` inherited `-i` and
+   prompted (or, non-interactively, silently declined) on every hosts.toml
+   overwrite — first run left hosts.toml empty. Fixed with
+   `command mv -f` / `command rm -f`.
+2. **stderr corrupted `~/.ssh/codespaces`** — `cs-sync` captured
+   `gh codespace ssh --config 2>&1`, so gh's "skipping unavailable
+   codespace" stderr note landed as line 1 of the SSH config, which ssh
+   rejects wholesale ("Bad configuration option"). Fixed by capturing
+   stdout only.
+3. **Mirror daemon never started** — `herdr server reload-config` does not
+   (re)start the mirror plugin's polling daemon, and the plugin's autostart
+   only fires at herdr launch — if `hosts.toml` didn't exist yet at that
+   point (exactly the first-run case), nothing ever polled, and
+   `herdr plugin action invoke status --plugin mirror` showed
+   `daemon: not running` even though it could see the host config. Fixed:
+   `cs-sync` now invokes the plugin's `start` action ("Start (or resume)" —
+   verified idempotent, same daemon pid across re-invocations) after
+   reload-config.
+
+**Other observations worth keeping:**
+
+- A **fresh headless remote server has zero workspaces**, and the mirror
+  (correctly) shows nothing until one exists. Interactive use never hits
+  this — running `herdr` in the SSH session creates a workspace — but
+  don't mistake "connected and synced, 0 mirror workspaces" for a failure
+  when testing headlessly.
+- Mirror daemon status/log is inspectable via
+  `herdr plugin action invoke status --plugin mirror` then
+  `herdr plugin log list` — the useful debugging loop for all of the above.
+- `herdr workspace list` does include mirrored workspaces, so it works for
+  scripted checks; no need to parse `herdr api snapshot`.
+- **Splitting inside a mirror (added after first real use, 2026-08-07)**:
+  core split keys do a *local* split even in a mirrored workspace — herdr
+  core doesn't know about mirror semantics. The plugin's
+  `remote-split-right`/`remote-split-down` actions handle it (remote split
+  inside a mirror, plain local split anywhere else — graceful fallback
+  confirmed by the plugin's own action descriptions), so `config.toml` now
+  unbinds core `split_vertical`/`split_horizontal` and rebinds the same
+  keys (`prefix+\`, `prefix+minus`) to those actions via
+  `[[keys.command]]`. Verified live: a remote `pane split` on the
+  Codespace mirrored into the local sidebar within seconds. Equivalent
+  actions exist for tabs (`remote-new-tab`, also graceful-fallback) and
+  workspaces (`remote-new-workspace` — **not** graceful: outside a mirror
+  it targets `default_host`, so don't blindly rebind `new_workspace`).
+- **Copying text out of a mirrored pane (added 2026-08-07, after hitting
+  it live with a Claude auth URL)**: grid-level copying is a dead end for
+  long URLs in mirrored panes, for three stacked reasons discovered in
+  order. (1) Mouse: the mirror's mouse handling is adaptive per its
+  README — at a remote *shell* prompt drag-select works natively, but
+  with a *TUI* foreground (Claude Code's login is one) clicks forward to
+  the remote app, so highlighting does nothing. (2) herdr's pane
+  scrollbar column sat inside terminal-native (shift+drag) selections —
+  `config.toml` now sets `[ui] pane_scrollbars = false` (`[ui]`-scoped,
+  not root; reload-config's diagnostics call out misplaced keys). (3) The
+  killer, found by diffing local vs remote `herdr pane read` of the same
+  content: **the mirror's rendering drops the rightmost character of
+  every wrapped row** (remote wraps at a width one column wider than the
+  local pane draws — width-sync off-by-one, e.g. "platform" → "platorm",
+  and OAuth state/challenge params silently corrupted). So even a
+  perfect visual copy of the on-screen URL is invalid — the *display* is
+  lossy, not the copying. (An earlier note here blamed tmux for the bad
+  copies — wrong: that tmux belonged to the Claude session's own
+  terminal, not the herdr instance, which runs directly in its own
+  terminal. The lossy mirror grid was the real culprit all along, herdr
+  copy mode included.)
+  **Fixed 2026-08-07 via upstream PR
+  [nikok6/herdr-mirror#27](https://github.com/nikok6/herdr-mirror/pull/27)**
+  ("don't let a full-width row erase its own last column" — the renderer's
+  erase-to-end-of-line fired while the cursor still sat in the last
+  column under deferred wrap, wiping the just-painted cell). The PR
+  branch (`finafisken/herdr-mirror@fix/full-width-row-el`, based on the
+  same 0.1.16 release; 108/108 tests pass) is now **fully provisioned by
+  the build script**: `install_herdr_mirror_plugin` (`lib/herdr.sh`)
+  clones the branch to `~/code/herdr-mirror`, builds it with cargo (Rust
+  provisioned via the standard asdf pattern —
+  `asdf_install_latest_rust`/`asdf_cleanup_rust` in `asdf_langs.sh`,
+  wired into `build_ubuntu.sh`'s languages section), links it as the
+  `mirror` plugin (shown as `local:` in `herdr plugin list`), pulls and
+  rebuilds when the branch moves, and — once it detects PR #27 is merged
+  *and* a release newer than v0.1.16 exists — automatically unlinks the
+  patched build, deletes the clone (only after verifying the dir really
+  is its own clone of the fix fork), and reverts to the plain GitHub
+  install; at that point the temporary block in `lib/herdr.sh` can be
+  deleted. All of it verified live: fresh clone → asdf-cargo build →
+  link reproduced from scratch, second run is a no-op, and a 310-char
+  marker string printed on the Codespace read back byte-for-byte intact
+  from the local mirror pane across wraps.
+  Related, still open upstream:
+  [#25](https://github.com/nikok6/herdr-mirror/issues/25) — mirror panes
+  drop OSC 52, so remote-side clipboard writes (Claude Code's "c to
+  copy", remote nvim OSC52 yanks) never reach the local clipboard;
+  verified live (an OSC 52 emitted in a remote pane left the local
+  clipboard untouched). Until that's fixed, remote→local clipboard needs
+  a selection or `cs-copy-url`. **`cs-copy-url`** (in
+  `.workrc-codespaces`) remains as a convenience: reads the remote
+  panes' buffers over SSH, joins wrapped rows, and puts the last URL
+  printed there into the local clipboard via xclip — note it only sees
+  what's currently on the remote screens (`pane read` returns the
+  visible screen; its deeper-history flags are advertised but broken on
+  this preview build). Verified live: reconstructed a 450-char Claude
+  auth URL intact.
+- **Second, separate width bug: stale remote pty size after a mirror
+  daemon restart (found 2026-08-07 while verifying the PR #27 fix)**:
+  after teardown/start cycles of the mirror daemon, a mirrored pane can
+  render *several* columns narrower than the remote pty it mirrors (seen
+  live: remote wrapping at 32 cols, local pane drawing 26 — every row
+  visibly missing its last 6 characters; distinct from the PR #27 bug,
+  which loses exactly 1). The daemon apparently only pushes the local
+  pane size to the remote pty on resize events, and a restart doesn't
+  re-send it. **Recovery: any resize** — nudge the pane split, resize the
+  window, or toggle zoom (`prefix+z` twice); fresh output then wraps at
+  the synced width and mirrors byte-for-byte (verified). Old rows printed
+  during the desync stay cropped (ptys don't rewrap history). Not yet
+  reported upstream; worth an issue on nikok6/herdr-mirror if it recurs
+  in normal use (daemon restarts are rare outside plugin surgery like
+  today's).
+- **Preview-build flag skew in `herdr pane read`**: its `--help`
+  advertises `--source`/`--lines`/`--format`, but the parser rejects all
+  of them ("unknown option") — only the bare `herdr pane read <pane_id>`
+  form works on `0.8.0-preview.2026-08-04`. Errors go to stderr, so with
+  `2>/dev/null` it looks like an empty buffer — check stderr before
+  concluding a pane is empty.
+- **Running `herdr` inside a mirrored pane fails by design** — the pane's
+  shell already has `HERDR_ENV=1`/`HERDR_PANE_ID` set (it *is* a remote
+  herdr pane), so the TUI refuses: "nested herdr is disabled by default."
+  There's nothing to start — the remote server is already running. CLI
+  subcommands (`herdr workspace create`, `herdr pane split --current
+  --direction right`, etc.) work fine from that shell and talk to the
+  remote server via `HERDR_SOCKET_PATH`, so they're the scriptable
+  alternative to the plugin actions.
+
+**Not exercised** (interactive-only, left for first real use): the
+`cs-connect` fzf picker and its `exec` into `gh codespace ssh`; `_cs_create`
+(new-Codespace path); typing into a mirrored workspace (control
+escalation/release); `cs-remote`.
+
 ## Still open
 
-All script changes described above are now applied to both repos (not yet
-committed — see [Implementation status](#implementation-status) below).
-Remaining open items:
+All script changes are applied to both repos and the core mechanism is now
+live-verified (see [Live test results](#live-test-results-2026-08-07) —
+step 4's mechanism check is resolved, and the `codespace` scope step is
+done). Remaining open items:
 
-- **Picker UX** — `cs-connect`/`cs-remote` were implemented with the fzf
-  default sketched above (falls back to plain `select` if fzf is missing).
-  Revisit if that's not what you want.
-- Anything from the [Mechanism check on step 4](#mechanism-check-on-step-4)
-  section that changes the shape of what you want, now that it's spelled
-  out precisely — this is still the one piece of the whole plan that's
-  never been run against a real Codespace.
-- The `gh auth refresh -h github.com -s codespace` one-time step is still
-  outstanding on this machine (confirmed missing under
-  [Verified facts](#gh-codespace-ssh-checked-against-cligithubcommanual-and-live-clicli-trunk-source))
-  — `ensure_gh_codespace_scope` will log instructions for it on the next
-  build run rather than doing it itself.
+- **Commit the changes** — `dotfiles` (`.workrc-codespaces` fixes,
+  `config.toml` keybindings/scrollbars, `lib/herdr.sh` patched-build
+  lifecycle, `lib/asdf_langs.sh` rust, `build_ubuntu.sh` wiring, this doc)
+  and `comoto-codespaces-dotfiles` are both still uncommitted.
+- **Upstream housekeeping** — watch
+  [PR #27](https://github.com/nikok6/herdr-mirror/pull/27): once merged
+  and released, the next build-script run switches back to the GitHub
+  install automatically and the temporary block in `lib/herdr.sh` can be
+  deleted. Consider filing the stale-pty-size-after-daemon-restart bug
+  (see Live test results) and watching
+  [#25](https://github.com/nikok6/herdr-mirror/issues/25) (OSC 52) —
+  when that lands, Claude Code's "c to copy" will work through the
+  mirror and `cs-copy-url` becomes mostly redundant.
+- **First interactive use** — the fzf picker in `cs-connect`/`cs-remote`
+  and the `_cs_create` new-Codespace path are still never exercised
+  (typing into a mirrored workspace has now been used for real).
+- **Picker UX** — revisit the fzf default if it's not what you want.
 
 ## Implementation status
 
@@ -529,14 +718,28 @@ Remaining open items:
   now has a `[update]\nchannel = "preview"` block that wasn't there before —
   `herdr channel set` writes to `config.toml` itself, which the file's own
   header comment (in `lib/herdr.sh`) didn't previously account for
-  (previously said "herdr only *reads* it" except for onboarding — narrowly
-  true until this, worth a follow-up comment fix, not done as part of this
-  session since it's unrelated to the task at hand).
-- Still outstanding: `gh auth refresh -h github.com -s codespace` (checked
-  live — `codespace` scope still missing), and no live Codespace has been
-  touched yet (no `cs-connect`/`cs-sync` run, `comoto-codespaces-dotfiles/script/setup`
-  not yet run on an actual Codespace). First real test against a live
-  Codespace is still pending.
+  (~~worth a follow-up comment fix~~ **comment fixed 2026-08-07**).
+  Side effect worth knowing: because that block is tracked in the shared
+  repo copy of `config.toml`, **both machines** (work and personal) now
+  read `channel = "preview"` — the preview-channel *switch* is gated to
+  the work machine in `build_ubuntu.sh`, but the tracked config makes the
+  channel itself effectively global. Accepted for now (herdr can't keep
+  channel state machine-local without rewriting a tracked file on every
+  switch); revisit if preview ever misbehaves on the personal machine.
+- **2026-08-07, patched herdr-mirror + asdf rust**: `lib/asdf_langs.sh`
+  gained `asdf_install_latest_rust`/`asdf_cleanup_rust` (standard asdf
+  pattern, precompiled toolchains, called unconditionally from
+  `build_ubuntu.sh`'s languages section), and `install_herdr_mirror_plugin`
+  in `lib/herdr.sh` became the full patched-build lifecycle described in
+  [Live test results](#live-test-results-2026-08-07). A stray rustup
+  toolchain used for the first ad-hoc build (and the `. "$HOME/.cargo/env"`
+  lines it appended to the tracked `.bashrc`/`.bash_profile` and
+  `~/.profile`) was removed — asdf's rust is the only toolchain now.
+- ~~Still outstanding: `gh auth refresh` / first live test~~ **Done
+  2026-08-07**: the `codespace` scope is present, and the full mechanism
+  was verified against a real Codespace — see
+  [Live test results](#live-test-results-2026-08-07), including the three
+  `.workrc-codespaces` bug fixes that test produced.
 
 ## Fallback if Option A doesn't pan out
 
