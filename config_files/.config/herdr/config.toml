@@ -43,6 +43,14 @@ split_horizontal = ""
 # doesn't need a mnemonic letter the way reviewr's "r" does.
 resize_mode = "prefix+v"
 
+# Unset by default. Direct (no prefix) bindings, not prefix+X - needs to
+# work while a Claude session or Neovim has focus, same as vim-herdr-
+# navigation's ctrl+hjkl below: herdr grabs direct bindings at the
+# multiplexer level before the foreground process ever sees the
+# keystroke, same mechanism, not something special-cased per binding.
+previous_workspace = "alt+k"
+next_workspace = "alt+j"
+
 [[keys.command]]
 key = "shift+left"
 type = "shell"
