@@ -127,6 +127,7 @@ sudo apt-get --yes install \
   gimp \
   keepassxc \
   libreoffice \
+  libspa-0.2-bluetooth \
   nemo \
   okular \
   peek \
