@@ -260,10 +260,7 @@ asdf_cleanup_rust
 ######################################################################
 # Neovim
 ######################################################################
-# After "Languages (via asdf)" above, not before - ruby_lsp/elixirls/
-# ts_ls/css-lsp need Ruby/Elixir+Erlang/Node already on PATH before
-# Mason can install them. See lib/neovim.sh for why this needs to be
-# more than just a `Lazy sync`.
+# See lib/neovim.sh for why this needs to be more than just a `Lazy sync`.
 install_neovim
 
 

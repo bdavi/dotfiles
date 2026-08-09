@@ -130,29 +130,6 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   {
-    "mason-org/mason-lspconfig.nvim",
-    dependencies = {
-      { "mason-org/mason.nvim", opts = {} },
-      "neovim/nvim-lspconfig",
-    },
-    opts = {
-      -- lspconfig server names, not Mason package names (mason-lspconfig
-      -- translates between the two) -- e.g. ruby_lsp <-> ruby-lsp.
-      ensure_installed = { "elixirls", "cssls", "ts_ls", "ruby_lsp" },
-    },
-    config = function(_, opts)
-      -- Neovim 0.11+'s native vim.lsp.config replaces the old
-      -- require('lspconfig').server.setup{} pattern (deprecated/removed).
-      -- '*' applies to every server config as a default, so blink.cmp's
-      -- completion capabilities reach whichever server attaches.
-      vim.lsp.config("*", {
-        capabilities = require("blink.cmp").get_lsp_capabilities(),
-      })
-      -- Installs ensure_installed above, then vim.lsp.enable()'s each one.
-      require("mason-lspconfig").setup(opts)
-    end,
-  },
-  {
     "nvim-treesitter/nvim-treesitter",
     -- nvim-treesitter's `main` branch requires Neovim 0.12+; `master` is the
     -- frozen-but-supported branch for 0.10/0.11 and is what this box runs.
@@ -254,7 +231,7 @@ require("lazy").setup({
         -- without needing to navigate to it first.
         list = { selection = { preselect = true } },
       },
-      sources = { default = { "lsp", "path", "snippets", "buffer" } },
+      sources = { default = { "path", "snippets", "buffer" } },
       fuzzy = { implementation = "prefer_rust_with_warning" },
     },
     opts_extend = { "sources.default" },
@@ -268,9 +245,9 @@ require("lazy").setup({
     opts = {},
   },
   {
-    -- Symbol outline sidebar (backed by LSP when attached, treesitter
-    -- otherwise) -- orienting fast in a large/unfamiliar file without
-    -- hunting line by line, e.g. after an AI-generated edit.
+    -- Symbol outline sidebar, runs off treesitter (no LSP in this setup)
+    -- -- orienting fast in a large/unfamiliar file without hunting line
+    -- by line, e.g. after an AI-generated edit.
     "stevearc/aerial.nvim",
     keys = {
       { "<leader>a", "<cmd>AerialToggle<cr>", desc = "Toggle symbol outline" },
@@ -328,9 +305,7 @@ require("lazy").setup({
       formatters_by_ft = {
         elixir = { "mix" },
       },
-      -- Falls back to the attached LSP server's formatter for filetypes
-      -- with no formatter configured above.
-      format_on_save = { timeout_ms = 500, lsp_format = "fallback" },
+      format_on_save = { timeout_ms = 500 },
     },
   },
   {
@@ -357,28 +332,6 @@ require("lazy").setup({
     },
   },
 })
-
---------------------------------------------------------------------------
--- LSP keybindings and diagnostics
---------------------------------------------------------------------------
-vim.api.nvim_create_autocmd("LspAttach", {
-  desc = "LSP keybindings, buffer-local so they only exist where a server actually attaches",
-  callback = function(args)
-    local b = { buffer = args.buf }
-    vim.keymap.set("n", "gd", "<cmd>FzfLua lsp_definitions<cr>", vim.tbl_extend("force", b, { desc = "Go to definition" }))
-    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", b, { desc = "Go to declaration" }))
-    vim.keymap.set("n", "gi", "<cmd>FzfLua lsp_implementations<cr>", vim.tbl_extend("force", b, { desc = "Go to implementation" }))
-    vim.keymap.set("n", "gr", "<cmd>FzfLua lsp_references<cr>", vim.tbl_extend("force", b, { desc = "Go to references" }))
-    vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", b, { desc = "Hover docs" }))
-    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", b, { desc = "Rename symbol" }))
-    vim.keymap.set({ "n", "x" }, "<leader>ca", "<cmd>FzfLua lsp_code_actions<cr>", vim.tbl_extend("force", b, { desc = "Code action" }))
-    vim.keymap.set("n", "<leader>cs", "<cmd>FzfLua lsp_document_symbols<cr>", vim.tbl_extend("force", b, { desc = "Document symbols" }))
-  end,
-})
-
-vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Previous diagnostic" })
-vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Next diagnostic" })
-vim.keymap.set("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line diagnostics" })
 
 --------------------------------------------------------------------------
 -- vim-herdr-navigation (Ctrl-h/j/k/l across herdr panes, tmux panes, and
