@@ -1,0 +1,23 @@
+# Shadows /etc/xdg/autostart/org.buddiesofbudgie.labwc-bridge.desktop (same
+# basename) to pin the system python. The stock entry launches `python3` via
+# PATH, which resolves to the asdf shim - that python can't see
+# /usr/lib/python3/dist-packages, so the bridge dies on `import systemd`
+# before doing anything. Without the bridge, Budgie's Wayland session never
+# translates gsettings keybindings (and workspace count, etc.) into labwc's
+# rc.xml, so keyboard shortcut changes made in Budgie settings silently
+# don't apply. Inert outside Budgie (OnlyShowIn), so harmless on XFCE
+# dev boxes.
+[Desktop Entry]
+Name=Labwc Bridge
+Comment=Bridge between GNOME Settings to Labwc
+Exec=/usr/bin/python3 /usr/libexec/budgie-desktop/labwc_bridge.py
+Type=Application
+NoDisplay=true
+Categories=System;
+X-GNOME-Autostart-Notify=false
+X-GNOME-AutoRestart=true
+X-GNOME-Autostart-enabled=true
+# Kept from the stock entry: the bridge exits at startup if no labwc
+# process exists yet, so it must not launch before the compositor.
+X-GNOME-Autostart-Delay=10
+OnlyShowIn=Budgie;
