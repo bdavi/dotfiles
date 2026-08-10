@@ -48,8 +48,15 @@ resize_mode = "prefix+v"
 # navigation's ctrl+hjkl below: herdr grabs direct bindings at the
 # multiplexer level before the foreground process ever sees the
 # keystroke, same mechanism, not something special-cased per binding.
-previous_workspace = "alt+k"
-next_workspace = "alt+j"
+# alt+shift, not plain alt / ctrl+alt / super: plain alt+j encodes as
+# ESC j, so a fast Esc-then-j/k (leaving vim insert mode, escaping a TUI)
+# read as alt+j/k and triggered "random" workspace jumps. ctrl+alt+j and
+# super+j never registered at all - legacy terminal encoding has no
+# distinct sequence for them on letter keys. alt+shift+j (ESC J) does
+# register; known tradeoff: a fast Esc-then-J (e.g. escaping vim then
+# joining lines) can still misfire the same way plain alt did.
+previous_workspace = "alt+shift+k"
+next_workspace = "alt+shift+j"
 
 [[keys.command]]
 key = "shift+left"
