@@ -9,13 +9,46 @@ alias rm='rm -I --preserve-root'
 if grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null ; then
   alias open="explorer.exe"
 else
-  # Swap esc and caplock
-  alias swapesc='/usr/bin/setxkbmap -option caps:swapescape'
-  /usr/bin/setxkbmap -option caps:swapescape
+  # Under Wayland (Budgie runs labwc) keyboard settings live in labwc's config
+  # files, which it reloads on --reconfigure. Under X11, set them directly.
+
+  # Swap esc and capslock
+  swapesc() {
+    if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+      local env_file="${XDG_CONFIG_HOME:-$HOME/.config}/budgie-desktop/labwc/environment"
+      if ! grep -qs 'caps:swapescape' "$env_file"; then
+        mkdir -p "${env_file%/*}"
+        if grep -qs '^XKB_DEFAULT_OPTIONS=' "$env_file"; then
+          sed -i 's/^XKB_DEFAULT_OPTIONS=.*/&,caps:swapescape/' "$env_file"
+        else
+          echo 'XKB_DEFAULT_OPTIONS=caps:swapescape' >> "$env_file"
+        fi
+        labwc --reconfigure 2>/dev/null
+      fi
+    else
+      /usr/bin/setxkbmap -option caps:swapescape
+    fi
+  }
+  swapesc
 
   # Keyboard speed
-  alias keyfast='xset r rate 225 60'
-  xset r rate 225 60
+  keyfast() {
+    if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+      local rc="${XDG_CONFIG_HOME:-$HOME/.config}/budgie-desktop/labwc/rc.xml"
+      if [ -f "$rc" ] && { ! grep -qs '<repeatRate>60<' "$rc" || ! grep -qs '<repeatDelay>225<' "$rc"; }; then
+        if grep -qs '<repeatRate>' "$rc"; then
+          sed -i -e 's|<repeatRate>[^<]*</repeatRate>|<repeatRate>60</repeatRate>|' \
+                 -e 's|<repeatDelay>[^<]*</repeatDelay>|<repeatDelay>225</repeatDelay>|' "$rc"
+        else
+          sed -i '0,/<keyboard>/s||<keyboard>\n\t\t<repeatRate>60</repeatRate>\n\t\t<repeatDelay>225</repeatDelay>|' "$rc"
+        fi
+        labwc --reconfigure 2>/dev/null
+      fi
+    else
+      xset r rate 225 60
+    fi
+  }
+  keyfast
 
   # Screen reslution adjustments
   alias r2k='xrandr -s 2560x1440'
