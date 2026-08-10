@@ -224,11 +224,19 @@ _cs_pick() {
 # and gives little feedback of its own.
 _cs_create() {
   _cs_log "Creating new codespace in $CS_REPO (this can take a few minutes)..."
+  # `gh codespace create` has no --json flag (unlike `gh codespace list`) -
+  # it prints the new codespace's name as its stdout. Keep only the last
+  # line in case gh ever prepends informational output there too.
   local name
-  name="$(gh codespace create --repo "$CS_REPO" --json name --jq .name)" || {
+  name="$(gh codespace create --repo "$CS_REPO")" || {
     _cs_log "gh codespace create failed"
     return 1
   }
+  name="${name##*$'\n'}"
+  if [[ -z "$name" ]]; then
+    _cs_log "gh codespace create printed no codespace name - check 'gh codespace list' manually"
+    return 1
+  fi
   _cs_log "Created $name, waiting for it to become Available..."
 
   local state
@@ -437,20 +445,57 @@ herdr-add-cs() {
     return 1
   fi
 
+  # A codespace reports Available before its dotfiles bootstrap (the thing
+  # that installs herdr, see misc/herdr_codespaces.md) has finished - on a
+  # fresh codespace ~/.local/bin/herdr can lag Available by minutes
+  # (confirmed live 2026-08-10: nohup logged "No such file or directory"
+  # while the ssh command still exited 0, so this function claimed success
+  # with no server started). Wait for the binary before trying to run it.
+  _cs_log "herdr-add-cs: waiting for herdr to be installed on $target_name (dotfiles bootstrap)..."
+  local installed=0
+  for _ in $(seq 1 36); do
+    if ssh -o BatchMode=yes "$ssh_alias" 'test -x ~/.local/bin/herdr' 2>/dev/null; then
+      installed=1
+      break
+    fi
+    sleep 5
+  done
+  if [[ "$installed" != 1 ]]; then
+    _cs_log "herdr-add-cs: herdr never appeared at ~/.local/bin/herdr on $target_name after 3 minutes - check the codespace's dotfiles setup, then re-run"
+    return 1
+  fi
+
   # Non-interactive: start herdr's headless server on the codespace and
   # detach, rather than an interactive `gh codespace ssh` session (that's
   # cs-connect's job - this function is meant to be run unattended).
-  # NEEDS LIVE VERIFICATION: `herdr server`'s exact flags and whether it
-  # self-daemonizes were never confirmed against a real Codespace (see
-  # misc/herdr_codespaces.md's live test results, which only exercised
-  # plain interactive `herdr`) - nohup+disown handles "survive the SSH
-  # session closing" at the shell level regardless of that, but if `herdr
-  # server` turns out to need different flags this is the line to fix.
-  if ssh -o BatchMode=yes "$ssh_alias" \
+  # `herdr server` self-daemonizing confirmed live 2026-08-10; nohup+disown
+  # still handles "survive the SSH session closing" at the shell level.
+  if ! ssh -o BatchMode=yes "$ssh_alias" \
     'nohup ~/.local/bin/herdr server </dev/null >/tmp/herdr-add-cs.log 2>&1 & disown'; then
-    _cs_log "herdr-add-cs: started herdr on $target_name - should appear in the mirror within ~20s"
-  else
     _cs_log "herdr-add-cs: couldn't reach $target_name over SSH"
     return 1
   fi
+
+  # The start runs backgrounded, so the ssh exit code above only proves the
+  # shell ran - confirm a server process actually exists before claiming
+  # success (the exact failure mode of the race this function used to have).
+  sleep 2
+  if ! ssh -o BatchMode=yes "$ssh_alias" 'pgrep -f "herdr server" >/dev/null'; then
+    _cs_log "herdr-add-cs: herdr server did not stay up on $target_name - check /tmp/herdr-add-cs.log there"
+    return 1
+  fi
+
+  # A fresh headless server has zero workspaces, and the mirror only
+  # renders remote workspaces - it logs "connected and synced" yet nothing
+  # appears in the local sidebar (confirmed live 2026-08-10). Seed one so
+  # the codespace actually shows up.
+  if ! ssh -o BatchMode=yes "$ssh_alias" \
+    '~/.local/bin/herdr workspace list 2>/dev/null | grep -q workspace_id'; then
+    _cs_log "herdr-add-cs: seeding initial monorepo workspace on $target_name"
+    ssh -o BatchMode=yes "$ssh_alias" \
+      '~/.local/bin/herdr workspace create --cwd /workspaces/monorepo --label monorepo >/dev/null' \
+      || _cs_log "herdr-add-cs: couldn't seed a workspace on $target_name - create one there manually"
+  fi
+
+  _cs_log "herdr-add-cs: started herdr on $target_name - should appear in the mirror within ~20s"
 }
