@@ -26,6 +26,7 @@ source "$SCRIPT_DIR/lib/journald.sh"
 source "$SCRIPT_DIR/lib/fstrim.sh"
 source "$SCRIPT_DIR/lib/inotify.sh"
 source "$SCRIPT_DIR/lib/configure_xfce.sh"
+source "$SCRIPT_DIR/lib/budgie_panel.sh"
 source "$SCRIPT_DIR/lib/qt_scaling.sh"
 source "$SCRIPT_DIR/lib/console_font.sh"
 source "$SCRIPT_DIR/lib/docker.sh"
@@ -341,6 +342,16 @@ configure_qt_scale_factor
 # Same story - the virtual console exists independent of any desktop
 # session, so this is safe during initial box setup too.
 configure_console_font
+
+
+######################################################################
+# Budgie
+######################################################################
+# Like the two steps above, just writes files - no desktop session
+# needed, safe under cron. No-op unless budgie-desktop is installed
+# (the work box, Ubuntu Budgie since 26.04); the Xubuntu box skips it
+# entirely. See lib/budgie_panel.sh for why this workaround exists.
+configure_budgie_panel_primary_display
 
 
 ######################################################################
