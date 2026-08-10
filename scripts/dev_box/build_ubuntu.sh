@@ -114,6 +114,7 @@ sudo apt-get --yes install \
   tmux \
   tree \
   wget \
+  wl-clipboard \
   xclip
 
 

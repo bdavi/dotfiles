@@ -315,7 +315,7 @@ cs-copy-url() {
     return 1
   fi
 
-  printf '%s' "$url" | xclip -selection clipboard
+  printf '%s' "$url" | clipcopy
   _cs_log "Copied ${#url} chars to clipboard: ${url:0:60}..."
 }
 

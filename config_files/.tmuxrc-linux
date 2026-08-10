@@ -1,8 +1,15 @@
 # Fix the copy mode clipboard
 # Per: http://squidarth.com/programming/2018/12/14/tmux-linux.html
 
+# tmux's default update-environment list refreshes DISPLAY on client attach
+# but not WAYLAND_DISPLAY (still true in tmux 3.6). A server that outlives a
+# login would hand clipcopy a stale/missing WAYLAND_DISPLAY, making it point
+# wl-copy at a dead socket or fall back to xclip - the windowless-X11 path
+# Wayland apps can't see. See misc/wayland_clipboard.md.
+set-option -ga update-environment "WAYLAND_DISPLAY"
+
 # For binding 'y' to copy and exiting selection mode
-bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'xclip -sel clip -i'
+bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'clipcopy'
 
 # For binding 'Enter' to copy and not leave selection mode
-bind-key -T copy-mode-vi Enter send-keys -X copy-pipe 'xclip -sel clip -i' '\;'  send -X clear-selection
+bind-key -T copy-mode-vi Enter send-keys -X copy-pipe 'clipcopy' '\;'  send -X clear-selection

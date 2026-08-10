@@ -1,0 +1,12 @@
+#!/bin/sh
+# Copies stdin to the system clipboard, picking the backend that matches
+# the session type. Under Wayland (labwc), xclip only reaches the
+# X11/XWayland clipboard - a selection owned by a windowless X client
+# never propagates to the Wayland clipboard, so Wayland-native apps
+# (sakura, etc.) paste nothing. wl-copy writes the Wayland clipboard,
+# and the compositor mirrors that to XWayland, so both worlds see it.
+# See misc/wayland_clipboard.md for the full story.
+if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null 2>&1; then
+  exec wl-copy
+fi
+exec xclip -selection clipboard
