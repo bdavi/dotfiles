@@ -557,6 +557,12 @@ Added 2026-08-07:
 | Preview channel now effectively on both machines | **Accepted** — `herdr channel set` wrote `[update] channel = "preview"` into the tracked `config.toml`, which both machines symlink; keeping it tracked beats a per-machine untracked file that herdr rewrites (see Implementation status) |
 | Mirror split/copy ergonomics | `prefix+\`/`prefix+minus` rebound to the mirror plugin's remote-aware split actions; `[ui] pane_scrollbars = false`; `cs-copy-url` kept for the OSC 52 gap (upstream #25) |
 
+Added 2026-08-10:
+
+| Question | Decision |
+|---|---|
+| Mirror auto-reconnect at herdr launch | **Disabled** — `cs-sync` now writes `autostart = false` into its managed `hosts.toml` block (and the live file was updated to match). A stale host entry (codespace up, remote herdr server dead) otherwise leaves the daemon retrying every 30s from session start. Reconnecting is now always explicit: any `cs-*` function (they all call `cs-sync`, which invokes the plugin's `start` action) or `herdr plugin action invoke start --plugin mirror`. Verified live that the `ensure` hook (workspace.focused) respects `autostart = false` — a killed daemon with no pause state stays down through `ensure`. To kill a retrying mirror on demand: `herdr plugin action invoke teardown --plugin mirror` (stops the daemon, closes all mirror workspaces). |
+
 ## Live test results (2026-08-07)
 
 Run non-interactively (Claude-driven) against a real, freshly created
