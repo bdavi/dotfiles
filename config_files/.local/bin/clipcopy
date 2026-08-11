@@ -6,7 +6,19 @@
 # (sakura, etc.) paste nothing. wl-copy writes the Wayland clipboard,
 # and the compositor mirrors that to XWayland, so both worlds see it.
 # See misc/wayland_clipboard.md for the full story.
-if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null 2>&1; then
+#
+# WAYLAND_DISPLAY can outlive the compositor - a tmux server (or any
+# long-lived process) that spans a Wayland -> X11 relogin still carries
+# the old value, and exec'ing wl-copy at a dead socket loses the copy
+# with no fallback. So require the socket to actually exist, not just
+# the variable. Per the Wayland spec, WAYLAND_DISPLAY is a socket name
+# relative to XDG_RUNTIME_DIR unless it's an absolute path.
+case "$WAYLAND_DISPLAY" in
+  "") wl_socket="" ;;
+  /*) wl_socket="$WAYLAND_DISPLAY" ;;
+  *)  wl_socket="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/$WAYLAND_DISPLAY" ;;
+esac
+if [ -n "$wl_socket" ] && [ -S "$wl_socket" ] && command -v wl-copy >/dev/null 2>&1; then
   exec wl-copy
 fi
 exec xclip -selection clipboard

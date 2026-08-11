@@ -8,6 +8,12 @@
 # Wayland apps can't see. See misc/wayland_clipboard.md.
 set-option -ga update-environment "WAYLAND_DISPLAY"
 
+# XDG_SESSION_TYPE isn't refreshed by default either, and the swapesc/keyfast
+# functions in .commonrc-linux branch on it - a server surviving a
+# Wayland <-> X11 relogin would send new panes down the wrong branch
+# (editing labwc config instead of running setxkbmap/xset, or vice versa).
+set-option -ga update-environment "XDG_SESSION_TYPE"
+
 # For binding 'y' to copy and exiting selection mode
 bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel 'clipcopy'
 
