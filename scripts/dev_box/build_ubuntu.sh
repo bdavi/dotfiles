@@ -125,7 +125,6 @@ sudo apt-get --yes install \
   blueman \
   evince \
   filezilla \
-  flameshot \
   gimp \
   keepassxc \
   libreoffice \
@@ -147,6 +146,16 @@ install_flatpak
 sudo flatpak install --system --noninteractive flathub org.mozilla.firefox
 sudo flatpak install --system --noninteractive flathub org.chromium.Chromium
 sudo flatpak install --system --noninteractive flathub com.github.PintaProject.Pinta
+# Flatpak rather than apt: the archive still ships v13, whose capture
+# overlay misplaces itself on multi-monitor Wayland (offset selections,
+# "shifting" windows - the v14 release notes' headline fix is the
+# per-monitor capture rework). Drop back to the apt package once it
+# reaches >= 14. The remove is the v13 -> v14 migration for boxes built
+# before this change; no-op elsewhere.
+if pkg_installed flameshot; then
+  sudo apt-get --yes remove flameshot
+fi
+sudo flatpak install --system --noninteractive flathub org.flameshot.Flameshot
 sudo flatpak install --system --noninteractive flathub net.nokyan.Resources
 sudo flatpak install --system --noninteractive flathub io.github.linx_systems.ClamUI
 sudo flatpak install --system --noninteractive flathub com.slack.Slack

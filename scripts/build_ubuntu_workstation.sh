@@ -14,8 +14,12 @@ sudo apt-get --yes install curl git ranger highlight silversearcher-ag \
 ###########################################################################
 # A few apps
 ###########################################################################
-sudo apt-get --yes install chromium-browser evince flameshot gimp peek \
+sudo apt-get --yes install chromium-browser evince gimp peek \
   keepassxc libreoffice pinta speedcrunch sakura virtualbox stacer vlc
+
+# Flameshot via flatpak, not apt - the archive's v13 has broken
+# multi-monitor Wayland capture, fixed by v14's per-monitor rework.
+flatpak install flathub org.flameshot.Flameshot
 
 
 #######################################################################
