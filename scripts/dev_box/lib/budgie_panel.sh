@@ -47,8 +47,11 @@ configure_budgie_panel_primary_display() {
 [ -n "$WAYLAND_DISPLAY" ] || exit 0
 command -v wlr-randr >/dev/null 2>&1 || exit 0
 
-# Let the session and budgie-panel finish starting first.
-sleep 8
+# Let the session and budgie-panel finish starting first at login. --now
+# skips that for by-hand runs (plugging in a monitor, or suspend/resume
+# reshuffling the output order - the fix-panel function in
+# .commonrc-linux).
+[ "$1" = "--now" ] || sleep 8
 
 # Output names sit at column zero; per-output details are indented.
 outputs="$(wlr-randr | grep '^[^ ]' | cut -d' ' -f1)"

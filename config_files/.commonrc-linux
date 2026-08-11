@@ -50,6 +50,17 @@ else
   }
   keyfast
 
+  # Budgie's panel always lands on the first Wayland output (the laptop
+  # eDP screen). The autostart entry installed by
+  # scripts/dev_box/lib/budgie_panel.sh handles login, but the output
+  # order can reshuffle mid-session too - suspend/resume, replugging a
+  # monitor - and the panel jumps back. This re-runs the same
+  # output-reorder trick immediately (--now skips the script's
+  # login-time settle sleep).
+  fix-panel() {
+    bash "$HOME/.local/bin/budgie-panel-to-external.sh" --now
+  }
+
   # Screen reslution adjustments
   alias r2k='xrandr -s 2560x1440'
   alias rhd='xrandr -s 1920x1080'
