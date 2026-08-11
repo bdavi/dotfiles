@@ -141,40 +141,48 @@ cs-sync-gcloud() {
     return 1
   fi
 
-  local adc_file="$GCLOUD_CONFIG_DIR/application_default_credentials.json"
-  local target f ok
+  local target
   for target in "${targets[@]}"; do
     _cs_log "Pushing gcloud auth to $target..."
-    ok=1
-
-    ssh -o BatchMode=yes "$target" "mkdir -p ~/.config/gcloud/configurations" 2>/dev/null || {
-      _cs_log "  couldn't reach $target - skipping"
-      continue
-    }
-
-    for f in "${GCLOUD_SYNC_FILES[@]}"; do
-      [[ -f "$GCLOUD_CONFIG_DIR/$f" ]] || continue
-      scp -o BatchMode=yes -q "$GCLOUD_CONFIG_DIR/$f" "$target:.config/gcloud/$f" || ok=0
-    done
-    if [[ -f "$adc_file" ]]; then
-      scp -o BatchMode=yes -q "$adc_file" "$target:.config/gcloud/application_default_credentials.json" || ok=0
-    fi
-
-    # Match gcloud's own restrictive file permissions - these are
-    # credential material, and anything else running under the codespace's
-    # user account (an installed dependency, a devcontainer feature, ...)
-    # can otherwise read them same as you can. Errors suppressed: a file
-    # that didn't get copied above (missing locally) has nothing to chmod.
-    ssh -o BatchMode=yes "$target" \
-      'chmod 600 ~/.config/gcloud/credentials.db ~/.config/gcloud/application_default_credentials.json 2>/dev/null' \
-      || true
-
-    if [[ "$ok" == 1 ]]; then
+    if _cs_push_gcloud "$target"; then
       _cs_log "  done"
     else
       _cs_log "  one or more files failed to copy to $target"
     fi
   done
+}
+
+# Pushes the local gcloud credential files to a single codespace, by SSH
+# alias - the per-target mechanics of cs-sync-gcloud, factored out so
+# herdr-add-cs can push to just the codespace it's setting up.
+_cs_push_gcloud() {
+  local target="$1"
+  local adc_file="$GCLOUD_CONFIG_DIR/application_default_credentials.json"
+  local f ok=1
+
+  ssh -o BatchMode=yes "$target" "mkdir -p ~/.config/gcloud/configurations" 2>/dev/null || {
+    _cs_log "  couldn't reach $target - skipping"
+    return 1
+  }
+
+  for f in "${GCLOUD_SYNC_FILES[@]}"; do
+    [[ -f "$GCLOUD_CONFIG_DIR/$f" ]] || continue
+    scp -o BatchMode=yes -q "$GCLOUD_CONFIG_DIR/$f" "$target:.config/gcloud/$f" || ok=0
+  done
+  if [[ -f "$adc_file" ]]; then
+    scp -o BatchMode=yes -q "$adc_file" "$target:.config/gcloud/application_default_credentials.json" || ok=0
+  fi
+
+  # Match gcloud's own restrictive file permissions - these are
+  # credential material, and anything else running under the codespace's
+  # user account (an installed dependency, a devcontainer feature, ...)
+  # can otherwise read them same as you can. Errors suppressed: a file
+  # that didn't get copied above (missing locally) has nothing to chmod.
+  ssh -o BatchMode=yes "$target" \
+    'chmod 600 ~/.config/gcloud/credentials.db ~/.config/gcloud/application_default_credentials.json 2>/dev/null' \
+    || true
+
+  [[ "$ok" == 1 ]]
 }
 
 # Lists open Comoto-Tech/dev-hub codespaces as tab-separated
@@ -387,6 +395,15 @@ herdr-add-cs() {
     return 0
   fi
 
+  # Fail fast if local gcloud can't mint a token - the auth push below
+  # would otherwise copy dead credentials over, and dev-hub's setup.sh
+  # would then hit its interactive `gcloud auth login` branch on the
+  # codespace instead of running unattended.
+  if ! gcloud auth print-access-token >/dev/null 2>&1; then
+    _cs_log "herdr-add-cs: local gcloud auth is missing or expired - run 'gcloud auth login' first"
+    return 1
+  fi
+
   cs-sync
 
   # Labels of every workspace this herdr session currently knows about,
@@ -447,22 +464,56 @@ herdr-add-cs() {
 
   # A codespace reports Available before its dotfiles bootstrap (the thing
   # that installs herdr, see misc/herdr_codespaces.md) has finished - on a
-  # fresh codespace ~/.local/bin/herdr can lag Available by minutes
-  # (confirmed live 2026-08-10: nohup logged "No such file or directory"
-  # while the ssh command still exited 0, so this function claimed success
-  # with no server started). Wait for the binary before trying to run it.
-  _cs_log "herdr-add-cs: waiting for herdr to be installed on $target_name (dotfiles bootstrap)..."
-  local installed=0
-  for _ in $(seq 1 36); do
-    if ssh -o BatchMode=yes "$ssh_alias" 'test -x ~/.local/bin/herdr' 2>/dev/null; then
-      installed=1
+  # fresh codespace the bootstrap lagged Available by ~2.5 minutes
+  # (confirmed live 2026-08-10, via the mirror daemon's "no such file"
+  # retries against creation.log timestamps). script/setup in
+  # bdavi/comoto-codespaces-dotfiles touches ~/.dotfiles-setup-done as its
+  # final step, so that file means "bootstrap actually completed" - unlike
+  # the herdr binary, which appears partway through. Codespaces created
+  # from a dotfiles commit predating the sentinel never get one; the
+  # binary check is the (weaker) fallback for those.
+  _cs_log "herdr-add-cs: waiting for the dotfiles bootstrap to finish on $target_name..."
+  local bootstrapped=0
+  for _ in $(seq 1 60); do
+    if ssh -o BatchMode=yes "$ssh_alias" 'test -f ~/.dotfiles-setup-done' 2>/dev/null; then
+      bootstrapped=1
       break
     fi
     sleep 5
   done
-  if [[ "$installed" != 1 ]]; then
-    _cs_log "herdr-add-cs: herdr never appeared at ~/.local/bin/herdr on $target_name after 3 minutes - check the codespace's dotfiles setup, then re-run"
+  if [[ "$bootstrapped" != 1 ]]; then
+    if ssh -o BatchMode=yes "$ssh_alias" 'test -x ~/.local/bin/herdr' 2>/dev/null; then
+      _cs_log "herdr-add-cs: no ~/.dotfiles-setup-done after 5 minutes, but herdr is installed - dotfiles bootstrap likely predates the sentinel; continuing"
+    else
+      _cs_log "herdr-add-cs: dotfiles bootstrap never finished on $target_name after 5 minutes - check /workspaces/.codespaces/.persistedshare/creation.log there, then re-run"
+      return 1
+    fi
+  fi
+
+  # dev-hub wires setup.sh as a postAttachCommand, which fires only for
+  # editor attaches (VS Code/web) - never for this SSH-only workflow - so
+  # run it here. Auth must land first: with valid gcloud credentials in
+  # place, setup.sh's interactive `gcloud auth login` branch never
+  # executes and the rest of it is non-interactive and re-runnable.
+  _cs_log "herdr-add-cs: pushing local gcloud auth to $target_name..."
+  if ! _cs_push_gcloud "$ssh_alias"; then
+    _cs_log "herdr-add-cs: gcloud auth push failed - stopping before setup.sh would hit its interactive login; fix and re-run"
     return 1
+  fi
+  if ssh -o BatchMode=yes "$ssh_alias" 'test -x /workspaces/dev-hub/setup.sh' 2>/dev/null; then
+    _cs_log "herdr-add-cs: running dev-hub setup.sh on $target_name (kubectl contexts, sops decrypt - takes a minute)..."
+    # zsh -lic, not a bare ssh exec: the devcontainer's google-cloud-sdk
+    # feature only puts gcloud/kubectl on PATH for interactive shells
+    # (confirmed live 2026-08-10 - a plain ssh exec gets "command not
+    # found: gcloud"), and setup.sh needs both.
+    if ssh -o BatchMode=yes "$ssh_alias" 'zsh -lic "/workspaces/dev-hub/setup.sh >/tmp/dev-hub-setup.log 2>&1"'; then
+      _cs_log "herdr-add-cs: dev-hub setup.sh completed"
+    else
+      _cs_log "herdr-add-cs: dev-hub setup.sh failed on $target_name - see /tmp/dev-hub-setup.log there"
+      return 1
+    fi
+  else
+    _cs_log "herdr-add-cs: no /workspaces/dev-hub/setup.sh on $target_name - skipping repo setup"
   fi
 
   # Non-interactive: start herdr's headless server on the codespace and
