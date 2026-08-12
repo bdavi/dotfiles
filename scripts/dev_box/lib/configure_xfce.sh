@@ -232,6 +232,42 @@ configure_xfce_keyboard_shortcuts() {
   pgrep -x xfwm4 >/dev/null && xfwm4 --replace &
 }
 
+# Bare Super tap -> whisker menu, without breaking held-Super combos
+# (the tiling/maximize bindings above). Binding Super_L directly in
+# xfce4-keyboard-shortcuts doesn't work: the grab fires on key *press*,
+# so every Super+arrow combo popped the menu, whose keyboard grab then
+# swallowed the arrow key - tested and reverted. Instead xcape
+# (installed in build_ubuntu.sh) injects a keystroke only on a *tap* -
+# Super pressed and released with nothing else in between. The injected
+# key is XF86Launch5, a phantom keysym no physical keyboard emits, so
+# it can't collide with anything (Ctrl+Escape, the whiskermenu FAQ's
+# suggestion, is already xfdesktop --menu). <Super>space (set above)
+# stays as a fallback for the same popup.
+#
+# The autostart entry is OnlyShowIn=XFCE so xcape doesn't hijack the
+# Super key under the Budgie session on the work box. Written as a
+# plain file, not a config_files/ symlink, to match how this script
+# owns its config (see header).
+configure_xfce_super_whiskermenu() {
+  xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/XF86Launch5" -n -t string -s "xfce4-popup-whiskermenu"
+
+  mkdir -p ~/.config/autostart
+  cat > ~/.config/autostart/xcape-whisker.desktop <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=xcape (Super tap -> Whisker Menu)
+Comment=Tap of bare Super injects XF86Launch5, which xfce4-keyboard-shortcuts binds to xfce4-popup-whiskermenu. Held Super combos (tiling/maximize) are unaffected.
+Exec=xcape -e 'Super_L=XF86Launch5'
+OnlyShowIn=XFCE;
+StartupNotify=false
+Terminal=false
+Hidden=false
+EOF
+
+  # take effect now rather than at next login; xcape daemonizes itself
+  pgrep -u "$USER" -x xcape >/dev/null || xcape -e 'Super_L=XF86Launch5'
+}
+
 # Number of virtual desktops - pairs with the workspace switcher plugin
 # added in configure_xfce_panel. Workspace names aren't set explicitly;
 # xfwm4 auto-generates "Workspace N" for any workspace without a stored

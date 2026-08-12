@@ -330,8 +330,9 @@ enable_fail2ban
 # xfce4 is a no-op on Xubuntu but installs XFCE as an alternative
 # session on the Budgie work box (pick it from the login screen's
 # session menu). xfce4-goodies fills in the extra panel plugins and
-# tools neither install ships by default.
-sudo apt-get --yes install xfce4 xfce4-goodies
+# tools neither install ships by default. xcape powers the bare-Super
+# whisker-menu tap (see configure_xfce_super_whiskermenu).
+sudo apt-get --yes install xfce4 xfce4-goodies xcape
 
 # MANUAL (one-time, per machine): configure_xfce_panel pins the panel to
 # the "Primary" output, but a fresh box has no monitor flagged primary
@@ -362,6 +363,7 @@ if pgrep -u "$USER" -x xfce4-session >/dev/null; then
   configure_xfce_power_manager
   configure_xfce_panel
   configure_xfce_keyboard_shortcuts
+  configure_xfce_super_whiskermenu
   configure_xfce_workspaces
   configure_xfce_hidpi_host_overrides
   configure_xfce_ensure_panel_visible
