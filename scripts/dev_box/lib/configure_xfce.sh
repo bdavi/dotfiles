@@ -64,6 +64,14 @@ configure_xfce_terminal() {
 # below has no shipped default at all, meaning it's unset until explicitly
 # written - confirms these are real overrides, not schema noise.
 configure_xfce_power_manager() {
+  # Never suspend the system on inactivity - suspending is always an
+  # explicit action (lid/menu). 0 = never, which is also xfpm 4.20's
+  # shipped default; asserted anyway so a stray settings-dialog save
+  # can't leave a timeout behind. Display sleep (dpms below) is
+  # deliberately kept - it's the monitor, not the machine.
+  xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/inactivity-on-ac -n -t uint -s 0
+  xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/inactivity-on-battery -n -t uint -s 0
+
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-enabled -n -t bool -s true
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-on-ac-sleep -n -t uint -s 60
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/show-tray-icon -n -t bool -s false
