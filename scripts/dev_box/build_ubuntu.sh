@@ -327,6 +327,28 @@ enable_fail2ban
 ######################################################################
 # XFCE
 ######################################################################
+# xfce4 is a no-op on Xubuntu but installs XFCE as an alternative
+# session on the Budgie work box (pick it from the login screen's
+# session menu). xfce4-goodies fills in the extra panel plugins and
+# tools neither install ships by default.
+sudo apt-get --yes install xfce4 xfce4-goodies
+
+# MANUAL (one-time, per machine): configure_xfce_panel pins the panel to
+# the "Primary" output, but a fresh box has no monitor flagged primary
+# (the displays channel starts with no saved profile), so the panel falls
+# back to the first monitor. Open Settings -> Display, arrange the
+# monitors, tick "Primary" on the main one, and Apply - then also save
+# the layout as a named profile (Advanced tab in the same dialog).
+# Apply alone only updates the "Default" scheme, which xfsettingsd
+# reasserts at session startup but NOT when a monitor connects
+# mid-session - and NVIDIA PRIME outputs (HDMI-1-0 etc.) enumerate after
+# the session starts, so with only "Default" the layout is lost at every
+# login. A saved profile whose EDID set matches the connected monitors
+# is reapplied on both startup and connect (/AutoEnableProfiles, ships
+# as 3 = always). The profile can also be created headlessly by copying
+# the /Default tree in the displays channel to /<name> via xfconf-query
+# and pointing /ActiveProfile at it.
+
 # Needs a running desktop session - xfconf-query talks to xfconfd over
 # the session D-Bus, which doesn't exist under cron. Skipped there rather
 # than left to fail (which would trip set -e), and deliberately placed

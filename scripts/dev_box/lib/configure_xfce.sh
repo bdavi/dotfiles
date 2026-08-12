@@ -69,9 +69,12 @@ configure_xfce_power_manager() {
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/lid-action-on-ac -n -t uint -s 1
 }
 
-# Single top panel: thin (24px), full-width, autohide off, 10 plugins in
-# order - whiskermenu, separator, tasklist, expanding separator, workspace
-# switcher, systray, notifications, power manager, pulseaudio, clock.
+# Single top panel on the primary display: thin (24px), full-width,
+# autohide off, 10 plugins in order - whiskermenu, separator, tasklist,
+# expanding separator, workspace switcher, systray, notifications, power
+# manager, pulseaudio, clock. Vanilla xfce4 (the Budgie box's alternative
+# session) also ships a second bottom dock panel that Xubuntu doesn't -
+# /panels below drops it, and its stale panel-2 subtree gets cleared.
 # whiskermenu's "recent" list and systray's "known-items" are usage-history
 # caches, not settings - deliberately not reproduced here, they'll just
 # repopulate on use.
@@ -86,8 +89,12 @@ configure_xfce_power_manager() {
 # updating both.
 configure_xfce_panel() {
   xfconf-query -c xfce4-panel -p /panels -n -a -t int -s 1
+  xfconf-query -c xfce4-panel -p /panels/panel-2 -r -R 2>/dev/null || true
 
   xfconf-query -c xfce4-panel -p /panels/panel-1/position -n -t string -s "p=6;x=0;y=0"
+  # "Primary" tracks whichever monitor is flagged primary in xrandr, so
+  # the panel follows docking changes without pinning a connector name.
+  xfconf-query -c xfce4-panel -p /panels/panel-1/output-name -n -t string -s Primary
   xfconf-query -c xfce4-panel -p /panels/panel-1/length -n -t uint -s 100
   xfconf-query -c xfce4-panel -p /panels/panel-1/position-locked -n -t bool -s true
   xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -n \
