@@ -221,6 +221,14 @@ configure_xfce_keyboard_shortcuts() {
   xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/<Super>Left" -n -t string -s "tile_left_key"
   xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/<Super>Right" -n -t string -s "tile_right_key"
 
+  # <Super>Up -> maximize (toggle). The custom tree ships <Alt>F10 ->
+  # maximize_window_key; that's cleared first because it would be a
+  # second custom binding on the same action - the exact duplicate-action
+  # grab bug described above, which would leave <Super>Up silently
+  # ungrabbed.
+  xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/<Alt>F10" -r 2>/dev/null || true
+  xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/<Super>Up" -n -t string -s "maximize_window_key"
+
   pgrep -x xfwm4 >/dev/null && xfwm4 --replace &
 }
 
