@@ -13,9 +13,12 @@
 # preferences directly through xfconf-query instead, which is what
 # actually persists.
 #
-# Each function is idempotent (xfconf-query -n only creates a property if
-# it doesn't already exist) - safe to re-run any time, same as the asdf_*
-# install functions.
+# Each function is idempotent - safe to re-run any time, same as the
+# asdf_* install functions. Note -n is create-if-missing but still
+# overwrites the value when the property already exists (verified
+# empirically) - so re-runs reassert every value here, and anything
+# host-specific has to win by running *after* the generic functions
+# (see configure_xfce_hidpi_host_overrides).
 ######################################################################
 
 # GTK theme and icon theme - checked against Xubuntu's shipped defaults
@@ -227,6 +230,28 @@ configure_xfce_keyboard_shortcuts() {
 # name.
 configure_xfce_workspaces() {
   xfconf-query -c xfwm4 -p /general/workspace_count -n -t int -s 2
+}
+
+# Per-host overrides for the work laptop's 32" 4K Dell, which at stock
+# sizes is squint territory. Whole-UI scaling was ruled out there:
+# fractional per-monitor scale is broken on NVIDIA PRIME (the image
+# scales but the input map doesn't, so clicks land offset from what's
+# drawn), and 2x (GDK window scaling / 1.75x DPI) was tried and
+# reverted as too large - see configure_xfce_theme. What works: 1.25x
+# fonts via Xft DPI - which Qt apps also pick up through xrdb, unlike
+# the rest of xsettings (they ignore /Gtk/FontName entirely, cf.
+# qt_scaling.sh) - plus a taller panel with icon size 0 (= track the
+# row height instead of pinning 16px). Hostname-gated: the other boxes
+# drive 1080p monitors where the stock sizes are fine.
+#
+# Must run after configure_xfce_theme (which resets /Xft/DPI) and
+# configure_xfce_panel (which asserts the stock 24px size) - -n still
+# overwrites existing values on re-run (see header), so last write wins.
+configure_xfce_hidpi_host_overrides() {
+  [ "$(hostname)" = "REM-BDAVIES-LT3" ] || return 0
+  xfconf-query -c xsettings -p /Xft/DPI -n -t int -s 120
+  xfconf-query -c xfce4-panel -p /panels/panel-1/size -n -t uint -s 36
+  xfconf-query -c xfce4-panel -p /panels/panel-1/icon-size -n -t int -s 0
 }
 
 # xfwm4 --replace in configure_xfce_keyboard_shortcuts hands window
