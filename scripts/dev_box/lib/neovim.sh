@@ -122,7 +122,18 @@ install_neovim() {
   # Installs/updates every plugin lazy.nvim manages.
   nvim --headless "+Lazy! sync" +qa
 
-  # Blocks until every configured parser finishes compiling - unlike
-  # ensure_installed's async auto_install, which +qa can cut off mid-job.
-  nvim --headless "+TSUpdateSync" +qa
+  # nvim-treesitter's `main` branch (config_files/.config/nvim/init.lua)
+  # installs its own parsers via an async `install()` job as part of
+  # loading during the "Lazy! sync" run above, but that job can still be
+  # mid-compile when +qa exits. `main` also dropped `:TSUpdateSync` (the
+  # old `master`-branch blocking command), so instead this re-issues the
+  # same install call and blocks on it directly - a no-op wait for
+  # anything already compiled, a real wait for anything still in flight.
+  # Keep this list in sync with the `parsers` list in init.lua.
+  nvim --headless -c "lua require('nvim-treesitter').install({
+    'bash', 'css', 'elixir', 'embedded_template', 'erlang', 'go',
+    'html', 'javascript', 'json', 'lua', 'markdown', 'markdown_inline',
+    'perl', 'python', 'query', 'ruby', 'tsx', 'typescript', 'vim',
+    'vimdoc', 'yaml',
+  }):wait(300000)" +qa
 }
