@@ -163,6 +163,7 @@ sudo flatpak install --system --noninteractive flathub com.tomjwatson.Emote
 sudo flatpak install --system --noninteractive flathub org.gnome.baobab
 sudo flatpak install --system --noninteractive flathub com.github.johnfactotum.Foliate
 sudo flatpak install --system --noninteractive flathub org.kiwix.desktop
+sudo flatpak install --system --noninteractive flathub com.github.marktext.marktext
 
 configure_default_browser
 
