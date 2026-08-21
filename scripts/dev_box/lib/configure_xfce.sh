@@ -276,6 +276,40 @@ EOF
   pgrep -u "$USER" -x xcape >/dev/null || xcape -e 'Super_L=XF86Launch5'
 }
 
+# Keep ayatana-indicator-application out of XFCE sessions: its stock
+# autostart includes XFCE (meant for panels using the indicator plugin),
+# where it grabs the org.kde.StatusNotifierWatcher D-Bus name before the
+# panel's systray plugin can. Tray icons (flameshot, nm-applet) then
+# register with it and are displayed by nothing - they silently vanish.
+# The user-level override shadows the system file with XFCE dropped from
+# OnlyShowIn; Budgie keeps the service since its applets are what
+# actually display ayatana indicators. If the service is currently
+# running it's killed here - the systray plugin claims the watcher name
+# the moment it frees up, and SNI apps re-register on their own.
+# Guarded on the system file existing (not every box ships ayatana).
+configure_xfce_systray_watcher() {
+  [ -f /etc/xdg/autostart/ayatana-indicator-application.desktop ] || return 0
+
+  cat > ~/.config/autostart/ayatana-indicator-application.desktop <<'EOF'
+# User override of /etc/xdg/autostart/ayatana-indicator-application.desktop
+# with XFCE removed from OnlyShowIn: this service grabs the D-Bus name
+# org.kde.StatusNotifierWatcher before the XFCE panel's systray plugin can,
+# so tray icons (flameshot, nm-applet) register with it and never appear in
+# the panel. Budgie keeps it - its applets are what actually display
+# ayatana indicators.
+[Desktop Entry]
+Type=Application
+Name=Ayatana Indicator Application
+Exec=/usr/libexec/ayatana-indicator-application/ayatana-indicator-application-service
+StartupNotify=false
+Terminal=false
+OnlyShowIn=Unity;MATE;Budgie;
+NoDisplay=true
+EOF
+
+  pkill -f ayatana-indicator-application-service 2>/dev/null || true
+}
+
 # Number of virtual desktops - pairs with the workspace switcher plugin
 # added in configure_xfce_panel. Workspace names aren't set explicitly;
 # xfwm4 auto-generates "Workspace N" for any workspace without a stored
