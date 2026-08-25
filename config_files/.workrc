@@ -12,6 +12,9 @@ if [ -d "$COMOTO_PROJECT_ROOT/monorepo" ]
 then
   source /usr/share/google-cloud-sdk/completion.bash.inc
   source ~/monorepo/zlaverse/support/bash_functions.sh
+
+  # Worktree-scoped dev environments (w* commands). See ~/.monorepo-worktrees/README.md
+  [ -f ~/.monorepo-worktrees/functions.sh ] && source ~/.monorepo-worktrees/functions.sh
   # export COMPOSE_FILE=./docker-compose.yml:./docker-compose-linux.yml
   alias ecom-log='docker logs -f --tail 1000 zla-ecom-webapp-1'
   alias ecom-logs='docker logs -f --tail 1000 zla-ecom-webapp-1'
@@ -27,7 +30,10 @@ then
   alias ps-logs='container-log product-search-service'
   alias elts='ecom-load-test-schema'
   alias cglts='cg-load-test-schema'
-  alias fixit='cd ~/monorepo && docker compose down && docker volume remove zla_cg-deps zla_jp-deps zla_rz-deps zla_cg-build zla_jp-build zla_rz-build && docker compose pull && docker-compose up --scale jobs=1 --scale admin=1 --scale ecom_api=1 -d'
+  # fixit drops the deps volumes, so it always pays a cold `mix deps.get` — which
+  # dies on any group-writable file in ~/.ssh. Leading `;` not `&&`: a missing
+  # helper must not abort the rebuild. See ~/.monorepo-worktrees/NOTES.md.
+  alias fixit='_wt_ssh_preflight 2>/dev/null; cd ~/monorepo && docker compose down && docker volume remove zla_cg-deps zla_jp-deps zla_rz-deps zla_cg-build zla_jp-build zla_rz-build && docker compose pull && docker-compose up --scale jobs=1 --scale admin=1 --scale ecom_api=1 -d'
   alias nf='git checkout master redline/apps/redline_store_portal/package-lock.json && git checkout master redline/apps/redline_web_store/package-lock.json'
   alias dcb='docker compose down && docker compose up --scale jobs=1 --scale admin=1 --scale ecom_api=1 -d'
 fi
