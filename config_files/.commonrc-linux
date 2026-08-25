@@ -74,9 +74,19 @@ else
   # across reboots, and the right mechanism now that systemd 259 dropped
   # /etc/sysctl.conf (`sudo sysctl -p` fails since that update) - then
   # applies it live; the kernel drops every v6 address on the spot, ::1
-  # included. Idempotent: re-running when already active is a no-op.
-  # On-demand by choice, not part of build_ubuntu.sh - undo by deleting
-  # the drop-in and rebooting (or re-enabling via sysctl by hand).
+  # included. On-demand by choice, not part of build_ubuntu.sh - undo by
+  # deleting the drop-in and rebooting.
+  #
+  # disable_ipv6 alone is not enough: FortiClient re-enables it
+  # per-interface (wlo1/enp3s0/its own tun, observed live 2026-08-25) on
+  # every VPN connect, and in-kernel SLAAC rebuilds global addresses
+  # from RAs within seconds. accept_ra=0 is the backstop FortiClient
+  # doesn't touch - with RAs ignored, a re-enabled interface gets a
+  # link-local address at most and IPv4 still carries all real traffic.
+  # The per-interface loop exists because writing all=1 only cascades
+  # when the value *changes*: after a FortiClient flip, `all` is still 1
+  # and a plain reload fixes nothing (also why the old "already active"
+  # check was a lie - it only looked at `all`).
   useip4() {
     local conf_file="/etc/sysctl.d/99-disable-ipv6.conf"
     local rule
@@ -86,17 +96,27 @@ else
 # written by useip4 (config_files/.commonrc-linux).
 net.ipv6.conf.all.disable_ipv6=1
 net.ipv6.conf.default.disable_ipv6=1
+# FortiClient re-enables disable_ipv6 per interface at VPN connect;
+# ignoring RAs keeps that flip from producing usable v6 addresses.
+net.ipv6.conf.all.accept_ra=0
+net.ipv6.conf.default.accept_ra=0
 EOF
     )"
 
     if [ -f "$conf_file" ] && [ "$(cat "$conf_file")" = "$rule" ] \
-      && [ "$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6)" = "1" ]; then
+      && ! grep -q '^0$' /proc/sys/net/ipv6/conf/*/disable_ipv6; then
       echo "useip4: already active"
       return 0
     fi
 
     echo "$rule" | sudo tee "$conf_file" >/dev/null \
       && sudo sysctl --system >/dev/null \
+      && sudo sh -c '
+           for d in /proc/sys/net/ipv6/conf/*/; do
+             case "$d" in */all/|*/default/) continue ;; esac
+             echo 1 > "${d}disable_ipv6" 2>/dev/null
+             echo 0 > "${d}accept_ra" 2>/dev/null
+           done' \
       && echo "useip4: IPv6 disabled box-wide, IPv4 only from here on"
   }
 fi
