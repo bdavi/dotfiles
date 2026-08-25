@@ -156,6 +156,12 @@ if pkg_installed flameshot; then
   sudo apt-get --yes remove flameshot
 fi
 sudo flatpak install --system --noninteractive flathub org.flameshot.Flameshot
+# The Flatpak must take screenshots through xdg-desktop-portal even on
+# X11, and XFCE's portal config routes Screenshot to the xapp backend
+# (the gtk backend dropped Screenshot in 1.15). Without xapp nothing on
+# the bus implements Screenshot and Flameshot times out after 30s.
+# Only needed while flameshot is the Flatpak - drop alongside the above.
+sudo apt-get --yes install xdg-desktop-portal-xapp
 sudo flatpak install --system --noninteractive flathub net.nokyan.Resources
 sudo flatpak install --system --noninteractive flathub io.github.linx_systems.ClamUI
 sudo flatpak install --system --noninteractive flathub com.slack.Slack
