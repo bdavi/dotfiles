@@ -67,4 +67,36 @@ else
 
   # Reset audio so lineout is recognized by pulseaudio
   alias headphones!='sudo alsa force-reload'
+
+  # Force IPv4 box-wide: the work VPN carries no IPv6, so dual-stack
+  # destinations (e.g. the staging admin site) resolve AAAA-first and
+  # route around the tunnel. Writes a sysctl.d drop-in - persistent
+  # across reboots, and the right mechanism now that systemd 259 dropped
+  # /etc/sysctl.conf (`sudo sysctl -p` fails since that update) - then
+  # applies it live; the kernel drops every v6 address on the spot, ::1
+  # included. Idempotent: re-running when already active is a no-op.
+  # On-demand by choice, not part of build_ubuntu.sh - undo by deleting
+  # the drop-in and rebooting (or re-enabling via sysctl by hand).
+  useip4() {
+    local conf_file="/etc/sysctl.d/99-disable-ipv6.conf"
+    local rule
+    rule="$(
+      cat <<'EOF'
+# IPv4 only: the work VPN carries no IPv6, so v6 routes around it -
+# written by useip4 (config_files/.commonrc-linux).
+net.ipv6.conf.all.disable_ipv6=1
+net.ipv6.conf.default.disable_ipv6=1
+EOF
+    )"
+
+    if [ -f "$conf_file" ] && [ "$(cat "$conf_file")" = "$rule" ] \
+      && [ "$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6)" = "1" ]; then
+      echo "useip4: already active"
+      return 0
+    fi
+
+    echo "$rule" | sudo tee "$conf_file" >/dev/null \
+      && sudo sysctl --system >/dev/null \
+      && echo "useip4: IPv6 disabled box-wide, IPv4 only from here on"
+  }
 fi
