@@ -318,7 +318,13 @@ else:
     "$_letter" "$_letter" "$_letter"
   printf '  next:  wdc up -d      (cycle gear only; other services are scale 0)\n\n'
 
-  cd "$_dir" || return 1
+  # Land in the new worktree only when no herdr workspace was opened for
+  # it. Inside herdr that workspace already gets its own panes at the
+  # worktree root, and cd'ing here would drag the invoking pane - the
+  # primary monorepo one - into the worktree too.
+  if [ -z "$_ws" ]; then
+    cd "$_dir" || return 1
+  fi
   unset _top _name _explicit_remote _mode _letter _l _idx _dir _state _ws
 }
 
