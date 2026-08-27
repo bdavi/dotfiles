@@ -79,6 +79,32 @@ regardless of which repo you're actively working in.
   `create staging` affects CI behavior and must be present before the first CI run kicks
   off, so it can't be added as a follow-up edit.
 
+#### Worktree dev environments (`w*` commands)
+
+Only on the work dev box. The monorepo also runs as git worktrees under
+`~/worktrees/<letter>` alongside the primary checkout at `~/monorepo`, each with
+its own containers (`wt<letter>-*`) and URLs
+(`https://<letter>-{rz,cg,jp}.devzla.com`), managed by the `w*` shell commands
+(`wnew`, `wdel`, `wls`, `wdc`, `wcg-bash`, ...) from
+`~/.monorepo-worktrees/functions.sh`. Docs live next to it: `CHEATSHEET.md`
+(command reference), `README.md` (how it fits together), `NOTES.md` (full design
+record - constraints, evidence, rejected approaches). Read those before changing
+the tooling; update them when you do.
+
+- Inside a worktree, never run bare `docker compose` - it would try to boot a
+  second full stack. Use `wdc`, which scopes compose to the worktree's generated
+  files in `~/.local/share/wt/<letter>/`. `compose.yaml` there is machine-owned
+  (rewritten by `wregen`); hand edits belong in `compose.override.yaml`.
+- The `w` prefix is load-bearing: `wcg-bash`/`wcg-log`/`wcg-iex` target the
+  worktree's container, while the unprefixed `cg-*` twins target the shared
+  primary stack. One letter is the only difference.
+- Postgres, redis, rabbitmq, and elasticsearch are shared with the primary
+  stack. Migrations and test-schema rebuilds (`welts`/`wclts`) therefore touch
+  shared state - time them deliberately, and say so before running one.
+- A worktree's identity is its directory (slot letter), never its branch -
+  branches can be switched inside a worktree. `wls` is the only letter -> branch
+  map.
+
 ### bdavi/dotfiles
 
 - Whenever installing a tool or application on a dev box - even one needed for a
