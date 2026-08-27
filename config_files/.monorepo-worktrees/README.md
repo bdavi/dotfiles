@@ -20,7 +20,7 @@ Twenty slots, three brands each. Do it once and it covers every worktree from th
 
 | Command | Does |
 | --- | --- |
-| `wnew <branch>` | create a worktree (run from the primary monorepo) |
+| `wnew <branch>` | create a worktree (run from the primary monorepo or any worktree) |
 | `wdel [--force]` | tear down and remove the current worktree, keeping the branch |
 | `wls` | every slot: letter, branch, containers up, URL |
 | `windex` | the current slot letter |

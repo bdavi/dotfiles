@@ -210,11 +210,19 @@ wnew() {
     return 1
   fi
 
-  _top=$(git rev-parse --show-toplevel 2>/dev/null)
-  if [ "$_top" != "$WT_PRIMARY_REPO" ]; then
-    _wt_err "wnew runs from the primary monorepo ($WT_PRIMARY_REPO)"
+  # Any checkout of the monorepo will do - the primary or one of its
+  # worktrees. Worktrees share refs, remotes, and the worktree list with
+  # the primary, so every git command below behaves identically from
+  # either; the check only rejects shells that aren't in the monorepo at
+  # all. --git-common-dir resolves to the primary's .git from any of
+  # them (the same fact the wt-generate.py .git mount leans on).
+  _common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+  if [ "$_common" != "$WT_PRIMARY_REPO/.git" ]; then
+    _wt_err "wnew runs from the primary monorepo or one of its worktrees ($WT_PRIMARY_REPO)"
+    unset _common
     return 1
   fi
+  unset _common
 
   _name="$1"
   _explicit_remote=0
@@ -325,7 +333,7 @@ else:
   if [ -z "$_ws" ]; then
     cd "$_dir" || return 1
   fi
-  unset _top _name _explicit_remote _mode _letter _l _idx _dir _state _ws
+  unset _name _explicit_remote _mode _letter _l _idx _dir _state _ws
 }
 
 # wdel [--force] — tear down and remove the current worktree. Keeps the branch.

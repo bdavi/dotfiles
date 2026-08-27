@@ -187,7 +187,7 @@ The originals go through `container-log <service>` and `cd $COMPOSE_ROOT && dock
 
 ### `wnew <branch>`
 
-Runs only from the primary checkout. Validates the `<handle>/<TICKET-123>` convention (a guardrail now, not load-bearing), allocates the lowest free letter, creates the worktree, generates the compose file and nginx confs, and adds a herdr workspace when `HERDR_ENV=1` via `herdr worktree create --branch --base --path --label --focus`.
+Runs from any checkout of the monorepo — the primary or an existing worktree; they share refs, remotes, and the worktree list, so behavior is identical (originally primary-only, relaxed once running it from inside a worktree proved routine). Validates the `<handle>/<TICKET-123>` convention (a guardrail now, not load-bearing), allocates the lowest free letter, creates the worktree, generates the compose file and nginx confs, and adds a herdr workspace when `HERDR_ENV=1` via `herdr worktree create --branch --base --path --label --focus`.
 
 Branch resolution, with the chosen path always announced:
 

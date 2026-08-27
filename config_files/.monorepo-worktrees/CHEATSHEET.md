@@ -16,7 +16,7 @@ sudo tee -a /etc/hosts < ~/.monorepo-worktrees/hosts-block.txt
 
 ## Create, list, remove
 
-`wnew` runs from `~/monorepo`, everything else from inside a worktree.
+`wnew` runs from `~/monorepo` or any worktree, everything else from inside a worktree.
 
 ```bash
 # New branch, created off local master
