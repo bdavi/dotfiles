@@ -389,10 +389,33 @@ wdel() {
 
   if [ -n "$_ws" ]; then
     if [ "$_ws" = "$HERDR_WORKSPACE_ID" ]; then
-      printf 'this herdr workspace (%s) belonged to that worktree — close it when you are done here.\n' "$_ws"
-    else
+      # Running inside the workspace being deleted: move herdr somewhere
+      # sane, then close this workspace as the very last act - the close
+      # kills this pane, and everything after it with it (which is why
+      # the unsets happen early and nothing follows the close). Target:
+      # the first remaining worktree's workspace (state dirs glob in slot
+      # letter order; this slot's is already deleted); none left, a fresh
+      # workspace at the primary monorepo (--focus moves herdr as it
+      # creates).
+      _target=""
+      for _d in "$WT_STATE_ROOT"/*/; do
+        [ -d "$_d" ] || continue
+        _target=$(sed -n 's/^WT_HERDR_WORKSPACE=//p' "${_d}meta" 2>/dev/null)
+        [ -n "$_target" ] && break
+      done
+      if [ -n "$_target" ]; then
+        printf 'moving herdr to the first remaining worktree, then closing this workspace.\n'
+        herdr workspace focus "$_target" >/dev/null 2>&1
+      else
+        printf 'no worktree workspaces left — moving herdr to a fresh monorepo workspace, then closing this one.\n'
+        herdr workspace create --cwd "$WT_PRIMARY_REPO" --label monorepo --focus >/dev/null 2>&1
+      fi
+      unset _force _branch _dirty _ahead _letter _dir _state _target _d
       herdr workspace close "$_ws" >/dev/null 2>&1
+      unset _ws
+      return 0
     fi
+    herdr workspace close "$_ws" >/dev/null 2>&1
   fi
 
   unset _force _branch _dirty _ahead _letter _dir _state _ws
