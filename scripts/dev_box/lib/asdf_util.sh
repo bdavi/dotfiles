@@ -69,12 +69,19 @@ install_asdf() {
   echo "Installed asdf $latest to ~/.local/bin/asdf (was: ${installed:-not installed})"
 }
 
-# Idempotently adds an asdf plugin.
+# Idempotently adds an asdf plugin, updating it to the latest commit when
+# already present - a stale plugin can miss upstream fixes for new tool
+# releases (e.g. asdf-pnpm not recognizing pnpm 12's bin/pnpm.mjs layout
+# until a plugin fix landed) with no signal beyond a failed install.
 asdf_plugin_add() {
   local name="$1"
   local url="$2"
 
-  asdf plugin list | grep -qx "$name" || asdf plugin add "$name" "$url"
+  if asdf plugin list | grep -qx "$name"; then
+    asdf plugin update "$name"
+  else
+    asdf plugin add "$name" "$url"
+  fi
 }
 
 # Installs the latest version of an asdf-managed tool (no-op if that
