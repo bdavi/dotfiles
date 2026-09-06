@@ -57,6 +57,8 @@ resize_mode = "prefix+v"
 # joining lines) can still misfire the same way plain alt did.
 previous_workspace = "alt+shift+k"
 next_workspace = "alt+shift+j"
+previous_tab = "alt+shift+h"
+next_tab = "alt+shift+l"
 
 [[keys.command]]
 key = "shift+left"
