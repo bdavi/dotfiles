@@ -67,13 +67,23 @@ configure_xfce_power_manager() {
   # Never suspend the system on inactivity - suspending is always an
   # explicit action (lid/menu). 0 = never, which is also xfpm 4.20's
   # shipped default; asserted anyway so a stray settings-dialog save
-  # can't leave a timeout behind. Display sleep (dpms below) is
-  # deliberately kept - it's the monitor, not the machine.
+  # can't leave a timeout behind.
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/inactivity-on-ac -n -t uint -s 0
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/inactivity-on-battery -n -t uint -s 0
 
+  # Never blank or power down the display on AC either (was a 60-minute
+  # display sleep before the policy changed to hands-off entirely, same
+  # spirit as configure_xfce_screen_locking's no-idle-lock). blank-on-ac
+  # drives the X screensaver timeout - the thing that used to fire at 10
+  # idle minutes - and the dpms-on-ac pair the monitor sleep/off timers.
+  # Battery is left at xfpm's defaults so an unplugged laptop still
+  # saves itself. xfpm only pushes these to the X server at login and on
+  # power events; applying to a live session also needs
+  # `xset s off; xset dpms 0 0 0`.
+  xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/blank-on-ac -n -t int -s 0
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-enabled -n -t bool -s true
-  xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-on-ac-sleep -n -t uint -s 60
+  xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-on-ac-sleep -n -t uint -s 0
+  xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-on-ac-off -n -t uint -s 0
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/show-tray-icon -n -t bool -s false
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/brightness-switch-restore-on-exit -n -t int -s 1
   xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/brightness-switch -n -t int -s 0
