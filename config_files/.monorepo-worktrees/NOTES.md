@@ -159,6 +159,8 @@ In a worktree, `.git` is a **file** containing `gitdir: /home/brian/monorepo/.gi
 
 Read-only because the only consumer is a compile-time read, and because the container runs as `deploy`: a stray write would leave lock files or objects owned by the wrong user inside the real `.git`, surfacing later as permission errors in host-side git. If something ever needs write access it fails with an obvious error and the flag is a one-word change.
 
+**The target is created on the host.** `/rz/redline/.git` does not exist in the checkout, so docker creates it — and since `/rz/redline` is itself a bind mount, it appears inside the checkout as `redline/.git`, root-owned, mirroring the type of its source. In the primary that is a directory; in a worktree it is an empty file. Both are correct and neither shows up in `git status`, because git ignores any path named `.git`. Only the *wrong* type is a problem, which is what `_wt_git_mount_preflight` checks ([evidence](#stray-git-mount-targets)).
+
 ---
 
 ## 4. Commands
@@ -319,6 +321,25 @@ A separate compose project attached to `zla_default` as external resolved `postg
 | primary `.git` dir → `/rz/redline/.git` (primary-style) | ❌ docker refuses: can't mount a directory over a file |
 
 Read-only was sufficient for `rev-parse`.
+
+### Stray `.git` mount targets
+
+An ad-hoc `docker run -v /home/brian/monorepo/.git:/rz/redline/.git:ro` against a worktree checkout (an attempt to run tests before the `w*` stack was up) left a root-owned empty **directory** at `~/worktrees/e/redline/.git`. Every subsequent `wdc up` then failed at container creation:
+
+```
+error mounting "/home/brian/worktrees/e/.git" to rootfs at "/rz/redline/.git":
+not a directory: Are you trying to mount a directory onto a file (or vice-versa)?
+```
+
+The message names the mount but not which side is wrong, and the fix — `rmdir` a path that looks like a git directory — is not one you guess at. Observed types, all root-owned:
+
+| Checkout | `redline/.git` | Correct? |
+| --- | --- | --- |
+| primary (`~/monorepo`) | directory | ✅ source is the real `.git` dir |
+| worktree, healthy | empty file | ✅ source is the `gitdir:` pointer file |
+| worktree, after a stray mount | directory | ❌ breaks every `wdc up` |
+
+So the check is on type, not existence — `[ -d ]` inside a worktree — and it runs on `up|start|restart` before compose is invoked, since docker's own error arrives too late to be useful.
 
 ### `container_name` with `scale: 0`
 

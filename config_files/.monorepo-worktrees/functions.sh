@@ -205,6 +205,25 @@ _wt_ssh_preflight() {
   unset _bad _f _mode
 }
 
+# `redline/.git` is docker's mount target for the repo-root `.git`, created on
+# the host because `/rz/redline` is itself a bind mount. It mirrors the type of
+# its source, so an empty root-owned *file* there is correct in a worktree (the
+# source is the `gitdir:` pointer file) and a *directory* is correct in the
+# primary. A directory in a worktree means something bind-mounted a real git
+# directory over that path — an ad-hoc `docker run -v …:/rz/redline/.git`, say —
+# and every `wdc up` afterwards dies with "not a directory: Are you trying to
+# mount a directory onto a file", which names neither the cause nor the cure.
+# See ~/.monorepo-worktrees/NOTES.md.
+_wt_git_mount_preflight() {
+  [ -d "$_WT_DIR/redline/.git" ] || return 0
+
+  _wt_err "$_WT_DIR/redline/.git is a directory; in a worktree it must be a file (or absent)."
+  _wt_err "Something mounted a git directory over it. Remove it and retry:"
+  _wt_err "  rmdir $_WT_DIR/redline/.git"
+  _wt_err "(it should be empty and root-owned; look inside before removing it if rmdir refuses)"
+  return 1
+}
+
 # nginx resolves upstream names once at startup, so confs are refreshed and the
 # sidecar restarted whenever app containers are created or recreated.
 _wt_refresh_gateway() {
@@ -472,7 +491,10 @@ wdc() {
   fi
   _sub="$1"
   case "$_sub" in
-    up|start|restart) _wt_ssh_preflight ;;
+    up|start|restart)
+      _wt_git_mount_preflight || { unset _sub; return 1; }
+      _wt_ssh_preflight
+      ;;
   esac
   docker compose -p "wt$_WT_L" \
     -f "$_WT_STATE/compose.yaml" -f "$_WT_STATE/compose.override.yaml" "$@"
