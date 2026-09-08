@@ -68,55 +68,116 @@ else
   # Reset audio so lineout is recognized by pulseaudio
   alias headphones!='sudo alsa force-reload'
 
-  # Force IPv4 box-wide: the work VPN carries no IPv6, so dual-stack
-  # destinations (e.g. the staging admin site) resolve AAAA-first and
-  # route around the tunnel. Writes a sysctl.d drop-in - persistent
-  # across reboots, and the right mechanism now that systemd 259 dropped
-  # /etc/sysctl.conf (`sudo sysctl -p` fails since that update) - then
-  # applies it live; the kernel drops every v6 address on the spot, ::1
-  # included. On-demand by choice, not part of build_ubuntu.sh - undo by
-  # deleting the drop-in and rebooting.
+  # Force IPv4 box-wide, permanently: the work VPN carries no IPv6, so
+  # dual-stack destinations (e.g. the staging admin site) resolve
+  # AAAA-first and route around the tunnel. A one-shot sysctl isn't
+  # enough - FortiClient re-enables disable_ipv6 per interface on every
+  # VPN connect (observed live 2026-08-25) and maintains v6 addresses
+  # itself, so the setting has to be *enforced*, not just set. useip4
+  # installs that enforcement, all root-owned system config:
   #
-  # disable_ipv6 alone is not enough: FortiClient re-enables it
-  # per-interface (wlo1/enp3s0/its own tun, observed live 2026-08-25) on
-  # every VPN connect, and in-kernel SLAAC rebuilds global addresses
-  # from RAs within seconds. accept_ra=0 is the backstop FortiClient
-  # doesn't touch - with RAs ignored, a re-enabled interface gets a
-  # link-local address at most and IPv4 still carries all real traffic.
-  # The per-interface loop exists because writing all=1 only cascades
-  # when the value *changes*: after a FortiClient flip, `all` is still 1
-  # and a plain reload fixes nothing (also why the old "already active"
-  # check was a lie - it only looked at `all`).
+  #   /etc/sysctl.d/99-disable-ipv6.conf   boot + new-interface state
+  #                                        (sysctl.d, not /etc/sysctl.conf
+  #                                        - systemd 259 dropped the latter,
+  #                                        which is why `sysctl -p` fails)
+  #   /usr/local/sbin/useip4-assert        one enforcement pass, repeated
+  #                                        over a ~25s settle window since
+  #                                        FortiClient's flip can trail the
+  #                                        tun's appearance
+  #   useip4.service + useip4.timer        the assert at boot and once a
+  #                                        minute as the catch-all backstop
+  #   /etc/udev/rules.d/99-useip4.rules    instant re-assert the moment a
+  #                                        fctvpn* tun appears or vanishes -
+  #                                        the exact moment FortiClient flips
+  #
+  # The per-interface loop in the assert script exists because writing
+  # all=1 only cascades when the value *changes*: after a FortiClient
+  # flip, `all` is still 1 and a plain `sysctl --system` fixes nothing.
+  # accept_ra=0 rides along so a flipped interface can't SLAAC while the
+  # window is open. Idempotent - re-running rewrites the same files and
+  # re-arms the timer. useip6 below disarms everything.
   useip4() {
-    local conf_file="/etc/sysctl.d/99-disable-ipv6.conf"
-    local rule
-    rule="$(
-      cat <<'EOF'
-# IPv4 only: the work VPN carries no IPv6, so v6 routes around it -
-# written by useip4 (config_files/.commonrc-linux).
+    sudo install -d -m 0755 /usr/local/sbin /etc/sysctl.d /etc/udev/rules.d
+
+    sudo tee /etc/sysctl.d/99-disable-ipv6.conf >/dev/null <<'EOF'
+# IPv4 only: the work VPN carries no IPv6, so v6 routes around it.
+# Managed by useip4 (dotfiles config_files/.commonrc-linux); enforcement
+# lives in useip4.timer and /etc/udev/rules.d/99-useip4.rules.
 net.ipv6.conf.all.disable_ipv6=1
 net.ipv6.conf.default.disable_ipv6=1
-# FortiClient re-enables disable_ipv6 per interface at VPN connect;
-# ignoring RAs keeps that flip from producing usable v6 addresses.
 net.ipv6.conf.all.accept_ra=0
 net.ipv6.conf.default.accept_ra=0
 EOF
-    )"
 
-    if [ -f "$conf_file" ] && [ "$(cat "$conf_file")" = "$rule" ] \
-      && ! grep -q '^0$' /proc/sys/net/ipv6/conf/*/disable_ipv6; then
-      echo "useip4: already active"
-      return 0
-    fi
+    sudo tee /usr/local/sbin/useip4-assert >/dev/null <<'EOF'
+#!/bin/sh
+# (Re)disable IPv6 on every interface, repeated over a ~25s settle
+# window: FortiClient flips disable_ipv6 back per interface around VPN
+# connect, not always in the first second. Each interface is written
+# directly because setting all=1 only cascades when the value changes.
+# Installed by useip4 (dotfiles config_files/.commonrc-linux).
+for delay in 0 5 5 15; do
+  sleep "$delay"
+  for d in /proc/sys/net/ipv6/conf/*/; do
+    case "$d" in */all/|*/default/) continue ;; esac
+    echo 1 > "${d}disable_ipv6" 2>/dev/null
+    echo 0 > "${d}accept_ra" 2>/dev/null
+  done
+done
+exit 0
+EOF
+    sudo chmod 0755 /usr/local/sbin/useip4-assert
 
-    echo "$rule" | sudo tee "$conf_file" >/dev/null \
-      && sudo sysctl --system >/dev/null \
-      && sudo sh -c '
-           for d in /proc/sys/net/ipv6/conf/*/; do
-             case "$d" in */all/|*/default/) continue ;; esac
-             echo 1 > "${d}disable_ipv6" 2>/dev/null
-             echo 0 > "${d}accept_ra" 2>/dev/null
-           done' \
-      && echo "useip4: IPv6 disabled box-wide, IPv4 only from here on"
+    sudo tee /etc/systemd/system/useip4.service >/dev/null <<'EOF'
+[Unit]
+Description=Assert IPv4-only (re-disable IPv6 on all interfaces)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/useip4-assert
+EOF
+
+    sudo tee /etc/systemd/system/useip4.timer >/dev/null <<'EOF'
+[Unit]
+Description=Re-assert IPv4-only every minute (FortiClient re-enables IPv6)
+
+[Timer]
+OnBootSec=15
+OnUnitActiveSec=60
+AccuracySec=5
+
+[Install]
+WantedBy=timers.target
+EOF
+
+    sudo tee /etc/udev/rules.d/99-useip4.rules >/dev/null <<'EOF'
+# FortiClient re-enables IPv6 around tunnel setup/teardown - re-assert
+# IPv4-only the moment a fctvpn* tun appears or vanishes. Managed by
+# useip4 (dotfiles config_files/.commonrc-linux).
+ACTION=="add|remove", SUBSYSTEM=="net", KERNEL=="fctvpn*", RUN+="/usr/bin/systemctl --no-block start useip4.service"
+EOF
+
+    sudo sysctl --system >/dev/null
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now useip4.timer >/dev/null 2>&1
+    sudo systemctl --no-block start useip4.service
+    sudo udevadm control --reload
+    echo "useip4: enforcement armed - sysctl baseline, boot + minutely timer, instant fctvpn* udev trigger"
+  }
+
+  # Disarm useip4's enforcement and re-enable IPv6. Addresses come back
+  # on the next network reconnect (or reboot); NM renegotiates them.
+  useip6() {
+    sudo systemctl disable --now useip4.timer >/dev/null 2>&1
+    sudo rm -f /etc/systemd/system/useip4.service /etc/systemd/system/useip4.timer \
+      /etc/udev/rules.d/99-useip4.rules /usr/local/sbin/useip4-assert \
+      /etc/sysctl.d/99-disable-ipv6.conf
+    sudo systemctl daemon-reload
+    sudo udevadm control --reload
+    sudo sh -c 'for d in /proc/sys/net/ipv6/conf/*/; do
+      echo 0 > "${d}disable_ipv6" 2>/dev/null
+      echo 1 > "${d}accept_ra" 2>/dev/null
+    done'
+    echo "useip6: enforcement removed, IPv6 re-enabled - reconnect or reboot to get addresses back"
   }
 fi
