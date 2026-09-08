@@ -94,6 +94,18 @@ The most expensive mistakes in a plan are confident sentences nobody checked. Be
 
 A measurement that decides a design is a prerequisite with an owner, not homework. Ask for aggregates, never row-level data.
 
+## Self-review before hand-off
+
+Before presenting a drafted ticket for review or sign-off, check it against its own rules:
+
+- The deliverable is named (module, function, arity) with a real file path.
+- Every cross-reference names the artifact, not just a ticket number.
+- Every dependency points at an earlier ticket - lower number or earlier letter.
+- Every number is measured, and says where it came from and when.
+- Every named precedent was actually read.
+- No open questions remain in a Tech Task.
+- The delete test has been run on the prose.
+
 ## Creating it in Jira
 
 🔴 **Nothing is created until there is a positive, explicit go-ahead.** Silence, "looks good", or a conversation that moved on is not sign-off. **"Write it up" means put it in the plan document** - it is never an instruction to create tickets.

@@ -63,7 +63,7 @@ Alongside them: `reference/` for data acquired during discovery, `superseded/` f
 
 - Title: `<Theme>: <Deliverable>` - e.g. `Community: Foundation`; the theme usually matches the component.
 - Component and scrum team on the epic **and** every child. No story points on the epic.
-- The description carries **the shape of the work**: what the epic is and the constraints that forced the design, the build order, the open items, and a pointer to the design document attached to the epic. Deliberately **not**: the ticket list (Jira renders children itself), anything point-in-time ("as of" tables, readiness status), or ticket-level build detail.
+- The description carries **the shape of the work**: what the epic is and the constraints that forced the design, the build order, the open items, the explicit non-scope (what the epic deliberately does not do - the epic-level twin of a ticket's `!!` exclusions), and a pointer to the design document attached to the epic. Deliberately **not**: the ticket list (Jira renders children itself), anything point-in-time ("as of" tables, readiness status), or ticket-level build detail.
 - Do not mingle planned work into a catch-all epic accumulating spikes - a planned epic has a shape (build order, milestone, meaningful point total) and merging erases all three.
 
 ## Moving an epic into Jira
