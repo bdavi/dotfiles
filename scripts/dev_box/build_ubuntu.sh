@@ -372,6 +372,7 @@ if pgrep -u "$USER" -x xfce4-session >/dev/null; then
   configure_xfce_keyboard_shortcuts
   configure_xfce_super_whiskermenu
   configure_xfce_systray_watcher
+  configure_xfce_screen_locking
   configure_xfce_workspaces
   configure_xfce_hidpi_host_overrides
   configure_xfce_ensure_panel_visible

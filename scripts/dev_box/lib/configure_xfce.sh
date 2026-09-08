@@ -310,6 +310,44 @@ EOF
   pkill -f ayatana-indicator-application-service 2>/dev/null || true
 }
 
+# Never lock the screen on inactivity - locking is a manual act (xflock4 /
+# Ctrl+Alt+L), the same policy as the never-suspend-on-idle setting in
+# configure_xfce_power_manager. Xubuntu's locker is light-locker, which
+# otherwise locks (= parks the session at the LightDM greeter) whenever
+# the X screensaver fires after the idle timeout. It has no xfconf
+# channel - its flags ride the autostart Exec line - so this is a
+# user-level override of /etc/xdg/autostart/light-locker.desktop, the
+# same pattern as configure_xfce_systray_watcher above.
+# --lock-after-screensaver=0 disables idle locking outright and
+# --no-late-locking covers the lock-on-screensaver-deactivation path.
+# Lock-on-suspend keeps its default: a closed lid still locks.
+configure_xfce_screen_locking() {
+  command -v light-locker >/dev/null || return 0
+
+  mkdir -p ~/.config/autostart
+  cat > ~/.config/autostart/light-locker.desktop <<'EOF'
+# User override of /etc/xdg/autostart/light-locker.desktop: never lock from
+# idle (--lock-after-screensaver=0 disables it, --no-late-locking covers the
+# screensaver-deactivation path). Locking is manual (xflock4 / Ctrl+Alt+L),
+# and lock-on-suspend keeps its default so a closed lid still locks.
+[Desktop Entry]
+Type=Application
+Name=Screen Locker
+Comment=Launch screen locker program
+Icon=preferences-desktop-screensaver
+Exec=light-locker --lock-after-screensaver=0 --no-late-locking
+NoDisplay=true
+NotShowIn=GNOME;Unity;
+EOF
+
+  # Hand the running locker the new flags now rather than at next login -
+  # skipped when no locker is up (e.g. initial box setup, no session yet).
+  if pgrep -x light-locker >/dev/null; then
+    pkill -x light-locker
+    setsid light-locker --lock-after-screensaver=0 --no-late-locking >/dev/null 2>&1 < /dev/null &
+  fi
+}
+
 # Number of virtual desktops - pairs with the workspace switcher plugin
 # added in configure_xfce_panel. Workspace names aren't set explicitly;
 # xfwm4 auto-generates "Workspace N" for any workspace without a stored
