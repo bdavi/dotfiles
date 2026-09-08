@@ -105,6 +105,25 @@ the tooling; update them when you do.
   branches can be switched inside a worktree. `wls` is the only letter -> branch
   map.
 
+Running commands in a worktree, for agents:
+
+- **The primary stack's containers cannot see a worktree's code.** `zla-*`
+  containers mount `~/monorepo/redline`; a worktree's are `wt<letter>-*`. Running
+  `mix compile`/`test`/`format` in a `zla-*` container while working in a
+  worktree checks master's code and reports a meaningless pass. Always go through
+  `wcg-bash` (or `docker exec -u deploy wt<letter>-cycle-gear-redline-webapp`).
+- Run mix from inside the container, per redline's `AGENTS.md`: tests in the
+  cycle-gear container, `cd /rz/redline/apps/<app> && mix test <path>`.
+- `w…-bash 'some command'` works without a terminal. A bare `w…-bash` and
+  `w…-iex` need one and will refuse - don't try to script them. `w…-log` follows
+  forever; for a one-shot read use `docker logs --tail 200 wt<letter>-<service>`.
+- The first command after `wdc up -d` on a fresh slot pays a cold `deps.get` plus
+  a full umbrella compile - minutes. Run it in the background; it has not hung.
+- Never bind-mount into a worktree with an ad-hoc `docker run`. Docker creates
+  missing mount targets on the host, inside the checkout, owned by root - which
+  can leave the slot unable to start and need a `sudo`-adjacent cleanup the user
+  has to do. Start the slot's own containers instead.
+
 ### bdavi/dotfiles
 
 - Whenever installing a tool or application on a dev box - even one needed for a
