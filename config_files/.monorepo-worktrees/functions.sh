@@ -98,12 +98,33 @@ _wt_exec_quiet() {
   _wt_exec_raw "$_c" "$2"
 }
 
+# `docker exec -t` needs a terminal on this side; without one it refuses the
+# whole call with "cannot attach stdin to a TTY-enabled container because stdin
+# is not a terminal". Scripts, CI and coding agents all run without one, so the
+# flags are conditional and a passed command still runs.
+#
+# The no-TTY branch also drops `-i`, so the container's stdin is empty rather
+# than an inherited pipe that may never close — a command that reads stdin
+# should end, not hang. The cost is that piping input into `w…-bash 'cmd'` only
+# works from a terminal, which nothing does.
+#
+# An interactive shell has nowhere to go without a terminal, so that case says
+# so rather than launching a doomed `bash -l`.
 _wt_exec_raw() {
-  if [ -z "$2" ]; then
-    docker exec -it -u deploy "$1" bash -lc "TERM=xterm-color bash -l"
-  else
-    docker exec -it -u deploy "$1" bash -lc "$2"
+  if [ -n "$2" ]; then
+    if [ -t 0 ]; then
+      docker exec -it -u deploy "$1" bash -lc "$2"
+    else
+      docker exec -u deploy "$1" bash -lc "$2"
+    fi
+    return $?
   fi
+
+  if [ ! -t 0 ]; then
+    _wt_err "an interactive shell needs a terminal; pass a command instead, e.g. wcg-bash 'mix test'"
+    return 1
+  fi
+  docker exec -it -u deploy "$1" bash -lc "TERM=xterm-color bash -l"
 }
 
 # The dev iex cookie is read from the monorepo at runtime rather than

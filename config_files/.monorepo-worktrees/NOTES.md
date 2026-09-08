@@ -177,6 +177,8 @@ All names verified free on this box.
 
 **Every log, shell, and iex command prints a one-line target banner** (`→ wta-cycle-gear-redline-webapp`). The `w` is the only thing between "my worktree" and the shared primary, and `cg-bash` typed by mistake targets the primary silently. Not applied to `welts`/`wclts`, which hit the same shared databases either way.
 
+**A passed command needs no terminal.** `docker exec -t` refuses the entire call when this side has no tty (`cannot attach stdin to a TTY-enabled container because stdin is not a terminal`), which ruled out scripts, cron and coding agents — the last of these being how the gap surfaced. `_wt_exec_raw` now adds `-it` only when stdin is a terminal and drops both flags otherwise, so `wcg-bash 'mix test …'` works either way, and `welts`/`wclts` became scriptable for free. The no-tty branch omits `-i` deliberately: an inherited pipe that never closes would hang a command that reads stdin, and nothing pipes input into these. A bare `w…-bash` and `w…-iex` genuinely need a terminal, so they now say so instead of launching a shell with nowhere to go.
+
 **When a container isn't running**, the message prints the exact command rather than an instruction — `wdc up -d --scale wta-revzilla-redline-webapp=1` — since the compose file lives outside the checkout.
 
 The originals go through `container-log <service>` and `cd $COMPOSE_ROOT && docker compose exec`; the twins don't need compose at all, because container names are deterministic: `docker logs -f --tail 1000 wta-cycle-gear-redline-webapp`, `docker exec -u deploy -it wta-… bash -lc …`. Simpler, and a cleaner "not running" error.

@@ -103,6 +103,23 @@ wclts
 welts
 ```
 
+## Scripted / non-interactive use
+
+Passing a command needs no terminal, so this works from a script, a cron job or a coding agent:
+
+```bash
+# Tests for one app (mix runs from the app dir inside the container)
+wcg-bash 'cd /rz/redline/apps/redline_crm && mix test test/redline_crm/discourse/'
+
+# Format and lint just the files you touched
+wcg-bash 'cd /rz/redline && mix format apps/redline_crm/lib/redline_crm/discourse/http.ex'
+wcg-bash 'cd /rz/redline && mix credo apps/redline_crm/lib/redline_crm/discourse/http.ex'
+```
+
+A bare `wcg-bash` and `wcg-iex` need a real terminal and will tell you so. `wcg-log` follows forever — for a scripted read use `docker logs --tail 200 wt<letter>-cycle-gear-redline-webapp`.
+
+The first command after a fresh `wdc up -d` pays a cold `deps.get` plus a full umbrella compile — minutes, not seconds. Run it in the background rather than assuming it hung.
+
 ## URLs
 
 Slot `a`:

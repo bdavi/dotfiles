@@ -74,7 +74,7 @@ A brand this worktree isn't running routes to the **primary's** container, which
 ## Gotchas
 
 - **Linux only.** Docker Desktop on macOS cannot route to container IPs.
-- The primary stack must be up: its network is where the databases live.
+- `w{cg,rz,jp,ecom}-bash 'some command'` works without a terminal, so scripts and coding agents can drive it. A bare `w…-bash` (interactive shell) and `w…-iex` still need one and say so rather than failing obscurely.- The primary stack must be up: its network is where the databases live.
 - nginx resolves upstreams once at startup, so `wdc` restarts the sidecar after anything that creates or recreates a container. If a site 502s after a container was replaced by hand, `wdc restart` fixes it.
 - A bare `docker compose` inside a worktree would try to start a whole second stack. Use `wdc`.
 - `wdel` drops the slot's `_build`/`deps`/`node_modules` volumes, so the next worktree compiles from cold.
