@@ -7,7 +7,7 @@ description: Plan an epic or a multi-epic programme - turn a requirement into a 
 
 How a requirement becomes an epic with tickets a team can execute. Every individual ticket obeys the **write-ticket** skill, including its verify-before-you-write checks and the sign-off gate; this skill covers everything that only exists when there is a *list*.
 
-Match the machinery to the scenario: a single ticket needs none of this; one epic needs Parts 1-2 below; only work spanning epics needs Part 3. Review requirements skeptically before planning - look for missed items, edge cases and inconsistencies, and ask about anything unclear before writing tickets.
+Match the machinery to the scenario: a single ticket needs none of this; one epic needs everything from "Work high level first" through "Moving an epic into Jira"; only work spanning several epics needs the "Across epics" section at the end. Review requirements skeptically before planning - look for missed items, edge cases and inconsistencies, and ask about anything unclear before writing tickets.
 
 ## Work high level first
 
@@ -81,7 +81,7 @@ Alongside them: `reference/` for data acquired during discovery, `superseded/` f
 
 **Lifecycle:** the local documents outlive creation only until grooming. Once the team is satisfied with the tickets and epics, the local files can be deleted - the longer documents live on as attachments to the epic, which from then on is the record.
 
-## Part 3 - across epics
+## Across epics
 
 - One epic is right up to roughly **30 points**. Past that, split along **delivery seams** a stakeholder would recognise ("Identity/SSO", "Data Migration"), not technical layers. **Group into epics last** - grouping depends on the final shape of the list.
 - **A "Foundations" epic first** when several later epics depend on the same groundwork - also the fix for circular dependencies between epics: extract the shared part into a third.
