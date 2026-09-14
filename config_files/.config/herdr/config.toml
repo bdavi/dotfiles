@@ -12,6 +12,23 @@ pane_scrollbars = false
 [ui.toast]
 delivery = "system"
 
+# One row per agent instead of the default two (["state_icon", "workspace",
+# "tab"] plus ["agent"]). herdr has no setting to hide the agent panel - the
+# sidebar's two sections are split by a draggable divider whose ratio is
+# clamped to [0.1, 0.9] in both the drag handler and the layout read, so
+# agents always keeps at least a tenth of the sidebar. Dragging the divider
+# to the bottom and halving each entry's height is as close as it gets.
+#
+# rows_by_agent.claude repeats the same row because it's unclear whether
+# herdr ships a built-in three-row override for claude (--default-config
+# shows one, commented, where every other commented line is a real default).
+# Setting it explicitly is correct either way.
+[ui.sidebar.agents]
+rows = [["state_icon", "workspace", "tab"]]
+
+[ui.sidebar.agents.rows_by_agent]
+claude = [["state_icon", "workspace", "tab"]]
+
 # Required by the jmarbutt.spaces-pr-status plugin (lib/herdr.sh) - without
 # these rows it computes PR status but has nowhere to render it. A row
 # disappears when none of its tokens have a value, so spaces without a PR
