@@ -32,12 +32,24 @@ claude = [["state_icon", "workspace", "tab"]]
 # Required by the jmarbutt.spaces-pr-status plugin (lib/herdr.sh) - without
 # these rows it computes PR status but has nowhere to render it. A row
 # disappears when none of its tokens have a value, so spaces without a PR
-# cost no extra height.
+# cost no extra height, and a merged/closed PR drops back to one line (the
+# plugin nulls checks and review once a PR is terminal).
+#
+# One token per row rather than the plugin README's single
+# ["$pr", "$pr_checks", "$pr_review"]. herdr joins a row's tokens with " · ",
+# which makes that row up to 36 columns ("◌ #9920 DRAFT · ✓ 17/17 · review
+# req") against a sidebar that auto-scales no wider than sidebar_max_width
+# (36 by default), so the tail was being clipped. herdr has no separator or
+# per-row truncation setting; splitting the row is the only fix that keeps
+# every token. Checks and review are dimmed so the space name and PR number
+# stay the things the eye lands on.
 [ui.sidebar.spaces]
 rows = [
   ["state_icon", "workspace"],
   ["branch", "git_status"],
-  ["$pr", "$pr_checks", "$pr_review"],
+  ["$pr"],
+  [{ token = "$pr_checks", dim = true }],
+  [{ token = "$pr_review", dim = true }],
 ]
 
 [theme]
