@@ -103,7 +103,11 @@ EOF
   # normal interactive sudo access covers these two calls already.
   local tmp
   tmp="$(mktemp)"
-  trap 'rm -f "$tmp"' RETURN
+  # Self-clearing: a plain `trap ... RETURN` stays armed past this
+  # function and fires again (on a now-gone local) when a caller wraps
+  # this and later returns itself. See neovim.sh's install_neovim_binary
+  # for the failure this caused there.
+  trap 'rm -f "$tmp"; trap - RETURN' RETURN
 
   echo "$rule" >"$tmp"
   sudo visudo -c -f "$tmp"

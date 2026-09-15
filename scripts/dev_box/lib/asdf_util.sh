@@ -55,7 +55,11 @@ install_asdf() {
 
   local tmp
   tmp="$(mktemp -d)"
-  trap 'rm -rf "$tmp"' RETURN
+  # Self-clearing: a plain `trap ... RETURN` stays armed past this
+  # function and fires again (on a now-gone local) when a caller wraps
+  # this and later returns itself. See neovim.sh's install_neovim_binary
+  # for the failure this caused there.
+  trap 'rm -rf "$tmp"; trap - RETURN' RETURN
 
   curl -fsSL \
     "https://github.com/asdf-vm/asdf/releases/download/${latest}/asdf-${latest}-linux-${arch}.tar.gz" \

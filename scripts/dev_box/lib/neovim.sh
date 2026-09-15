@@ -90,7 +90,12 @@ install_neovim_binary() {
   local install_dir="$HOME/.local/share/nvim-linux-${nvim_arch}"
   local tmp
   tmp="$(mktemp -d)"
-  trap 'rm -rf "$tmp"' RETURN
+  # A plain `trap ... RETURN` isn't scoped to this function - it stays
+  # armed and fires again when install_neovim (our caller) itself
+  # returns, by which point this $tmp local is gone and `set -u` kills
+  # the script. Clearing the trap as part of firing it keeps it to one
+  # shot.
+  trap 'rm -rf "$tmp"; trap - RETURN' RETURN
 
   curl -fsSL \
     "https://github.com/neovim/neovim/releases/download/${latest}/nvim-linux-${nvim_arch}.tar.gz" \
