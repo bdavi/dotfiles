@@ -39,7 +39,6 @@ source "$SCRIPT_DIR/lib/security_scanners.sh"
 source "$SCRIPT_DIR/lib/neovim.sh"
 source "$SCRIPT_DIR/lib/herdr.sh"
 source "$SCRIPT_DIR/lib/herdr_codespaces.sh"
-source "$SCRIPT_DIR/lib/nimbalyst.sh"
 
 require_sudo
 
@@ -326,12 +325,6 @@ if [ -d "$HOME/monorepo" ]; then
   ensure_gh_codespace_scope || true
   ensure_ssh_config_includes_codespaces
 fi
-
-
-######################################################################
-# Nimbalyst
-######################################################################
-install_nimbalyst
 
 
 ######################################################################
