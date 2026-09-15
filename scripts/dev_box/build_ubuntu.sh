@@ -156,6 +156,16 @@ if pkg_installed flameshot; then
   sudo apt-get --yes remove flameshot
 fi
 sudo flatpak install --system --noninteractive flathub org.flameshot.Flameshot
+# Qt 6 enables high-DPI scaling by default, and on a mixed-DPI X11
+# desktop it scales each monitor's size without scaling its origin. The
+# capture overlay is then drawn at the wrong offset - the frozen image
+# slides sideways as the overlay appears and runs off the edge of the
+# monitor, putting part of the screen out of reach. Pinning
+# devicePixelRatio to 1 lines the overlay's coordinates back up with the
+# pixmap, which is grabbed at full physical resolution either way. No
+# effect where the scale factor is already 1. Revisit once upstream
+# fixes the geometry; drop alongside the above.
+sudo flatpak override --system --env=QT_ENABLE_HIGHDPI_SCALING=0 org.flameshot.Flameshot
 # The Flatpak must take screenshots through xdg-desktop-portal even on
 # X11, and XFCE's portal config routes Screenshot to the xapp backend
 # (the gtk backend dropped Screenshot in 1.15). Without xapp nothing on
