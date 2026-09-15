@@ -77,7 +77,7 @@ Instructions and skills should grow out of friction that actually happened, not 
 
 **What to do.** Finish the task first - never interrupt work to raise this. At the end, do both:
 
-1. **Record it in memory**, in a single working list at `agent-instruction-candidates` (create it if absent, append if not). One entry: the date, what recurred and how often, the proposed rule, and the file it would belong in. This is the part that survives - most sessions end without a decision, and an observation raised only in conversation is lost when the session closes.
+1. **Record it in memory**, under `## Observed` in the working list at `agent-tooling-backlog` (create it if absent, append if not). One entry: the date, what recurred and how often, the proposed rule, and the file it would belong in. This is the part that survives - most sessions end without a decision, and an observation raised only in conversation is lost when the session closes.
 2. **Propose it** in a line or two, so it can be decided now if the moment allows.
 
 Route it the same way as anything else: employer-specific goes to the private overlay, always-true goes to an `AGENTS.md`, only-during-a-task goes to a skill. If an existing skill nearly covers it, propose amending that rather than adding a new one.
