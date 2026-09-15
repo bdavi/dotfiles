@@ -133,6 +133,7 @@ sudo apt-get --yes install \
   okular \
   peek \
   sakura \
+  sayonara \
   speedcrunch \
   stacer \
   qimgv \
