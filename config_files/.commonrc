@@ -111,11 +111,9 @@ fi
 ###############################################################################
 # Work specific
 ###############################################################################
-if [ -d "/home/brian/monorepo" ]; then
-  source ~/.workrc
-
-  # Codespaces-only, not personal-machine - ~/monorepo is the signal this
-  # is the work machine (this dotfiles repo is shared between both). See
-  # misc/herdr_codespaces.md.
-  source ~/.workrc-codespaces
-fi
+# These files ship in the private work overlay (bdavi/comoto-dotfiles), not
+# this repo, so guard on the file rather than on ~/monorepo - on a personal
+# machine, or a work machine where the overlay isn't installed yet, there is
+# nothing to source. See docs/work-overlay.md.
+[ -f ~/.workrc ] && source ~/.workrc
+[ -f ~/.workrc-codespaces ] && source ~/.workrc-codespaces
