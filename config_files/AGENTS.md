@@ -8,6 +8,8 @@ Global preferences, loaded for every project via `~/.claude/CLAUDE.md`. Employer
 
 - **Only commit when explicitly asked** ("commit" / "commit this") - never proactively.
 - **Never push without a specific request.** Commit, push, and PR-description edits each need their own explicit ask - none of them authorizes the next. Finding a bug while verifying or QAing something does not authorize shipping the fix: report it and stop.
+- 🔴 **Authorization is single-use and does not carry forward.** A grant covers the commits and pushes named in it, and nothing after. Later work in the same session starts unauthorized again, however similar it looks and however finished it feels. **"Continue" continues the task, never the publishing** - an instruction ending "then continue" applies the continuing to the work, and the next commit still needs its own ask.
+- **Run a commit or push as its own command.** Never chain it with other work (`git add ... && git commit && git push`). Chaining removes the pause between finishing and publishing, and makes it ambiguous what is being approved.
 - Scope commits to what was just discussed or implemented. Don't sweep in unrelated pre-existing uncommitted changes unless asked to include them too.
 - Never edit anything inside the `.git` directory by hand - removing `.git/index.lock`, rewriting refs, any of it. If a stale lock or similar blocks a command, report the error and ask; don't clear it yourself.
 - **Never rewrite published history.** No force-push, no rebase of anything already pushed, no amending a pushed commit.
