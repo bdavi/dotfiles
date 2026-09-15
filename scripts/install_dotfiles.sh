@@ -11,6 +11,56 @@ rm -f ~/.config/nvim/init.vim
 
 cp -rsf ~/code/dotfiles/config_files/. ~
 
+# Wire up the publish guard: a PreToolUse hook that forces an approval prompt
+# for git commit, git push, gh pr create/edit and gh repo create, and hard-
+# blocks gh pr merge. The script itself installs as a symlink with everything
+# else under config_files/; this merges its registration into settings.json.
+#
+# Merged rather than symlinked because Claude Code writes to that file itself
+# (/model, /config), so linking it would put personal state in this public repo
+# and let the next install clobber it. Merging touches only the guard's keys and
+# is idempotent - the same shape comoto-dotfiles/install.sh uses for
+# permissions.additionalDirectories.
+#
+# The hook is the mechanism, not the permission rules: ask rules were verified
+# NOT to fire in auto mode (2026-09-14), with the hook disabled and a matching
+# git commit running unprompted. They are kept only as a backstop for other
+# permission modes.
+install_publish_guard() {
+  local settings=~/.claude/settings.json tmp
+  command -v jq >/dev/null || { echo "jq missing - publish guard NOT installed" >&2; return 1; }
+  mkdir -p ~/.claude
+  [ -f "$settings" ] || echo '{}' > "$settings"
+  tmp="$(mktemp)"
+  jq '
+    def guard_entry:
+      { matcher: "Bash",
+        hooks: [
+          { type: "command", if: "Bash(git *)",
+            command: "~/.claude/hooks/guard-git-write.sh",
+            timeout: 10, statusMessage: "Checking publish authorization" },
+          { type: "command", if: "Bash(gh *)",
+            command: "~/.claude/hooks/guard-git-write.sh",
+            timeout: 10, statusMessage: "Checking publish authorization" }
+        ] };
+    .hooks.PreToolUse =
+      ([ (.hooks.PreToolUse // [])[]
+         | select([.hooks[]?.command // ""] | map(test("guard-git-write")) | any | not) ]
+       + [guard_entry])
+    | .permissions.ask =
+        (((.permissions.ask // []) + [
+          "Bash(git commit *)", "Bash(git push *)",
+          "Bash(git * commit *)", "Bash(git * push *)",
+          "Bash(gh pr create *)", "Bash(gh pr edit *)", "Bash(gh repo create *)"
+        ]) | unique)
+    | .permissions.deny =
+        (((.permissions.deny // []) + ["Bash(gh pr merge *)"]) | unique)
+  ' "$settings" > "$tmp" && mv "$tmp" "$settings" \
+    && echo "publish guard registered in $settings"
+}
+
+install_publish_guard
+
 # ~/.claude/CLAUDE.md imports ~/AGENTS.comoto.md, which only exists once the
 # private work overlay is installed. Create an empty stub so the import
 # resolves on a personal machine instead of dangling. Never overwrites a real
