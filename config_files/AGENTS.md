@@ -61,6 +61,10 @@ When given a feature requirement to plan, review it skeptically rather than taki
 
 Match the codebase's existing conventions - function and file structure, naming, comment style explaining *why* not *what* - instead of introducing a new style.
 
+## Database migrations
+
+- **Default to `text` for string columns.** In a new migration, write `text`, not `character varying`/`varchar` - with or without a length. In Postgres they are the same type underneath and a length limit buys no performance, only an `ALTER TABLE` later when the limit turns out to be wrong. Where a real maximum exists, enforce it in the application's validations (and a `CHECK` constraint if the database must guarantee it), not in the column type. Match an existing table's style when adding a column to it.
+
 ## Verifying claims
 
 Before repeating a claim about a fast-moving tool or product (especially one sourced from a subagent or web search), cross-check it against an authoritative, current source if the claim is consequential enough to act on.
