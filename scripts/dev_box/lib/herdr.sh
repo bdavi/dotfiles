@@ -225,8 +225,83 @@ install_herdr_vim_navigation_plugin() {
 # [ui.sidebar.spaces] rows live in config_files/.config/herdr/config.toml,
 # not here - without them the plugin computes status but has nowhere to
 # render it.
+#
+# Patched after install - see _patch_herdr_spaces_pr_status_single_session.
 install_herdr_spaces_pr_status_plugin() {
   herdr plugin install jmarbutt/herdr-spaces-pr-status -y
+  _patch_herdr_spaces_pr_status_single_session
+}
+
+# Keeps PR polling to the default session, so a named session doesn't run a
+# poller of its own.
+#
+# Background, because the guard now reads as a preference rather than a fix: up
+# to plugin commit 8a56c5d the poller was supervised through one machine-global
+# record (~/.local/state/herdr/plugins/jmarbutt.spaces-pr-status/daemon.json)
+# holding a single pid and socket path. With two servers up - a default `herdr`
+# and a named `herdr --session notes` - the second to start read the first one's
+# live poller, took the differing socket path for the live-handoff case that
+# check was written for, SIGTERMed it, and rebound polling to itself. A named
+# session here holds no spaces, so the sidebar that wanted PR status quietly
+# stopped updating (hit 2026-09-16, ~1h40m after a notes session started).
+# Upstream fixed exactly that in 23d2645 - PR #2, "multisession" - which
+# namespaces state per socket hash (sessionStateDir, lib/daemon-state.js) and
+# gives every server its own poller.
+#
+# So nothing is stolen any more; what's left is that each named session would
+# now start a poller that here only ever reports zero spaces. The guard makes
+# the plugin's [[startup]] hook a no-op in a named session, leaving that
+# session's actions and panes untouched. Socket path is what tells them apart:
+# the default server owns ~/.config/herdr/herdr.sock, a named one
+# ~/.config/herdr/sessions/<name>/herdr.sock.
+#
+# `herdr plugin install` replaces the plugin directory with a fresh checkout, so
+# this runs after every install rather than once. Delete the whole thing to let
+# named sessions show PR status too.
+HERDR_PR_STATUS_GUARD_MARKER="LOCAL PATCH (not upstream): only the default session polls"
+HERDR_PR_STATUS_GUARD_ANCHOR="^const socketPath = "
+
+_patch_herdr_spaces_pr_status_single_session() {
+  local root file guard
+
+  root="$(jq -r '.[] | select(.plugin_id == "jmarbutt.spaces-pr-status") | .plugin_root' \
+    "$HOME/.config/herdr/plugins.json" 2>/dev/null)"
+  file="$root/bin/startup.js"
+
+  if [[ -z "$root" || "$root" == "null" || ! -f "$file" ]]; then
+    echo "spaces-pr-status: no bin/startup.js found - skipping the single-session guard" >&2
+    return 0
+  fi
+
+  grep -qF "$HERDR_PR_STATUS_GUARD_MARKER" "$file" && return 0
+
+  # Upstream renaming this line is the one thing that would silently drop the
+  # guard, so it is checked rather than assumed. Not fatal - a dev box build
+  # shouldn't fail over a sidebar - but loud, because the symptom (a named
+  # session stealing the poller) looks like nothing at all until you notice
+  # the PR rows are gone.
+  if ! grep -qE "$HERDR_PR_STATUS_GUARD_ANCHOR" "$file"; then
+    echo "spaces-pr-status: bin/startup.js no longer defines socketPath where expected - single-session guard NOT applied; a named herdr session will take the poller again (see install_herdr_spaces_pr_status_plugin, lib/herdr.sh)" >&2
+    return 0
+  fi
+
+  guard="$(mktemp)"
+  cat > "$guard" <<'JS'
+
+// LOCAL PATCH (not upstream): only the default session polls. Applied by
+// _patch_herdr_spaces_pr_status_single_session in bdavi/dotfiles
+// (scripts/dev_box/lib/herdr.sh), which has the reasoning. Upstream supports a
+// poller per session; this box wants exactly one, in the default session,
+// because the named sessions here hold no spaces.
+if (socketPath?.includes('/sessions/')) {
+  process.stdout.write(`spaces-pr-status: named session (${socketPath}) - not starting a poller\n`);
+  process.exit(0);
+}
+JS
+
+  sed -i "/$HERDR_PR_STATUS_GUARD_ANCHOR/r $guard" "$file"
+  rm -f "$guard"
+  echo "spaces-pr-status: applied the single-session poller guard to $file"
 }
 
 # gitview (https://github.com/ChmaraX/herdr-gitview) - unofficial
