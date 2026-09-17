@@ -12,6 +12,7 @@ Global preferences, loaded for every project via `~/.claude/CLAUDE.md`. Employer
 - **Run a commit or push as its own command.** Never chain it with other work (`git add ... && git commit && git push`). Chaining removes the pause between finishing and publishing, and makes it ambiguous what is being approved.
 - Scope commits to what was just discussed or implemented. Don't sweep in unrelated pre-existing uncommitted changes unless asked to include them too.
 - Never edit anything inside the `.git` directory by hand - removing `.git/index.lock`, rewriting refs, any of it. If a stale lock or similar blocks a command, report the error and ask; don't clear it yourself.
+- **Never discard uncommitted work to set it aside.** `git checkout -- `, `git restore`, `git reset --hard` and `git clean` destroy it; /tmp is not a safety net, because a backup that silently failed looks exactly like one that worked. Make a WIP commit — git is the durable store and it is already right there.
 - **Never rewrite published history.** No force-push, no rebase of anything already pushed, no amending a pushed commit.
 
 ## Never deploy, never merge
