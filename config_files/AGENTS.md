@@ -46,6 +46,7 @@ When it applies:
 
 - **Never hard-wrap prose.** Write each paragraph, list item, and table row as a single long line and let the editor soft-wrap it. This applies to every markdown file, including this one. Fenced code blocks keep their real line breaks. Hard breaks mid-sentence make the raw file awkward to edit and produce noisy diffs - changing one word reflows a whole paragraph.
 - **Show bare URLs.** When asked for links, primary sources, references, or documentation, print the actual URL as visible text. A markdown link whose text is the page title is not enough on its own: Claude Code renders markdown in a terminal, so only the title shows and the href is hidden. Write the URL alone or after the title, and give every entry in a source list its own address. Applies to answers, plan docs, and tickets alike.
+- **Format shared output for the clipboard, not the terminal.** When the output is destined for somewhere else - a PR comment or description, a ticket, a Slack message, a wiki page, or a summary written to be pasted into one - assume it gets copied straight out of the terminal, where what lands on the clipboard is the *rendered* text and not the markdown source. Tables are the main casualty: they render as box-drawing characters and paste into GitHub as broken ASCII art. Use a list with a bold label per item instead, which reads the same rendered and plain. When a real table is the right structure, put it in a fenced code block so the pipe syntax survives the copy, or write it to a file and say where.
 
 ## Planning feature requirements
 
