@@ -125,6 +125,7 @@ sudo apt-get --yes install \
   evince \
   filezilla \
   gimp \
+  gthumb \
   keepassxc \
   libreoffice \
   libspa-0.2-bluetooth \
