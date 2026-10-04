@@ -231,6 +231,26 @@ configure_xfce_panel() {
 # setup before a desktop session exists.
 configure_xfce_keyboard_shortcuts() {
   xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>space" -n -t string -s "xfce4-popup-whiskermenu"
+
+  # Ctrl+Alt+L is Xubuntu's xflock4 (lock screen) binding, and it sits one
+  # slip away from combinations used all day, so it kept firing by accident.
+  # It reads as the machine suspending rather than locking, because
+  # light-locker locks by switching to the lightdm greeter - the journal
+  # shows a greeter session opening and closing, with no PM/suspend line at
+  # all.
+  #
+  # Bound to a no-op rather than cleared, because clearing does not stick:
+  # the same binding is in /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
+  # xfce4-keyboard-shortcuts.xml, so removing the user property just falls
+  # back to xflock4. The settings dialog disables a default by writing a
+  # property with no value, which xfconf-query cannot do - `-t empty` is
+  # rejected with "Unable to determine the type of the value." An empty
+  # string would also disable it, but XFCE still grabs the key and then
+  # tries to spawn "", which can raise a launch error; /bin/true is silent.
+  #
+  # The key stays grabbed either way, so applications never see it. Locking
+  # is still available from the menu, from `xflock4`, and on lid close.
+  xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Primary><Alt>l" -n -t string -s "/bin/true"
   xfconf-query -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/<Shift>Down" -r 2>/dev/null || true
 
   for kp in KP_Left KP_Right KP_Up KP_Down; do
@@ -338,8 +358,10 @@ configure_xfce_screen_locking() {
   cat > ~/.config/autostart/light-locker.desktop <<'EOF'
 # User override of /etc/xdg/autostart/light-locker.desktop: never lock from
 # idle (--lock-after-screensaver=0 disables it, --no-late-locking covers the
-# screensaver-deactivation path). Locking is manual (xflock4 / Ctrl+Alt+L),
-# and lock-on-suspend keeps its default so a closed lid still locks.
+# screensaver-deactivation path). Locking is manual - xflock4, from the menu
+# or a terminal, since Ctrl+Alt+L is deliberately a no-op (see
+# configure_xfce_keyboard_shortcuts) - and lock-on-suspend keeps its
+# default so a closed lid still locks.
 [Desktop Entry]
 Type=Application
 Name=Screen Locker
