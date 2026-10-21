@@ -170,5 +170,13 @@ type = "plugin_action"
 command = "persiyanov.reviewr.toggle"
 description = "review panel"
 
+[[keys.command]]
+# A local plugin, linked with `herdr plugin link` from the private work repo;
+# on a machine without it the key does nothing. prefix+i for "info".
+key = "prefix+i"
+type = "plugin_action"
+command = "ticket-card.open"
+description = "ticket and PR card"
+
 [update]
 channel = "preview"
