@@ -61,6 +61,18 @@ When given a feature requirement to plan, review it skeptically rather than taki
 
 Match the codebase's existing conventions - function and file structure, naming, comment style explaining *why* not *what* - instead of introducing a new style.
 
+## Editing files
+
+🔴 **A string replacement that matches nothing is the dangerous failure, because it looks exactly like success.** The script exits 0, the summary says "updated", and the change is simply absent - sometimes for several turns, while later work is built on the assumption that it landed.
+
+- **Use the editing tool, not scripted string surgery.** `Edit` fails loudly when the target is missing or ambiguous; `sed -i` and a Python `str.replace` fail silently. Reach for a script only for a change too repetitive to hand-edit, and then apply the rules below.
+- **Copy the anchor from the file as it currently stands**, never from what you believe you wrote earlier. Entity-vs-literal (`&#8212;` against an em dash), smart quotes, and whitespace are the usual mismatches, and none of them are visible in a diff you never saw.
+- **Assert the old text exists before replacing it.** In a script, `assert old in s` turns a silent no-op into a stack trace.
+- **Never replace from an index to end-of-file.** Splicing `s[:i] + new` silently drops everything that followed - a module's entry point, a closing section, the rest of a document.
+- 🔴 **Verify the new text is present afterwards, and say so based on that check.** Grep for a distinctive phrase from what you just inserted. A script's own `print("done")` proves only that the script ran.
+- **Re-validate structure after structural edits.** Parse the file (`ast.parse`, a tag-balance check, `jq`), and after renumbering or reordering anything, re-grep every cross-reference - numbers in prose do not move themselves.
+- **Never report an edit as applied on the strength of the command's exit code.** If a verification step was skipped, say that rather than implying the change is in place.
+
 ## Database migrations
 
 - **Default to `text` for string columns.** In a new migration, write `text`, not `character varying`/`varchar` - with or without a length. In Postgres they are the same type underneath and a length limit buys no performance, only an `ALTER TABLE` later when the limit turns out to be wrong. Where a real maximum exists, enforce it in the application's validations (and a `CHECK` constraint if the database must guarantee it), not in the column type. Match an existing table's style when adding a column to it.
