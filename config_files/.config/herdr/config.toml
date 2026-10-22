@@ -39,9 +39,9 @@ claude = [["state_icon", "workspace", "tab"]]
 # sidebar_max_width (36), so sharing a row with $pr cuts its tail off.
 #
 # $agentctl comes from the ticket agent's tick: what it's doing in a space it
-# opened for a ticket ("󰚩 Building · implementPlan 4m", "󰚩 HELD · ..."). Only
-# those spaces get a value, so the row costs nothing anywhere else, and it
-# expires when the agent stops ticking. The leading robot is a Nerd Font glyph
+# opened for a ticket ("󰚩 Building · implementPlan since 16:31", "󰚩 HELD · ...").
+# Only those spaces get a value, so the row costs nothing anywhere else, and it
+# expires a day after the agent's last tick. The leading robot is a Nerd Font glyph
 # (nf-md-robot, U+F06A9): the terminal showing herdr needs a Nerd Font, which
 # lib/configure_xfce.sh sets up here; anywhere else it shows as a box.
 [ui.sidebar.spaces]
@@ -177,6 +177,14 @@ key = "prefix+i"
 type = "plugin_action"
 command = "ticket-card.open"
 description = "ticket and PR card"
+
+[[keys.command]]
+# The same plugin's other popup: the ticket agent's view of this space's
+# ticket, its log, and Hold / Clear hold / Take over / Tick / Halt.
+key = "prefix+a"
+type = "plugin_action"
+command = "ticket-card.agent"
+description = "agent view of this space's ticket"
 
 [update]
 channel = "preview"
