@@ -61,6 +61,8 @@ When given a feature requirement to plan, review it skeptically rather than taki
 
 Match the codebase's existing conventions - function and file structure, naming, comment style explaining *why* not *what* - instead of introducing a new style.
 
+**No emoji in code.** Comments, docstrings and `@doc`/`@moduledoc` text are plain prose - no 🔴, ⚠️ or any other emoji, even where nearby code already has them. The emphasis markers these instructions and the writing skills use are for documents, never for source files. Where a comment needs weight, say why it matters in words.
+
 ## Editing files
 
 🔴 **A string replacement that matches nothing is the dangerous failure, because it looks exactly like success.** The script exits 0, the summary says "updated", and the change is simply absent - sometimes for several turns, while later work is built on the assumption that it landed.
