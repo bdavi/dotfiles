@@ -19,15 +19,28 @@ delivery = "system"
 # agents always keeps at least a tenth of the sidebar. Dragging the divider
 # to the bottom and halving each entry's height is as close as it gets.
 #
-# rows_by_agent.claude repeats the same row because it's unclear whether
-# herdr ships a built-in three-row override for claude (--default-config
-# shows one, commented, where every other commented line is a real default).
-# Setting it explicitly is correct either way.
+# rows_by_agent.claude is the herdr-claude-usage plugin's layout (lib/herdr.sh),
+# written here by hand because its setup action appends its own
+# rows_by_agent block and bails when one already exists. The first row is
+# still one line per Claude agent: $cu_head is the Claude mark plus the
+# workspace name, coloured by state (an invisible tag in the value - U+2061
+# working, U+2060 done, U+2062 blocked - drives the rules), in place of
+# state_icon and workspace. The three bar rows - context, 5h and 7d limits -
+# are only set for the focused Claude agent, and a row with no values
+# disappears, so every other agent stays one line. Only the token for the
+# current level (ok / warn / hot) is set, which is what picks the colour.
+# Without the plugin, $cu_head is empty and Claude rows show just the tab -
+# restore ["state_icon", "workspace", "tab"] if it's ever removed.
 [ui.sidebar.agents]
 rows = [["state_icon", "workspace", "tab"]]
 
 [ui.sidebar.agents.rows_by_agent]
-claude = [["state_icon", "workspace", "tab"]]
+claude = [
+  [{ token = "$cu_head", fg = "#a6e3a1", bold = true, rules = [{ contains = "⁡", fg = "#f9e2af" }, { contains = "⁠", fg = "#94e2d5" }, { contains = "⁢", fg = "#f38ba8" }] }, "tab"],
+  [{ token = "$cu_ctx_ok", fg = "#98b17d", dim = true }, { token = "$cu_ctx_warn", fg = "#dec27f" }, { token = "$cu_ctx_hot", fg = "#df919b" }],
+  [{ token = "$cu_5h_ok", fg = "#98b17d", dim = true }, { token = "$cu_5h_warn", fg = "#dec27f" }, { token = "$cu_5h_hot", fg = "#df919b" }],
+  [{ token = "$cu_7d_ok", fg = "#98b17d", dim = true }, { token = "$cu_7d_warn", fg = "#dec27f" }, { token = "$cu_7d_hot", fg = "#df919b" }],
+]
 
 # $pr is the jmarbutt.spaces-pr-status plugin's (lib/herdr.sh): without the
 # row it computes PR status but has nowhere to render it. A row disappears

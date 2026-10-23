@@ -306,10 +306,12 @@ install_latest_semgrep
 # Herdr
 ######################################################################
 install_latest_herdr
+install_herdr_claude_integration
 install_herdr_vim_navigation_plugin
 install_herdr_spaces_pr_status_plugin
 install_herdr_gitview_plugin
 install_herdr_reviewr_plugin
+install_herdr_claude_usage_plugin
 
 # This dotfiles repo is shared between a personal machine and a work
 # machine; ~/monorepo only exists on the work machine, so it's the same

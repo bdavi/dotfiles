@@ -327,3 +327,43 @@ install_herdr_gitview_plugin() {
 install_herdr_reviewr_plugin() {
   herdr plugin install persiyanov/herdr-reviewr -y
 }
+
+# herdr-claude-usage (https://github.com/oszypczy/herdr-claude-usage) -
+# unofficial third-party plugin, context / 5h / 7d usage bars under the
+# focused Claude agent in herdr's sidebar. No daemon, no network, no
+# credentials: it only reformats the JSON Claude Code already hands its
+# statusline. Needs herdr >= 0.9.0 and jq. Idempotent on its own, same as the
+# other install_herdr_*_plugin functions.
+#
+# Its `setup` action is deliberately not run. Both things it sets up are
+# tracked in this repo instead: the sidebar rows live in
+# config_files/.config/herdr/config.toml (setup would append a second
+# rows_by_agent block, or bail because one exists), and the statusline hook
+# line lives in config_files/.claude/statusline.sh (setup would rewrite that
+# tracked file in place). install_dotfiles.sh registers the statusline. The
+# plugin's [[startup]] hook links its report.sh into the plugin config dir
+# on every server start, which is the path statusline.sh calls.
+install_herdr_claude_usage_plugin() {
+  herdr plugin install oszypczy/herdr-claude-usage -y
+}
+
+# herdr's Claude Code integration - a hook script in ~/.claude/hooks plus
+# hook entries in ~/.claude/settings.json - is how herdr learns when Claude
+# is working, blocked or done, and which session to resume after a server
+# restart. herdr updates the integration's version with its own releases,
+# but nothing re-installs it: this box was still on v8 against herdr
+# 0.9.5's v11 (found 2026-10-22), missing the newer state detection. So
+# reinstall whenever `herdr integration status` doesn't call it current.
+#
+# Safe inside a herdr pane - it doesn't touch the herdr binary. Neither
+# file it writes is tracked in this repo: settings.json is a plain local
+# file (Claude Code rewrites it itself), and herdr-agent-state.sh is
+# herdr's, not ours. Claude Code doesn't need to be installed first - the
+# files just wait in ~/.claude until it is.
+install_herdr_claude_integration() {
+  if herdr integration status 2>/dev/null | grep -q '^claude: current'; then
+    echo "herdr claude integration already current"
+    return 0
+  fi
+  herdr integration install claude
+}
