@@ -306,19 +306,20 @@ install_latest_semgrep
 # Herdr
 ######################################################################
 install_latest_herdr
+install_herdr_claude_integration
 install_herdr_vim_navigation_plugin
 install_herdr_spaces_pr_status_plugin
 install_herdr_gitview_plugin
 install_herdr_reviewr_plugin
+install_herdr_claude_usage_plugin
 
 # This dotfiles repo is shared between a personal machine and a work
 # machine; ~/monorepo only exists on the work machine, so it's the same
 # signal .commonrc already uses to gate .workrc/.workrc-codespaces. The
-# GitHub Codespaces integration (preview channel, herdr-mirror, gh cs
-# wiring) is Comoto-specific and has no reason to run anywhere else - see
+# GitHub Codespaces integration (herdr-mirror, gh cs wiring) is
+# Comoto-specific and has no reason to run anywhere else - see
 # misc/herdr_codespaces.md.
 if [ -d "$HOME/monorepo" ]; then
-  switch_herdr_to_preview_channel
   install_herdr_mirror_plugin
 
   # Not fatal if the codespace scope is missing, just logs instructions

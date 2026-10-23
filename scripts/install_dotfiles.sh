@@ -61,6 +61,31 @@ install_publish_guard() {
 
 install_publish_guard
 
+# Register ~/.claude/statusline.sh (linked from config_files/ like the guard
+# script) as Claude Code's statusline - it feeds the herdr-claude-usage
+# sidebar bars; see the script for why. Merged into settings.json for the
+# same reason as the guard. Never replaces a different statusline someone set
+# by hand: it says so and leaves it.
+install_claude_statusline() {
+  local settings=~/.claude/settings.json tmp current
+  local ours="~/.claude/statusline.sh"
+  command -v jq >/dev/null || { echo "jq missing - Claude statusline NOT registered" >&2; return 1; }
+  [ -f "$settings" ] || echo '{}' > "$settings"
+
+  current="$(jq -r '.statusLine.command // empty' "$settings")"
+  if [ -n "$current" ] && [ "$current" != "$ours" ]; then
+    echo "Claude statusline already set to '$current' - left alone; ~/.claude/statusline.sh NOT registered" >&2
+    return 0
+  fi
+
+  tmp="$(mktemp)"
+  jq --arg cmd "$ours" '.statusLine = { type: "command", command: $cmd }' "$settings" > "$tmp" \
+    && mv "$tmp" "$settings" \
+    && echo "Claude statusline registered in $settings"
+}
+
+install_claude_statusline
+
 # ~/.claude/CLAUDE.md imports ~/AGENTS.comoto.md, which only exists once the
 # private work overlay is installed. Create an empty stub so the import
 # resolves on a personal machine instead of dangling. Never overwrites a real
