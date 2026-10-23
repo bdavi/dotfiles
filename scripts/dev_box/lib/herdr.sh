@@ -31,44 +31,42 @@
 # install-script build current (distinct from just re-running install.sh,
 # which the docs reserve for the initial install).
 #
-# The update runs even when this script is itself run from inside a herdr
-# pane ($HERDR_ENV is set for any shell running inside herdr, same signal
-# .vimrc/.commonrc key off via $HERDR_PANE_ID/$HERDR_WORKSPACE_ID). It used
-# to skip there, and since the build is nearly always run from a herdr
-# pane, that left a box two months and six releases behind (found
-# 2026-10-22). The new binary lands on disk; the running server keeps
-# going on the old one until it's restarted, so the build says so rather
-# than restarting it - that would kill every pane, this one included.
-# Live handoff (`herdr update --handoff`) would avoid the restart but is
-# still experimental per herdr's own release notes, so it isn't used. A
-# failed update is logged and the build carries on - a stale herdr isn't
-# worth taking the rest of the build down under set -e.
+# herdr refuses to update from inside its own session: `herdr update` in a
+# herdr pane prints "update failed: run `herdr update` outside herdr after
+# detaching from the session" (confirmed on 0.8.2, 2026-10-22). $HERDR_ENV
+# is set for any shell running inside herdr, same signal .vimrc/.commonrc
+# key off via $HERDR_PANE_ID/$HERDR_WORKSPACE_ID, so the update is skipped
+# there rather than left to fail.
+#
+# The skip is loud on purpose. It used to be one quiet line, and since the
+# build is nearly always run from a herdr pane, this box drifted two months
+# and six releases behind before anyone noticed. The warning goes to
+# stderr with the version still installed and the command to run.
 install_latest_herdr() {
   command -v herdr >/dev/null || curl -fsSL https://herdr.dev/install.sh | sh
 
   ensure_herdr_stable_channel
 
-  local before after
-  before="$(herdr --version)"
-  if ! herdr update; then
-    echo "herdr update failed - still on $before; re-run the build to retry" >&2
+  if [[ -n "${HERDR_ENV:-}" ]]; then
+    {
+      echo "WARNING: herdr NOT updated - herdr can't update itself from inside a herdr session."
+      echo "  Still on: $(herdr --version)"
+      echo "  To update: detach from herdr, run \`herdr update\` in a plain terminal, then start herdr again."
+    } >&2
     return 0
   fi
-  after="$(herdr --version)"
 
-  if [[ "$before" != "$after" && -n "${HERDR_ENV:-}" ]]; then
-    echo "herdr updated: $before -> $after"
-    echo "The running herdr server is still on the old version. To switch when nothing is running, detach and run: herdr server stop && herdr (stopping the server ends every pane)"
-  fi
+  herdr update
 }
 
 # Both machines track stable. Preview was only ever needed for herdr-mirror
 # (installed below), whose README asked for a preview build "until the next
 # stable"; stable has since shipped the terminal session streams it relies
 # on. The tracked config.toml already says stable, so this only acts on a
-# box whose config was changed by hand - `channel set` alone only changes
-# which channel future updates pull from, and the `herdr update` that
-# follows in install_latest_herdr is what actually fetches a stable build.
+# box whose config was changed by hand. `channel set` alone only changes
+# which channel future updates pull from; the next `herdr update` run
+# outside herdr is what actually fetches a stable build. Safe to run inside
+# herdr, since it doesn't touch the binary.
 ensure_herdr_stable_channel() {
   local current
   current="$(herdr channel show)"
@@ -249,8 +247,11 @@ install_herdr_spaces_pr_status_plugin() {
 # ~/.config/herdr/sessions/<name>/herdr.sock.
 #
 # `herdr plugin install` replaces the plugin directory with a fresh checkout, so
-# this runs after every install rather than once. Delete the whole thing to let
-# named sessions show PR status too.
+# this runs after every install rather than once. `herdr plugin update` likely
+# does the same: the guard was missing straight after one on 2026-10-22, though
+# whether it was there beforehand wasn't checked. After a manual plugin update,
+# re-run the build or this function. Delete the whole thing to
+# let named sessions show PR status too.
 HERDR_PR_STATUS_GUARD_MARKER="LOCAL PATCH (not upstream): only the default session polls"
 HERDR_PR_STATUS_GUARD_ANCHOR="^const socketPath = "
 
