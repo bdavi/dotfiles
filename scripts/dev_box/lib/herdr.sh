@@ -18,82 +18,75 @@
 # and the two things that write to it are both settled: first-run
 # onboarding is permanently skipped by setting onboarding = false, and
 # `herdr channel set` writes an [update] channel block (discovered
-# 2026-08-06 when switch_herdr_to_preview_channel ran) - that block is now
-# tracked in the repo copy, so the switch is a no-op on any box built from
-# these dotfiles and nothing rewrites the file day to day. Safe to track
+# 2026-08-06 when a channel switch ran) - that block is now tracked in the
+# repo copy, set to stable, so ensure_herdr_stable_channel is a no-op on
+# any box built from these dotfiles and nothing rewrites the file day to
+# day. Safe to track
 # and symlink normally, same as .vimrc. See
 # config_files/.config/herdr/config.toml.
 ######################################################################
 
-# Installs herdr on first run, then always calls `herdr update` - the
-# officially documented way to keep an install-script build current
-# (distinct from just re-running install.sh, which the docs reserve for
-# the initial install).
+# Installs herdr on first run, makes sure it's on the stable channel, then
+# always calls `herdr update` - the officially documented way to keep an
+# install-script build current (distinct from just re-running install.sh,
+# which the docs reserve for the initial install).
 #
-# `herdr update` replaces the running binary out from under the herdr
-# process managing the current session, which fails when this script is
-# itself run from inside a herdr pane (the same thing --handoff exists
-# for, per `herdr update --help` - not used here, we just skip). $HERDR_ENV
-# is set for any shell running inside herdr, same signal .vimrc/.commonrc
-# key off via $HERDR_PANE_ID/$HERDR_WORKSPACE_ID. Skipped rather than left
-# to fail (which would trip set -e and take the rest of the build down
-# with it) - the next run from outside a herdr session (e.g. the
-# unattended cron job) picks the update back up.
-#
-# Must run before switch_herdr_to_preview_channel below - on a genuinely
-# fresh box there's no herdr binary yet for `herdr channel` to run
-# against, and this is the function that installs one.
+# The update runs even when this script is itself run from inside a herdr
+# pane ($HERDR_ENV is set for any shell running inside herdr, same signal
+# .vimrc/.commonrc key off via $HERDR_PANE_ID/$HERDR_WORKSPACE_ID). It used
+# to skip there, and since the build is nearly always run from a herdr
+# pane, that left a box two months and six releases behind (found
+# 2026-10-22). The new binary lands on disk; the running server keeps
+# going on the old one until it's restarted, so the build says so rather
+# than restarting it - that would kill every pane, this one included.
+# Live handoff (`herdr update --handoff`) would avoid the restart but is
+# still experimental per herdr's own release notes, so it isn't used. A
+# failed update is logged and the build carries on - a stale herdr isn't
+# worth taking the rest of the build down under set -e.
 install_latest_herdr() {
   command -v herdr >/dev/null || curl -fsSL https://herdr.dev/install.sh | sh
 
-  if [[ -n "${HERDR_ENV:-}" ]]; then
-    echo "Running inside herdr - skipping herdr update"
+  ensure_herdr_stable_channel
+
+  local before after
+  before="$(herdr --version)"
+  if ! herdr update; then
+    echo "herdr update failed - still on $before; re-run the build to retry" >&2
     return 0
   fi
+  after="$(herdr --version)"
 
-  herdr update
+  if [[ "$before" != "$after" && -n "${HERDR_ENV:-}" ]]; then
+    echo "herdr updated: $before -> $after"
+    echo "The running herdr server is still on the old version. To switch when nothing is running, detach and run: herdr server stop && herdr (stopping the server ends every pane)"
+  fi
 }
 
-# herdr-mirror (nikok6/herdr-mirror, installed below) needs both ends of
-# the mirror connection on herdr's preview channel - specifically a
-# preview build dated 2026-06-30 or newer, per the plugin's own README
-# (see ../../../misc/herdr_codespaces.md for the full verification). This
-# switches the channel and re-runs `herdr update` so the binary actually
-# matches - `channel set` alone only changes which channel *future*
-# updates pull from, it doesn't itself fetch anything.
-#
-# Same $HERDR_ENV skip as install_latest_herdr, for the same reason -
-# only the update half needs to skip; the channel switch itself doesn't
-# touch the running binary and is safe to always run.
-switch_herdr_to_preview_channel() {
+# Both machines track stable. Preview was only ever needed for herdr-mirror
+# (installed below), whose README asked for a preview build "until the next
+# stable"; stable has since shipped the terminal session streams it relies
+# on. The tracked config.toml already says stable, so this only acts on a
+# box whose config was changed by hand - `channel set` alone only changes
+# which channel future updates pull from, and the `herdr update` that
+# follows in install_latest_herdr is what actually fetches a stable build.
+ensure_herdr_stable_channel() {
   local current
   current="$(herdr channel show)"
+  [[ "$current" == "stable" ]] && return 0
 
-  if [[ "$current" == "preview" ]]; then
-    echo "herdr already on preview channel ($(herdr --version))"
-    return 0
-  fi
-
-  echo "Switching herdr from $current to preview channel"
-  herdr channel set preview
-
-  if [[ -n "${HERDR_ENV:-}" ]]; then
-    echo "Running inside herdr - skipping herdr update (re-run the build outside a herdr pane to actually pick up a preview build)"
-    return 0
-  fi
-
-  herdr update
-  echo "herdr now on preview channel: $(herdr --version)"
-  echo "herdr-mirror needs a preview build dated 2026-06-30 or newer - if the plugin ever reports a version/compatibility mismatch, check that date against this version"
+  echo "Switching herdr from $current to the stable channel"
+  herdr channel set stable
 }
 
 # herdr-mirror (https://github.com/nikok6/herdr-mirror) - unofficial
 # third-party plugin, mirrors several remote herdr servers' workspaces into
 # the local sidebar simultaneously (prefixed "<host>: <name>"), unlike core
 # herdr's own `--remote` which attaches to one remote 1:1 and replaces the
-# local view. Needs herdr on the preview channel (see
-# switch_herdr_to_preview_channel above) - install this after that function
-# has run, not before. The remote side (each Codespace) needs no plugin,
+# local view. Needs both ends on the same herdr build; it used to need
+# the preview channel, which stable has since caught up with (see
+# ensure_herdr_stable_channel above). If the plugin reports a version or
+# compatibility mismatch, check its README's requirements against
+# `herdr --version` on both ends. The remote side (each Codespace) needs no plugin,
 # just herdr itself - see comoto-codespaces-dotfiles/script/setup. Its own
 # config - ~/.config/herdr-mirror/hosts.toml, a non-standard location the
 # plugin's README specifies directly rather than the usual

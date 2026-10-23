@@ -187,4 +187,4 @@ command = "ticket-card.agent"
 description = "agent view of this space's ticket"
 
 [update]
-channel = "preview"
+channel = "stable"
