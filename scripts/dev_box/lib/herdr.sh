@@ -402,11 +402,25 @@ install_herdr_reviewr_plugin() {
 # config_files/.config/herdr/config.toml (setup would append a second
 # rows_by_agent block, or bail because one exists), and the statusline hook
 # line lives in config_files/.claude/statusline.sh (setup would rewrite that
-# tracked file in place). install_dotfiles.sh registers the statusline. The
-# plugin's [[startup]] hook links its report.sh into the plugin config dir
-# on every server start, which is the path statusline.sh calls.
+# tracked file in place). install_dotfiles.sh registers the statusline.
+#
+# statusline.sh calls report.sh through a link in the plugin config dir,
+# which the plugin's [[startup]] hook makes - but startup hooks only run
+# when the herdr server starts, not on install or enable. Installed into a
+# running server, the plugin drew nothing until the next server restart
+# (found 2026-10-26), so the link step is run here too. It's the plugin's
+# own `setup.sh link`, which touches nothing but that link.
 install_herdr_claude_usage_plugin() {
   _install_herdr_plugin_needing oszypczy/herdr-claude-usage 0.9.0
+  _herdr_at_least 0.9.0 || return 0
+
+  local root
+  root="$(herdr plugin list --plugin oszypczy.claude-usage --json | jq -r '.result.plugins[0].plugin_root // empty')"
+  if [[ -z "$root" ]]; then
+    echo "WARNING: herdr-claude-usage: couldn't find its plugin root, so its report.sh link may be missing until herdr restarts" >&2
+    return 0
+  fi
+  HERDR_PLUGIN_ROOT="$root" sh "$root/setup.sh" link
 }
 
 # herdr's Claude Code integration - a hook script in ~/.claude/hooks plus
