@@ -83,6 +83,23 @@ vim.keymap.set("n", "<leader>d", '"=strftime("%a %m/%e/%Y")<CR>P', { desc = "Ins
 vim.keymap.set("n", "<leader>e", "a<%=  %><esc>hhi", { desc = "Insert ERB output tag" })
 vim.keymap.set("n", "<leader>E", "a<%  %><esc>hhi", { desc = "Insert ERB tag" })
 
+-- Send the visual selection to the todo app through `todo-add` (on PATH
+-- where it's installed): the first line becomes the title, the rest the
+-- description. The same <leader>t as .vimrc's CreateTodoFromSelection, which
+-- Neovim doesn't read. getregion() returns exactly what's selected in any
+-- visual mode - characterwise, linewise (V) or block - so there are no
+-- column bounds to trim by hand.
+vim.keymap.set("x", "<leader>t", function()
+  local lines = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), { type = vim.fn.mode() })
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
+  if vim.fn.executable("todo-add") == 0 then
+    vim.notify("todo-add isn't on PATH", vim.log.levels.ERROR)
+    return
+  end
+  local result = vim.trim(vim.fn.system("todo-add", table.concat(lines, "\n")))
+  vim.notify(result, vim.v.shell_error == 0 and vim.log.levels.INFO or vim.log.levels.ERROR)
+end, { desc = "Send selection to todo-add" })
+
 --------------------------------------------------------------------------
 -- Colors
 --------------------------------------------------------------------------
