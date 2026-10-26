@@ -135,7 +135,18 @@ install_latest_semgrep() {
   sudo apt-get --yes install pipx
 
   if pipx list --short 2>/dev/null | cut -d' ' -f1 | grep -qx semgrep; then
-    pipx upgrade semgrep
+    # A pipx venv is tied to the Python it was built with. An Ubuntu
+    # upgrade that replaces /usr/bin/python3 (3.12 -> 3.14 here) leaves it
+    # unable to import semgrep or run pip, and `pipx upgrade` then fails
+    # with "No module named pip"; only a reinstall rebuilds the venv.
+    local venv
+    venv="$(pipx environment --value PIPX_LOCAL_VENVS)/semgrep"
+    if "$venv/bin/python" -c 'import semgrep' >/dev/null 2>&1; then
+      pipx upgrade semgrep
+    else
+      echo "semgrep's pipx venv is broken (its Python changed); reinstalling it"
+      pipx reinstall semgrep
+    fi
   else
     pipx install semgrep
   fi
