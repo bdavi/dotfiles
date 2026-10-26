@@ -182,7 +182,14 @@ sudo flatpak install --system --noninteractive flathub com.github.johnfactotum.F
 sudo flatpak install --system --noninteractive flathub org.kiwix.desktop
 sudo flatpak install --system --noninteractive flathub com.github.marktext.marktext
 
-configure_default_browser
+# Firefox is the default browser on personal machines only. The work machine
+# keeps whatever browser was chosen there, since this runs on every build
+# and would otherwise switch it back to Firefox each time. ~/monorepo is the
+# work-machine signal used throughout this script (see the herdr Codespaces
+# block below).
+if [ ! -d "$HOME/monorepo" ]; then
+  configure_default_browser
+fi
 
 ######################################################################
 # Zotero
