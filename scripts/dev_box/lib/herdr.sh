@@ -27,7 +27,7 @@
 ######################################################################
 
 # Installs herdr on first run, makes sure it's on the stable channel, then
-# always calls `herdr update` - the officially documented way to keep an
+# always calls `herdr update --handoff` - the officially documented way to keep an
 # install-script build current (distinct from just re-running install.sh,
 # which the docs reserve for the initial install).
 #
@@ -50,13 +50,74 @@ install_latest_herdr() {
   if [[ -n "${HERDR_ENV:-}" ]]; then
     {
       echo "WARNING: herdr NOT updated - herdr can't update itself from inside a herdr session."
-      echo "  Still on: $(herdr --version)"
-      echo "  To update: detach from herdr, run \`herdr update\` in a plain terminal, then start herdr again."
+      echo "  Running: herdr $(_herdr_running_version) (latest stable: $(_herdr_latest_version))"
+      echo "  To update: detach from herdr, run \`herdr update --handoff\` in a plain terminal, then reattach."
     } >&2
     return 0
   fi
 
-  herdr update
+  # --handoff moves the running server onto the new binary. Without it the
+  # binary on disk updates but the server keeps running the old one until
+  # it's restarted, and plugins check the version of what's running.
+  herdr update --handoff
+  _check_herdr_server_current
+}
+
+# The latest stable release, from the manifest `herdr update` and the
+# installer both read. "unknown" when herdr.dev can't be reached.
+_herdr_latest_version() {
+  local manifest version
+  manifest="$(curl -fsSL --max-time 20 https://herdr.dev/latest.json 2>/dev/null || true)"
+  version="$(awk -F '"' '/^[[:space:]]*"version"[[:space:]]*:/ { print $4; exit }' <<<"$manifest")"
+  echo "${version:-unknown}"
+}
+
+# After an update, says so loudly if the running server is still on an
+# older version than the binary on disk: the handoff is a "try", and a
+# server left behind is how this box sat on an August preview build for
+# two months.
+_check_herdr_server_current() {
+  local status client server
+  status="$(herdr status 2>/dev/null)" || return 0
+  client="$(awk '/^client:/ { s = 1 } s && /version:/ { print $2; exit }' <<<"$status")"
+  server="$(awk '/^server:/ { s = 1 } s && /version:/ { print $2; exit }' <<<"$status")"
+  [[ -z "$server" || "$server" == "$client" ]] && return 0
+  {
+    echo "WARNING: herdr's running server is still $server; the installed binary is $client."
+    echo "  To switch: run \`herdr update --handoff\` in a plain terminal, or \`herdr server stop\` and start herdr again."
+  } >&2
+}
+
+# The version of the herdr that's running: the server's when one is, since
+# that's what plugins check, otherwise the binary's.
+_herdr_running_version() {
+  local status current
+  status="$(herdr status 2>/dev/null || true)"
+  current="$(awk '/^server:/ { s = 1 } s && /version:/ { print $2; exit }' <<<"$status")"
+  [[ -n "$current" ]] || current="$(herdr --version | awk '{ print $2 }')"
+  echo "$current"
+}
+
+# True when the running herdr is at least version $1. A preview build's
+# suffix (0.8.0-preview.2026-08-04-...) is dropped before comparing.
+_herdr_at_least() {
+  local current
+  current="$(_herdr_running_version)"
+  current="${current%%-*}"
+  [[ "$(printf '%s\n' "$1" "$current" | sort -V | head -n 1)" == "$1" ]]
+}
+
+# Installs a plugin that needs herdr >= $2, or skips it with a warning when
+# the running herdr is older. herdr refuses the install outright in that
+# case, and under set -e that ended the whole build; a skipped plugin is
+# picked up by the first build run after herdr is updated.
+_install_herdr_plugin_needing() {
+  local repo="$1" min="$2"
+  if ! _herdr_at_least "$min"; then
+    echo "WARNING: skipped herdr plugin $repo - it needs herdr >= $min, and the running herdr is $(_herdr_running_version). Update herdr, then run the build again." >&2
+    return 0
+  fi
+  herdr plugin install "$repo" -y
 }
 
 # Both machines track stable. Preview was only ever needed for herdr-mirror
@@ -315,8 +376,9 @@ install_herdr_gitview_plugin() {
 # third-party plugin, review panel for an agent's diff (comment, send
 # feedback back) plus a read-only PR/checks/comments view - complements
 # gitview above, which is edit/stage/commit focused, not review focused.
-# Needs herdr >= 0.7.5, git, and (for the PR tab) an authenticated `gh` -
-# all already present on this dev box. Idempotent on its own, same as the
+# Needs herdr >= 0.9.3 (as of reviewr 0.48.0; it was 0.7.5 when added),
+# git, and (for the PR tab) an authenticated `gh` - the last two already
+# present on this dev box. Idempotent on its own, same as the
 # other install_herdr_*_plugin functions. Its own settings (theme,
 # base_branches, default_scope, ...) live in a separate file reviewr owns -
 # ~/.config/herdr/plugins/config/persiyanov.reviewr/config.toml, unrelated
@@ -325,7 +387,7 @@ install_herdr_gitview_plugin() {
 # resize_mode off its default prefix+r onto prefix+v) lives in
 # config_files/.config/herdr/config.toml, not here.
 install_herdr_reviewr_plugin() {
-  herdr plugin install persiyanov/herdr-reviewr -y
+  _install_herdr_plugin_needing persiyanov/herdr-reviewr 0.9.3
 }
 
 # herdr-claude-usage (https://github.com/oszypczy/herdr-claude-usage) -
@@ -344,7 +406,7 @@ install_herdr_reviewr_plugin() {
 # plugin's [[startup]] hook links its report.sh into the plugin config dir
 # on every server start, which is the path statusline.sh calls.
 install_herdr_claude_usage_plugin() {
-  herdr plugin install oszypczy/herdr-claude-usage -y
+  _install_herdr_plugin_needing oszypczy/herdr-claude-usage 0.9.0
 }
 
 # herdr's Claude Code integration - a hook script in ~/.claude/hooks plus
