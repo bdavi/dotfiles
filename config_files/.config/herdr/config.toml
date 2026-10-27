@@ -57,9 +57,12 @@ claude = [
 # expires a day after the agent's last tick. The leading robot is a Nerd Font glyph
 # (nf-md-robot, U+F06A9): the terminal showing herdr needs a Nerd Font, which
 # lib/configure_xfce.sh sets up here; anywhere else it shows as a box.
+#
+# The workspace token dims when its label carries the snooze glyph (nf-md-sleep,
+# U+F04B2), which the dotfiles plugin's snooze action adds (herdr-plugin/).
 [ui.sidebar.spaces]
 rows = [
-  ["state_icon", "workspace"],
+  ["state_icon", { token = "workspace", rules = [{ contains = "󰒲", dim = true }] }],
   ["branch", "git_status"],
   ["$agentctl"],
   ["$pr"],
@@ -84,6 +87,9 @@ split_horizontal = ""
 # that up for the reviewr toggle below - resize is used less often and
 # doesn't need a mnemonic letter the way reviewr's "r" does.
 resize_mode = "prefix+v"
+# Freed for snooze (prefix+l, below). ctrl+l from vim-herdr-navigation
+# already focuses the pane to the right, without the prefix.
+focus_pane_right = ""
 
 # Unset by default. Direct (no prefix) bindings, not prefix+X - needs to
 # work while a Claude session or Neovim has focus, same as vim-herdr-
@@ -198,6 +204,15 @@ key = "prefix+a"
 type = "plugin_action"
 command = "ticket-card.agent"
 description = "agent view of this space's ticket"
+
+[[keys.command]]
+# This repo's own plugin (herdr-plugin/). prefix+l was focus_pane_right,
+# unbound above: ctrl+l (vim-herdr-navigation) already does that without the
+# prefix. Not prefix+z: that's the built-in zoom.
+key = "prefix+l"
+type = "plugin_action"
+command = "dotfiles.snooze"
+description = "snooze this space for a while, or wake it"
 
 [update]
 channel = "stable"

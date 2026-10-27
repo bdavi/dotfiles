@@ -319,6 +319,7 @@ install_herdr_spaces_pr_status_plugin
 install_herdr_gitview_plugin
 install_herdr_reviewr_plugin
 install_herdr_claude_usage_plugin
+install_herdr_dotfiles_plugin
 
 # This dotfiles repo is shared between a personal machine and a work
 # machine; ~/monorepo only exists on the work machine, so it's the same

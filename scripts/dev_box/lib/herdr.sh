@@ -423,6 +423,16 @@ install_herdr_claude_usage_plugin() {
   HERDR_PLUGIN_ROOT="$root" sh "$root/setup.sh" link
 }
 
+# This repo's own plugin (herdr-plugin/): general-purpose herdr additions,
+# snooze first. Linked rather than installed, so edits take effect without a
+# reinstall. Work-only plugins live in the private overlay repo instead. The
+# keybindings are in config_files/.config/herdr/config.toml, not here.
+install_herdr_dotfiles_plugin() {
+  local dir="$DOTFILES_DIR/herdr-plugin"
+  herdr plugin list 2>/dev/null | grep -q "local:${dir}" && return 0
+  herdr plugin link "$dir" --enabled >/dev/null
+}
+
 # herdr's Claude Code integration - a hook script in ~/.claude/hooks plus
 # hook entries in ~/.claude/settings.json - is how herdr learns when Claude
 # is working, blocked or done, and which session to resume after a server

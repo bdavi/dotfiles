@@ -1,0 +1,32 @@
+id = "dotfiles"
+name = "Dotfiles"
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+description = "General-purpose herdr additions from bdavi/dotfiles. Snooze: park a space at the bottom of the sidebar, dimmed, for a while."
+platforms = ["linux", "macos"]
+
+# Bound to prefix+l in config.toml. Opens the popup below.
+[[actions]]
+id = "snooze"
+title = "Snooze / wake space"
+description = "Snooze the focused space for a while (bottom of the sidebar, dimmed), or wake it"
+contexts = ["workspace", "tab", "pane"]
+command = ["/usr/bin/python3", "bin/snooze.py"]
+
+[[panes]]
+id = "snooze"
+title = "Snooze"
+placement = "popup"
+width = 40
+height = 16
+command = ["sh", "-c", "exec /usr/bin/python3 \"$HERDR_PLUGIN_ROOT/bin/popup.py\""]
+
+# The waker exits when nothing is waiting to wake, and a server restart ends it too; this brings it back for
+# any timed snooze still pending.
+[[startup]]
+command = ["/usr/bin/python3", "bin/snooze.py", "startup"]
+
+# herdr adds a new space at the end of the list, below any snoozed ones; this puts them back at the bottom.
+[[events]]
+on = "workspace.created"
+command = ["/usr/bin/python3", "bin/snooze.py", "settle"]
