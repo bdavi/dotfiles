@@ -42,6 +42,14 @@ When it applies:
 - Before committing, group the changes into logical chunks and commit each chunk separately, rather than one large commit.
 - Still never commit without a specific ask (see Authorization above).
 
+## Referring to tickets
+
+When an answer mentions more than one existing ticket, or how tickets depend on each other, write every reference as the ticket key, then in parentheses the plan's identifier for it and its current status: `APP-1360 (A2 Queued)`, `APP-1594 (16 In Progress)`. The plan's identifier is the letter-number label the epic or plan uses to sequence the work (`A2`, `C4`, `D-3`, a foundation number); omit it when the ticket has none, giving `APP-1167 (Closed)`. A bare key or a bare plan id makes a dependency chain impossible to follow, because neither tells you which ticket is meant and whether it is finished.
+
+**Every** mention takes the full form, wherever it sits: headings, bold labels, summary and verdict lines, and prose, not only the first mention or a list of tickets. "Unblocked once A2 and A3 merge" breaks the rule; "Unblocked once APP-1360 (A2 Queued) and APP-1361 (A3 In Progress) merge" follows it. Repeating the full form on every mention is intended - a heading is exactly where a reader scanning a dependency chain looks first. Do not stand in for a set of tickets with a group name such as "the C series" or "the foundation tickets"; name each ticket in full.
+
+Read each status from the tracker when writing the answer, never from memory or a planning document - a status that is out of date is worse than none.
+
 ## Writing markdown
 
 - **Never hard-wrap prose.** Write each paragraph, list item, and table row as a single long line and let the editor soft-wrap it. This applies to every markdown file, including this one. Fenced code blocks keep their real line breaks. Hard breaks mid-sentence make the raw file awkward to edit and produce noisy diffs - changing one word reflows a whole paragraph.
