@@ -217,6 +217,19 @@ sudo apt-get --yes install zotero
 install_firefox_extensions
 install_chromium_extensions
 
+# MANUAL (one-time, per browser profile): Alt+Shift+J / Alt+Shift+K for
+# next/previous tab. Chrome can't rebind its own tab-switching keys, so
+# this goes through Vimium C - and through its extension-level shortcut
+# commands rather than an ordinary `map`, because a `map` only fires
+# where Vimium C's content script runs, which excludes the New Tab page,
+# chrome:// pages and a focused address bar. Vimium C keeps its settings
+# in extension storage, so there's no file to drop in place.
+#   1. Vimium C Options -> Custom key mappings, add and save:
+#        shortcut userCustomized1 command="nextTab"
+#        shortcut userCustomized2 command="previousTab"
+#   2. chrome://extensions/shortcuts -> Vimium C: set "User customized 1"
+#      to Alt+Shift+J and "User customized 2" to Alt+Shift+K.
+
 
 ######################################################################
 # Docker
