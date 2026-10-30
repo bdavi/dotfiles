@@ -71,6 +71,10 @@ Match the codebase's existing conventions - function and file structure, naming,
 
 **No emoji in code.** Comments, docstrings and `@doc`/`@moduledoc` text are plain prose - no 🔴, ⚠️ or any other emoji, even where nearby code already has them. The emphasis markers these instructions and the writing skills use are for documents, never for source files. Where a comment needs weight, say why it matters in words.
 
+**Write each comment for a reader who was not in the conversation.** Name the system, value or call concretely ("the vendor's Ruby server decodes leniently", not "Ruby's decoding"); a vague stand-in like "counted" or "the one named" makes the reader reconstruct what you meant. Say the why in plain full sentences rather than compressing it. A test comment says what mistake in the code the test would catch. A claim about a third party's behaviour is checked against its source or documentation before it goes in a comment.
+
+**Before finishing, reread every comment you wrote and ask: if someone said they didn't understand this, what would I change?** Make that change now. A code review includes the same pass: put that question to each comment the change adds or edits, and report the ones that need rewording, with the rewrite.
+
 ## Editing files
 
 🔴 **A string replacement that matches nothing is the dangerous failure, because it looks exactly like success.** The script exits 0, the summary says "updated", and the change is simply absent - sometimes for several turns, while later work is built on the assumption that it landed.
