@@ -50,11 +50,16 @@ When an answer mentions more than one existing ticket, or how tickets depend on 
 
 Read each status from the tracker when writing the answer, never from memory or a planning document - a status that is out of date is worse than none.
 
+## Word choice
+
+These hold in everything you write: chat answers, code comments, docstrings, test names, names you choose for variables and functions, commit messages, tickets and documents. They win over whatever wording the surrounding code or document already uses; existing identifiers, such as a database column, keep their real names.
+
+- **Write "email" or "email address", never a bare "address".** On its own the word could just as well mean an IP address, a physical address or a URL, and the reader has to work out which from context.
+
 ## Writing markdown
 
 - **Never hard-wrap prose.** Write each paragraph, list item, and table row as a single long line and let the editor soft-wrap it. This applies to every markdown file, including this one. Fenced code blocks keep their real line breaks. Hard breaks mid-sentence make the raw file awkward to edit and produce noisy diffs - changing one word reflows a whole paragraph.
-- **Show bare URLs wherever a terminal will render them.** In a chat answer or a file read in the terminal, print the actual URL as visible text: Claude Code renders markdown, so a `[title](url)` shows only the title and the href is unreachable. Write the URL alone or after the title, and give every entry in a source list its own address. 🔴 **The exception is anything written for a destination that renders links properly** - Jira, GitHub, Confluence, a published page. There a markdown link is better, and the conversion happens when the text is pushed rather than in the local file.
-- **Write "email" or "email address", never a bare "address".** This holds in chat, comments, commit messages and documents alike. On its own the word could just as well mean an IP address, a physical address or a URL, and the reader has to work out which from context.
+- **Show bare URLs wherever a terminal will render them.** In a chat answer or a file read in the terminal, print the actual URL as visible text: Claude Code renders markdown, so a `[title](url)` shows only the title and the href is unreachable. Write the URL alone or after the title, and give every entry in a source list its own URL. 🔴 **The exception is anything written for a destination that renders links properly** - Jira, GitHub, Confluence, a published page. There a markdown link is better, and the conversion happens when the text is pushed rather than in the local file.
 - **Format shared output for the clipboard, not the terminal.** When the output is destined for somewhere else - a PR comment or description, a ticket, a Slack message, a wiki page, or a summary written to be pasted into one - assume it gets copied straight out of the terminal, where what lands on the clipboard is the *rendered* text and not the markdown source. Tables are the main casualty: they render as box-drawing characters and paste into GitHub as broken ASCII art. Use a list with a bold label per item instead, which reads the same rendered and plain. When a real table is the right structure, put it in a fenced code block so the pipe syntax survives the copy, or write it to a file and say where.
 
 ## Planning feature requirements
@@ -75,6 +80,11 @@ Match the codebase's existing conventions - function and file structure, naming,
 **Write each comment for a reader who was not in the conversation.** Name the system, value or call concretely ("the vendor's Ruby server decodes leniently", not "Ruby's decoding"); a vague stand-in like "counted" or "the one named" makes the reader reconstruct what you meant. Say the why in plain full sentences rather than compressing it. A test comment says what mistake in the code the test would catch. A claim about a third party's behaviour is checked against its source or documentation before it goes in a comment.
 
 **Before finishing, reread every comment you wrote and ask: if someone said they didn't understand this, what would I change?** Make that change now. A code review includes the same pass: put that question to each comment the change adds or edits, and report the ones that need rewording, with the rewrite.
+
+### Elixir
+
+- **Put test setup in the test itself, not in a shared `setup` block.** Each test builds the records and expectations it relies on, even when that repeats a few lines across tests. Shared setup creates "mystery guests" - data a test depends on that the reader cannot see from the test - couples tests to each other through one block that every change has to suit, and makes a test impossible to read in isolation. When adding to an existing file, using its existing setup is fine; new setup goes in the test. A small named helper the test calls (`insert_admin_user(email)`) is fine, because the call shows in the test what it gets.
+- **Avoid metaprogramming and process messaging in your own code.** No new macros, `__using__` blocks that inject code, or functions generated at compile time; and no `send`/`receive` to the current process, process dictionary entries or similar hidden state to carry information from one part of your code to another. Reach for them only when the plain approach - ordinary functions, arguments and return values - is considerably more complicated or untenable, and then say in a comment why the plain approach does not work. Processes the design genuinely needs, such as a `Task` or a GenServer, are not what this rule is about.
 
 ## Editing files
 
