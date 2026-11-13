@@ -11,10 +11,16 @@ rm -f ~/.config/nvim/init.vim
 
 cp -rsf ~/code/dotfiles/config_files/. ~
 
-# Wire up the publish guard: a PreToolUse hook that forces an approval prompt
-# for git commit, git push, gh pr create/edit and gh repo create, and hard-
-# blocks gh pr merge. The script itself installs as a symlink with everything
-# else under config_files/; this merges its registration into settings.json.
+# Wire up the command guard: a PreToolUse hook that forces an approval prompt
+# for git commit, git push, gh pr create/edit, gh repo create, gh api calls that
+# write, Ecto database resets and docker compose down -v, and hard-blocks
+# merging and force-pushing. The script itself installs as a symlink with
+# everything else under config_files/; this merges its registration into
+# settings.json.
+#
+# Registered with no "if" filter, so it sees every Bash command. An "if" rule
+# such as "Bash(git *)" only matches the command being run, so a database reset
+# wrapped in "docker exec app mix ecto.reset" would never reach the hook.
 #
 # Merged rather than symlinked because Claude Code writes to that file itself
 # (/model, /config), so linking it would put personal state in this public repo
@@ -36,12 +42,9 @@ install_publish_guard() {
     def guard_entry:
       { matcher: "Bash",
         hooks: [
-          { type: "command", if: "Bash(git *)",
+          { type: "command",
             command: "~/.claude/hooks/guard-git-write.sh",
-            timeout: 10, statusMessage: "Checking publish authorization" },
-          { type: "command", if: "Bash(gh *)",
-            command: "~/.claude/hooks/guard-git-write.sh",
-            timeout: 10, statusMessage: "Checking publish authorization" }
+            timeout: 10, statusMessage: "Checking guarded commands" }
         ] };
     .hooks.PreToolUse =
       ([ (.hooks.PreToolUse // [])[]
