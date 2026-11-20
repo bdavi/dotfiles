@@ -326,12 +326,26 @@ require("lazy").setup({
     "stevearc/conform.nvim",
     event = { "BufWritePre" },
     cmd = { "ConformInfo" },
-    opts = {
-      formatters_by_ft = {
-        elixir = { "mix" },
-      },
-      format_on_save = { timeout_ms = 500 },
-    },
+    -- A machine can add formatters without editing this file by providing
+    -- lua/local_conform.lua, returning any of `formatters`, `formatters_by_ft`
+    -- (which replaces the entry for that filetype) and `timeout_ms_by_ft`. The
+    -- work overlay uses it to format projects inside their dev containers.
+    opts = function()
+      local has_local, local_conform = pcall(require, "local_conform")
+      if not has_local then local_conform = {} end
+
+      local timeout_ms_by_ft = local_conform.timeout_ms_by_ft or {}
+
+      return {
+        formatters = local_conform.formatters or {},
+        formatters_by_ft = vim.tbl_extend("force", {
+          elixir = { "mix" },
+        }, local_conform.formatters_by_ft or {}),
+        format_on_save = function(bufnr)
+          return { timeout_ms = timeout_ms_by_ft[vim.bo[bufnr].filetype] or 500 }
+        end,
+      }
+    end,
   },
   {
     "iamcco/markdown-preview.nvim",
